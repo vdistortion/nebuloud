@@ -1,7 +1,6 @@
-import { Injectable } from '@angular/core';
-import artists from '../../db';
-import { artistSummaries } from '../../db/artist-summaries';
-import type { TypeArtistSummary, TypeItem, TypeItems } from '../../db/types';
+import { inject, Injectable } from '@angular/core';
+import type { TypeItem } from '../../db/types';
+import { LocalContentSource } from '../data/local-content.source';
 import type {
   ArtistProfile,
   CatalogAlbum,
@@ -13,12 +12,13 @@ import type {
   providedIn: 'root',
 })
 export class ContentService {
-  /** Local source for now; Directus adapter will replace this boundary later. */
-  readonly artists: TypeItems = artists;
-  readonly artistSummaries: TypeArtistSummary[] = artistSummaries;
+  /** The source can later be replaced with a Directus-backed implementation. */
+  private readonly source = inject(LocalContentSource);
+
+  readonly artistSummaries = this.source.artistSummaries;
 
   getArtist(id: string | null | undefined): TypeItem | undefined {
-    return id ? this.artists[id] : undefined;
+    return this.source.getArtist(id);
   }
 
   getArtistProfile(id: string | null | undefined): ArtistProfile | undefined {
