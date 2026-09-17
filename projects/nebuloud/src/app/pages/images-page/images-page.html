@@ -11,13 +11,11 @@
 
     @if (images().length) {
       <div class="galleries-grid">
-        @for (item of images(); track item.path.join('/'); let index = $index) {
+        @for (item of images(); track item.id) {
           <app-gallery-card
-            [link]="'/artist/' + artistId() + '/images/' + index"
-            [name]="item.path[item.path.length - 1]"
-            [image]="
-              '/artist/' + artistId() + '/images/' + item.path.join('/') + '/' + item.pictures[0]
-            "
+            [link]="'/artist/' + artistId() + '/images/' + item.id"
+            [name]="item.title"
+            [image]="imageUrl(item.id)"
             (click)="onClick(`click_gallery_${item.path.join('/')}_artist_${artistId()}`)"
           ></app-gallery-card>
         }

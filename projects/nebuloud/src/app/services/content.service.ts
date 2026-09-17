@@ -2,7 +2,12 @@ import { Injectable } from '@angular/core';
 import artists from '../../db';
 import { artistSummaries } from '../../db/artist-summaries';
 import type { TypeArtistSummary, TypeItem, TypeItems } from '../../db/types';
-import type { ArtistProfile, CatalogAlbum, CatalogSong } from '../models/content.models';
+import type {
+  ArtistProfile,
+  CatalogAlbum,
+  CatalogGallery,
+  CatalogSong,
+} from '../models/content.models';
 
 @Injectable({
   providedIn: 'root',
@@ -62,6 +67,28 @@ export class ContentService {
 
   getVideos(artistId: string | null | undefined): CatalogSong[] {
     return this.getSongs(artistId).filter((song) => Boolean(song.videoId));
+  }
+
+  getGalleries(artistId: string | null | undefined): CatalogGallery[] {
+    const images = this.getArtist(artistId)?.artist.images ?? [];
+    return images.map((gallery, index) => this.mapGallery(gallery, index));
+  }
+
+  getGallery(artistId: string | null | undefined, galleryId: string | null | undefined) {
+    const galleryIndex = galleryId === null || galleryId === undefined ? -1 : Number(galleryId);
+    return this.getGalleries(artistId).find((gallery) => gallery.id === String(galleryIndex));
+  }
+
+  private mapGallery(
+    gallery: NonNullable<TypeItem['artist']['images']>[number],
+    index: number,
+  ): CatalogGallery {
+    return {
+      id: String(index),
+      title: gallery.path[gallery.path.length - 1] ?? 'Галерея',
+      path: gallery.path,
+      pictures: gallery.pictures,
+    };
   }
 
   private mapAlbum(item: TypeItem, albumId: string): CatalogAlbum | undefined {

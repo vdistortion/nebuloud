@@ -21,6 +21,13 @@ export interface CatalogAlbum {
   streaming?: TypeStreaming;
 }
 
+export interface CatalogGallery {
+  id: string;
+  title: string;
+  path: string[];
+  pictures: string[];
+}
+
 export interface ArtistProfile {
   id: string;
   name: string;

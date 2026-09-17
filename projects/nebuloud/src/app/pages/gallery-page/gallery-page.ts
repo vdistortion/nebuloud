@@ -6,7 +6,6 @@ import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { ContentService } from '../../services/content.service';
-import type { TypeItems, TypeStructurePictures } from '../../../db/types';
 
 @Component({
   selector: 'app-gallery-page',
@@ -21,27 +20,15 @@ export class GalleryPage {
   private readonly analytics = inject(Analytics);
   private readonly content = inject(ContentService);
 
-  readonly artists: TypeItems = this.content.artists;
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
   });
   readonly galleryId = toSignal(this.route.paramMap.pipe(map((params) => params.get('gallery'))), {
     initialValue: null,
   });
-  readonly artist = computed(() => {
-    const id = this.artistId();
-    return id ? this.artists[id]?.artist : undefined;
-  });
-  readonly artistName = computed(() => this.artist()?.name ?? '');
-  readonly gallery = computed<TypeStructurePictures | undefined>(() => {
-    const images = this.artist()?.images;
-    const id = this.galleryId();
-    return images && id !== null ? images[Number(id)] : undefined;
-  });
-  readonly galleryName = computed(() => {
-    const path = this.gallery()?.path ?? [];
-    return path[path.length - 1] ?? 'Галерея';
-  });
+  readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
+  readonly gallery = computed(() => this.content.getGallery(this.artistId(), this.galleryId()));
+  readonly galleryName = computed(() => this.gallery()?.title ?? 'Галерея');
   readonly galleryPath = computed(() => this.gallery()?.path.join('/') ?? '');
   readonly pictures = computed(() => this.gallery()?.pictures ?? []);
 
