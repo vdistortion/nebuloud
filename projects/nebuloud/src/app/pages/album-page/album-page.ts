@@ -6,9 +6,9 @@ import { map } from 'rxjs';
 import { StreamingList } from '../../components/ui/streaming-list/streaming-list';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
-import { TrimPipe } from '../../trim.pipe';
 import { ContentService } from '../../services/content.service';
-import type { TypeAlbum, TypeItem, TypeItems } from '../../../db/types';
+import { TrimPipe } from '../../trim.pipe';
+import type { CatalogAlbum } from '../../models/content.models';
 
 type AlbumTrack = {
   name: string;
@@ -30,48 +30,25 @@ export class AlbumPage {
   private readonly analytics = inject(Analytics);
   private readonly content = inject(ContentService);
 
-  readonly artists: TypeItems = this.content.artists;
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
   });
   readonly albumId = toSignal(this.route.paramMap.pipe(map((params) => params.get('album'))), {
     initialValue: null,
   });
-  readonly artist = computed<TypeItem | undefined>(() => {
-    const id = this.artistId();
-    return id ? this.artists[id] : undefined;
-  });
-  readonly artistName = computed(() => this.artist()?.artist.name ?? '');
-  readonly album = computed<TypeAlbum | undefined>(() => {
-    const item = this.artist();
-    const id = this.albumId();
-    return item && id ? item.albums[id] : undefined;
-  });
-  readonly songs = computed<AlbumTrack[]>(() => {
-    const item = this.artist();
-    const album = this.album();
-    if (!item || !album) return [];
-
-    return album.songs.map((songId) => {
-      if (typeof songId === 'string') {
-        const song = item.songs[songId];
-        return {
-          id: song.id,
-          name: song.name[0],
-          duration: song.duration ?? 0,
-          isText: !!song.text.trim(),
-        };
-      }
-
-      if (Array.isArray(songId)) {
-        const [id, { name }] = songId;
-        const song = item.songs[id];
-        return { id, name: name[0], duration: song.duration ?? 0, isText: !!song.text.trim() };
-      }
-
-      return { name: songId.name, id: '', duration: 0, isText: false };
-    });
-  });
+  readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
+  readonly album = computed<CatalogAlbum | undefined>(() =>
+    this.content.getAlbum(this.artistId(), this.albumId()),
+  );
+  readonly songs = computed<AlbumTrack[]>(
+    () =>
+      this.album()?.songs.map((song) => ({
+        id: song.id,
+        name: song.title,
+        duration: song.duration ?? 0,
+        isText: Boolean(song.lyrics.trim()),
+      })) ?? [],
+  );
 
   constructor() {
     effect(() => {

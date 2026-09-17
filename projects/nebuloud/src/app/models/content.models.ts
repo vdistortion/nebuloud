@@ -1,10 +1,23 @@
 import type { TypeStreaming } from '../../db/types';
 
+export interface CatalogSong {
+  id: string;
+  title: string;
+  aliases: string[];
+  lyrics: string;
+  albums: string[];
+  authors?: string;
+  videoId?: string;
+  duration?: number;
+}
+
 export interface CatalogAlbum {
   id: string;
   name: string;
   year: number;
   cover?: string;
+  info?: string;
+  songs: CatalogSong[];
   streaming?: TypeStreaming;
 }
 
