@@ -1,8 +1,9 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { YouTubePlayer } from '@angular/youtube-player';
+import { Component, computed, effect, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
-import { AlbumCardComponent } from '../../components/ui/album-card/album-card.component';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { YouTubePlayer } from '@angular/youtube-player';
+import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { TrimPipe } from '../../trim.pipe';
@@ -11,41 +12,50 @@ import type { TypeAlbum, TypeItem, TypeItems, TypeSong } from '../../../db/types
 
 @Component({
   selector: 'app-song-page',
-  imports: [TrimPipe, YouTubePlayer, AlbumCardComponent],
+  imports: [RouterLink, TrimPipe, YouTubePlayer],
   templateUrl: './song-page.component.html',
   styleUrl: './song-page.component.scss',
 })
-export class SongPageComponent implements OnInit {
-  private analytics = inject(Analytics);
-  public artists: TypeItems = artists;
-  public artistName: string = '';
-  public artistId: string | null = null;
-  public albums: TypeAlbum[] = [];
-  public song: TypeSong | null = null;
+export class SongPageComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly titleService = inject(Title);
+  private readonly artistService = inject(ArtistService);
+  private readonly analytics = inject(Analytics);
 
-  constructor(
-    private route: ActivatedRoute,
-    private titleService: Title,
-    private artistService: ArtistService,
-  ) {
-    this.route.params.subscribe(({ artist, song }) => {
-      this.artistService.setArtist(artist, '', song);
+  readonly artists: TypeItems = artists;
+  readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
+    initialValue: null,
+  });
+  readonly songId = toSignal(this.route.paramMap.pipe(map((params) => params.get('song'))), {
+    initialValue: null,
+  });
+  readonly artist = computed<TypeItem | undefined>(() => {
+    const id = this.artistId();
+    return id ? this.artists[id] : undefined;
+  });
+  readonly artistName = computed(() => this.artist()?.artist.name ?? '');
+  readonly song = computed<TypeSong | undefined>(() => {
+    const item = this.artist();
+    const id = this.songId();
+    return item && id ? item.songs[id] : undefined;
+  });
+  readonly albums = computed<TypeAlbum[]>(() => {
+    const item = this.artist();
+    const song = this.song();
+    return item && song ? song.albums.map((id) => item.albums[id]).filter(Boolean) : [];
+  });
+
+  constructor() {
+    effect(() => {
+      const artistId = this.artistId() ?? '';
+      const songId = this.songId() ?? '';
+      const song = this.song();
+
+      this.artistService.setArtist(artistId, '', songId);
+      this.titleService.setTitle(
+        song ? `${song.name[0]} | ${this.artistName()}` : 'Песня не найдена',
+      );
     });
-    this.artistId = this.route.snapshot.paramMap.get('artist');
-    const songId: string | null = this.route.snapshot.paramMap.get('song');
-    if (!this.artistId || !songId) return;
-
-    const artist: TypeItem = this.artists[this.artistId];
-    this.artistName = artist.artist.name;
-    this.song = artist.songs[songId];
-
-    this.albums = this.song.albums.map((albumId) => {
-      return artist.albums[albumId];
-    });
-  }
-
-  ngOnInit(): void {
-    this.titleService.setTitle(`${this.song?.name[0]} | ${this.artistName}`);
   }
 
   onClick(event: string) {

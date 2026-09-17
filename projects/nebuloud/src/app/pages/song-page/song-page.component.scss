@@ -1,49 +1,156 @@
 .song-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 5rem;
+}
+
+.song-page__back {
+  display: inline-block;
+  margin-bottom: 2.5rem;
+  color: #999;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.song-page__back:hover {
+  color: #ff665f;
+}
+
+.song-layout {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-gap: 2%;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr);
+  align-items: start;
+  gap: clamp(2rem, 7vw, 6rem);
+}
 
-  @media (max-width: 992px) {
-    grid-template-columns: repeat(1, 1fr);
+.lyrics-card {
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px solid rgba(255, 68, 68, 0.16);
+  border-radius: 12px;
+  background: rgba(255, 68, 68, 0.025);
+}
+
+.eyebrow {
+  margin: 0;
+  color: #ff665f;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.lyrics-card__header {
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 68, 68, 0.18);
+}
+
+.lyrics-card h1 {
+  margin: 0.7rem 0 0;
+  color: #f2f2f2;
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.lyrics-card__alternative {
+  margin: 0.45rem 0 0;
+  color: #777;
+  font-size: 1rem;
+}
+
+.lyrics-card__artist {
+  margin: 1.5rem 0 0;
+  color: #bbb;
+  font-size: 1rem;
+}
+
+.lyrics-card__authors {
+  margin: 0.35rem 0 0;
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.lyrics-card__text {
+  margin: 2rem 0 0;
+  color: #c2c2c2;
+  font: inherit;
+  line-height: 2;
+  white-space: pre-wrap;
+}
+
+.song-sidebar {
+  position: sticky;
+  top: 100px;
+}
+
+.video-card,
+.song-meta {
+  padding: 1.2rem;
+  border: 1px solid rgba(255, 68, 68, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 68, 68, 0.025);
+}
+
+.video-card + .song-meta {
+  margin-top: 1rem;
+}
+
+.video-card__player {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  margin-top: 1rem;
+  border-radius: 6px;
+  background: #161616;
+}
+
+.video-card__player youtube-player {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.song-meta__albums {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.8rem;
+}
+
+.song-meta__album {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  color: #ddd;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.song-meta__album:hover {
+  color: #ff665f;
+}
+
+.song-meta__album small {
+  color: #666;
+  font-size: 0.75rem;
+}
+
+.song-page--empty {
+  min-height: 50vh;
+  color: #888;
+}
+
+@media (max-width: 800px) {
+  .song-page {
+    padding: 2rem 1rem 4rem;
   }
 
-  &__col {
-    position: relative;
+  .song-layout {
+    grid-template-columns: 1fr;
   }
 
-  &__full {
-    grid-column: 1 / -1;
-  }
-
-  &__albums {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-gap: 2%;
-
-    @media (max-width: 992px) {
-      grid-template-columns: repeat(4, 1fr);
-    }
-
-    @media (max-width: 768px) {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    @media (max-width: 480px) {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    @media (max-width: 320px) {
-      grid-template-columns: repeat(1, 1fr);
-    }
-  }
-
-  &__video {
-    position: sticky;
-    top: 20px;
-    aspect-ratio: 16 / 9;
-
-    @media (max-width: 992px) {
-      margin: 20px 0 40px;
-    }
+  .song-sidebar {
+    position: static;
   }
 }

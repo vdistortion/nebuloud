@@ -1,46 +1,85 @@
-@if (artistName) {
-  <div class="album-page">
-    <div class="album-page__item">
-      @if (album && album.folder) {
-        <div class="album-page__folder">
-          <img [src]="'.' + album.folder" [alt]="album.name" />
+@if (album(); as currentAlbum) {
+  <main class="album-page">
+    <a class="album-page__back" [routerLink]="'/artist/' + artistId()">← {{ artistName() }}</a>
+
+    <section class="album-hero">
+      <div class="album-hero__cover">
+        @if (currentAlbum.folder) {
+          <img [src]="'.' + currentAlbum.folder" [alt]="currentAlbum.name" />
+        }
+      </div>
+      <div class="album-hero__details">
+        <p class="eyebrow">Альбом</p>
+        <h1>{{ currentAlbum.name }}</h1>
+        <p class="album-hero__artist">{{ artistName() }} · {{ currentAlbum.year }}</p>
+        <div class="album-hero__meta">
+          <span
+            ><strong>{{ songs().length }}</strong> треков</span
+          >
+          <span
+            ><strong>{{ currentAlbum.year }}</strong> год</span
+          >
         </div>
-      }
+      </div>
+    </section>
 
-      <h3>
-        {{ album?.name }}
-        <span class="album-page__year">{{ album?.year }}</span>
-      </h3>
+    <section class="track-section" aria-labelledby="tracklist-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Содержание</p>
+          <h2 id="tracklist-title">Треклист</h2>
+        </div>
+        <span>{{ songs().length }} треков</span>
+      </div>
 
-      @for (song of songs; track song.id || song.name; let i = $index) {
-        <div class="album-page__song">
-          @if (song.id && song.isText) {
-            {{ i + 1 }}.
-            <a
-              [routerLink]="'/artist/' + artistId + '/song/' + song.id"
-              (click)="onClick(`click_song_${song.id}_album_${album?.id}_artist_${artistId}`)"
-            >
-              {{ song.name }}
-            </a>
+      <div class="tracklist">
+        @for (song of songs(); track song.id || song.name; let i = $index) {
+          <div class="track" [class.track--muted]="!song.id || !song.isText">
+            <span class="track__number">{{ formatTrackNumber(i) }}</span>
+            <div class="track__name">
+              @if (song.id && song.isText) {
+                <a
+                  [routerLink]="'/artist/' + artistId() + '/song/' + song.id"
+                  (click)="
+                    onClick(`click_song_${song.id}_album_${currentAlbum.id}_artist_${artistId()}`)
+                  "
+                >
+                  {{ song.name }}
+                </a>
+              } @else {
+                <span>{{ song.name }}</span>
+              }
+            </div>
             @if (song.duration) {
-              ({{ getTime(song.duration) }})
+              <span class="track__duration">{{ getTime(song.duration) }}</span>
             }
-          } @else {
-            {{ i + 1 }}. <span>{{ song.name }}</span>
-          }
+          </div>
+        }
+      </div>
+    </section>
+
+    @if (currentAlbum.info) {
+      <section class="album-info">
+        <p class="eyebrow">Об альбоме</p>
+        <pre>{{ currentAlbum.info | trim }}</pre>
+      </section>
+    }
+
+    @if (currentAlbum.streaming) {
+      <section class="album-streaming">
+        <div>
+          <p class="eyebrow">Слушать</p>
+          <h2>Альбом на площадках</h2>
         </div>
-      }
-
-      @if (album?.info) {
-        <pre>{{ album?.info | trim }}</pre>
-      }
-
-      <app-streaming-list
-        [streaming]="album?.streaming"
-        (clickStreaming)="
-          onClick(`click_streaming_${$event}_album_${album?.id}_artist_${artistId}`)
-        "
-      ></app-streaming-list>
-    </div>
-  </div>
+        <app-streaming-list
+          [streaming]="currentAlbum.streaming"
+          (clickStreaming)="
+            onClick(`click_streaming_${$event}_album_${currentAlbum.id}_artist_${artistId()}`)
+          "
+        ></app-streaming-list>
+      </section>
+    }
+  </main>
+} @else {
+  <main class="album-page album-page--empty">Альбом не найден.</main>
 }

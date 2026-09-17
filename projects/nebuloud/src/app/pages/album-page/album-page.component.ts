@@ -1,6 +1,8 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Component, computed, effect, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 import { StreamingListComponent } from '../../components/ui/streaming-list/streaming-list.component';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
@@ -8,38 +10,50 @@ import { TrimPipe } from '../../trim.pipe';
 import artists from '../../../db';
 import type { TypeAlbum, TypeItem, TypeItems } from '../../../db/types';
 
+type AlbumTrack = {
+  name: string;
+  id: string;
+  duration: number;
+  isText: boolean;
+};
+
 @Component({
   selector: 'app-album-page',
   imports: [RouterLink, TrimPipe, StreamingListComponent],
   templateUrl: './album-page.component.html',
   styleUrl: './album-page.component.scss',
 })
-export class AlbumPageComponent implements OnInit {
-  private analytics = inject(Analytics);
-  public artists: TypeItems = artists;
-  public artistName: string = '';
-  public artistId: string | null = null;
-  public album: TypeAlbum | null = null;
-  public songs: { name: string; id: string; duration: number; isText: boolean }[] = [];
+export class AlbumPageComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly titleService = inject(Title);
+  private readonly artistService = inject(ArtistService);
+  private readonly analytics = inject(Analytics);
 
-  constructor(
-    private route: ActivatedRoute,
-    private titleService: Title,
-    private artistService: ArtistService,
-  ) {
-    this.route.params.subscribe(({ artist, album }) => {
-      this.artistService.setArtist(artist, album);
-    });
-    this.artistId = this.route.snapshot.paramMap.get('artist');
-    const albumId: string | null = this.route.snapshot.paramMap.get('album');
-    if (!this.artistId || !albumId) return;
+  readonly artists: TypeItems = artists;
+  readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
+    initialValue: null,
+  });
+  readonly albumId = toSignal(this.route.paramMap.pipe(map((params) => params.get('album'))), {
+    initialValue: null,
+  });
+  readonly artist = computed<TypeItem | undefined>(() => {
+    const id = this.artistId();
+    return id ? this.artists[id] : undefined;
+  });
+  readonly artistName = computed(() => this.artist()?.artist.name ?? '');
+  readonly album = computed<TypeAlbum | undefined>(() => {
+    const item = this.artist();
+    const id = this.albumId();
+    return item && id ? item.albums[id] : undefined;
+  });
+  readonly songs = computed<AlbumTrack[]>(() => {
+    const item = this.artist();
+    const album = this.album();
+    if (!item || !album) return [];
 
-    const artist: TypeItem = this.artists[this.artistId];
-    this.artistName = artist.artist.name;
-    this.album = artist.albums[albumId];
-    this.songs = this.album.songs.map((songId) => {
+    return album.songs.map((songId) => {
       if (typeof songId === 'string') {
-        const song = artist.songs[songId];
+        const song = item.songs[songId];
         return {
           id: song.id,
           name: song.name[0],
@@ -47,28 +61,36 @@ export class AlbumPageComponent implements OnInit {
           isText: !!song.text.trim(),
         };
       }
+
       if (Array.isArray(songId)) {
         const [id, { name }] = songId;
-        const song = artist.songs[id];
-        return {
-          id,
-          name: name[0],
-          duration: song.duration ?? 0,
-          isText: !!song.text.trim(),
-        };
+        const song = item.songs[id];
+        return { id, name: name[0], duration: song.duration ?? 0, isText: !!song.text.trim() };
       }
+
       return { name: songId.name, id: '', duration: 0, isText: false };
+    });
+  });
+
+  constructor() {
+    effect(() => {
+      const artistId = this.artistId() ?? '';
+      const albumId = this.albumId() ?? '';
+      const album = this.album();
+
+      this.artistService.setArtist(artistId, albumId);
+      this.titleService.setTitle(
+        album ? `${album.name} (${album.year}) | ${this.artistName()}` : 'Альбом не найден',
+      );
     });
   }
 
-  ngOnInit(): void {
-    this.titleService.setTitle(`${this.album?.name} (${this.album?.year}) | ${this.artistName}`);
+  getTime(duration: number): string {
+    return `${Math.trunc(duration / 60)}:${String(duration % 60).padStart(2, '0')}`;
   }
 
-  getTime(duration: number): string {
-    const m = duration / 60;
-    const s = duration % 60;
-    return [Math.trunc(m), ('0' + s).slice(-2)].join(':');
+  formatTrackNumber(index: number): string {
+    return String(index + 1).padStart(2, '0');
   }
 
   onClick(event: string) {

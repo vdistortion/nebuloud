@@ -1,58 +1,60 @@
-@if (artistName) {
-  <div class="song-page">
-    <div class="song-page__col">
-      @if (song?.name) {
-        @for (name of song?.name; track name; let index = $index) {
-          @if (index) {
-            <small>{{ name }}</small>
-          } @else {
-            <h3>
-              {{ name }}
-            </h3>
+@if (song(); as currentSong) {
+  <main class="song-page">
+    <a class="song-page__back" [routerLink]="'/artist/' + artistId() + '/songs'">
+      ← Все тексты {{ artistName() }}
+    </a>
+
+    <section class="song-layout">
+      <article class="lyrics-card">
+        <header class="lyrics-card__header">
+          <p class="eyebrow">Текст песни</p>
+          <h1>{{ currentSong.name[0] }}</h1>
+          @if (currentSong.name.length > 1) {
+            @for (name of currentSong.name.slice(1); track name) {
+              <p class="lyrics-card__alternative">{{ name }}</p>
+            }
           }
-        }
-      }
-      <small>{{ song?.authors }}</small>
-      <pre>{{ song?.text | trim }}</pre>
-    </div>
+          <p class="lyrics-card__artist">{{ artistName() }}</p>
+          @if (currentSong.authors) {
+            <p class="lyrics-card__authors">Авторы: {{ currentSong.authors }}</p>
+          }
+        </header>
+        <pre class="lyrics-card__text">{{ currentSong.text | trim }}</pre>
+      </article>
 
-    <div class="song-page__col">
-      @if (song?.clipYouTubeId) {
-        <div class="song-page__video">
-          <youtube-player
-            [videoId]="song?.clipYouTubeId"
-            placeholderImageQuality="low"
-          ></youtube-player>
-        </div>
-      }
-    </div>
-
-    <div class="song-page__full">
-      <div class="song-page__albums">
-        @if (albums.length) {
-          @for (album of albums; track album.id) {
-            <div class="song-page__album">
-              <app-album-card
-                [name]="album.name"
-                [link]="'/artist/' + artistId + '/album/' + album.id"
-                [year]="album.year"
-                [image]="album.folder"
-                [thumbnail]="true"
-                (click)="onClick(`click_album_${album.id}_from_${song?.id}_artist_${artistId}`)"
-              ></app-album-card>
+      <aside class="song-sidebar">
+        @if (currentSong.clipYouTubeId) {
+          <section class="video-card">
+            <p class="eyebrow">Видео</p>
+            <div class="video-card__player">
+              <youtube-player [videoId]="currentSong.clipYouTubeId" placeholderImageQuality="low" />
             </div>
-          }
-        } @else {
-          <div class="song-page__album">
-            <app-album-card
-              [link]="'/artist/' + artistId + '/songs/other'"
-              [name]="'Песни, не вошедшие в альбомы'"
-              [thumbnail]="true"
-              (click)="onClick(`click_album_other_from_${song?.id}_artist_${artistId}`)"
-            ></app-album-card>
-          </div>
+          </section>
         }
-      </div>
-    </div>
-  </div>
+
+        <section class="song-meta">
+          <p class="eyebrow">Выпуски</p>
+          @if (albums().length) {
+            <div class="song-meta__albums">
+              @for (album of albums(); track album.id) {
+                <a
+                  class="song-meta__album"
+                  [routerLink]="'/artist/' + artistId() + '/album/' + album.id"
+                >
+                  <span>{{ album.name }}</span>
+                  <small>{{ album.year }}</small>
+                </a>
+              }
+            </div>
+          } @else {
+            <a class="song-meta__album" [routerLink]="'/artist/' + artistId() + '/songs/other'">
+              <span>Песни вне альбомов</span>
+            </a>
+          }
+        </section>
+      </aside>
+    </section>
+  </main>
+} @else {
+  <main class="song-page song-page--empty">Песня не найдена.</main>
 }
