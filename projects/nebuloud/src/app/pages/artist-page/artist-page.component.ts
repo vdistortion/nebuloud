@@ -8,7 +8,7 @@ import { StreamingListComponent } from '../../components/ui/streaming-list/strea
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { ContentService } from '../../services/content.service';
-import type { TypeAlbum, TypeArtist, TypeItem, TypeItems, TypeStreaming } from '../../../db/types';
+import type { ArtistProfile } from '../../models/content.models';
 
 @Component({
   selector: 'app-artist-page',
@@ -23,23 +23,16 @@ export class ArtistPageComponent {
   private readonly analytics = inject(Analytics);
   private readonly content = inject(ContentService);
 
-  readonly artists: TypeItems = this.content.artists;
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
   });
 
-  readonly artist = computed<TypeItem | undefined>(() => {
-    const id = this.artistId();
-    return id ? this.artists[id] : undefined;
-  });
-
-  readonly artistData = computed<TypeArtist | undefined>(() => this.artist()?.artist);
-  readonly artistName = computed(() => this.artistData()?.name ?? '');
-  readonly albums = computed<TypeAlbum[]>(() => {
-    const item = this.artist();
-    return item ? item.artist.albums.map((id) => item.albums[id]).filter(Boolean) : [];
-  });
-  readonly streaming = computed<TypeStreaming | undefined>(() => this.artistData()?.streaming);
+  readonly artistProfile = computed<ArtistProfile | undefined>(() =>
+    this.content.getArtistProfile(this.artistId()),
+  );
+  readonly artistName = computed(() => this.artistProfile()?.name ?? '');
+  readonly albums = computed(() => this.artistProfile()?.albums ?? []);
+  readonly streaming = computed(() => this.artistProfile()?.streaming);
 
   constructor() {
     effect(() => {

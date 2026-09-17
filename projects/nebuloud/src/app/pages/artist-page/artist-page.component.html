@@ -1,23 +1,23 @@
-@if (artistData() && artistId()) {
+@if (artistProfile() && artistId()) {
   <main class="artist-page">
     <section class="artist-hero">
       <div class="artist-hero__backdrop" aria-hidden="true"></div>
       <div class="artist-hero__content">
         <img
           class="artist-hero__avatar"
-          [src]="'.' + artistData()!.image"
-          [alt]="artistData()!.name"
+          [src]="'.' + artistProfile()!.image"
+          [alt]="artistProfile()!.name"
         />
         <div class="artist-hero__info">
           <p class="eyebrow">Артист</p>
-          <h1>{{ artistData()!.name }}</h1>
-          <p class="artist-hero__countries">{{ artistData()!.country.join(' · ') }}</p>
+          <h1>{{ artistProfile()!.name }}</h1>
+          <p class="artist-hero__countries">{{ artistProfile()!.country.join(' · ') }}</p>
           <div class="artist-hero__stats" aria-label="Статистика артиста">
             <span
               ><strong>{{ albums().length }}</strong> альбомов</span
             >
             <span
-              ><strong>{{ artistData()!.albums.length }}</strong> релизов</span
+              ><strong>{{ artistProfile()!.albums.length }}</strong> релизов</span
             >
           </div>
         </div>
@@ -31,7 +31,7 @@
       <a class="artist-tabs__link" [routerLink]="'/artist/' + artistId() + '/songs'"
         >Тексты песен</a
       >
-      @if (artistData()!.images?.length) {
+      @if (artistProfile()!.hasImages) {
         <a class="artist-tabs__link" [routerLink]="'/artist/' + artistId() + '/images'">Фото</a>
       }
       <a class="artist-tabs__link" [routerLink]="'/artist/' + artistId() + '/video'">Видео</a>
@@ -52,7 +52,7 @@
             [link]="'/artist/' + artistId() + '/album/' + album.id"
             [name]="album.name"
             [year]="album.year"
-            [image]="album.folder"
+            [image]="album.cover"
             (click)="onClick(`click_album_${album.id}_artist_${artistId()}`)"
           ></app-album-card>
         }
