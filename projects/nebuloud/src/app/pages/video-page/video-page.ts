@@ -7,7 +7,7 @@ import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { ContentService } from '../../services/content.service';
-import type { TypeItem, TypeItems, TypeSong } from '../../../db/types';
+import type { CatalogSong } from '../../models/content.models';
 
 @Component({
   selector: 'app-video-page',
@@ -22,23 +22,12 @@ export class VideoPage {
   private readonly analytics = inject(Analytics);
   private readonly content = inject(ContentService);
 
-  readonly artists: TypeItems = this.content.artists;
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
   });
-  readonly artist = computed<TypeItem | undefined>(() => {
-    const id = this.artistId();
-    return id ? this.artists[id] : undefined;
-  });
-  readonly artistName = computed(() => this.artist()?.artist.name ?? '');
-  readonly songs = computed<TypeSong[]>(
-    () =>
-      this.artist()
-        ?.getAllVideos()
-        .sort((a, b) => {
-          const artist = this.artist();
-          return artist ? artist.yearOfSong(a) - artist.yearOfSong(b) : 0;
-        }) ?? [],
+  readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
+  readonly songs = computed<CatalogSong[]>(() =>
+    this.content.getVideos(this.artistId()).sort((a, b) => this.yearOfSong(a) - this.yearOfSong(b)),
   );
 
   constructor() {
@@ -49,8 +38,10 @@ export class VideoPage {
     });
   }
 
-  yearOfSong(song: TypeSong): number {
-    return this.artist()?.yearOfSong(song) ?? 0;
+  yearOfSong(song: CatalogSong): number {
+    return Math.min(
+      ...song.albums.map((albumId) => this.content.getAlbum(this.artistId(), albumId)?.year ?? 0),
+    );
   }
 
   onClick(event: string) {

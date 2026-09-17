@@ -6,7 +6,7 @@ import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { ContentService } from '../../services/content.service';
-import type { TypeItem, TypeItems, TypeSong } from '../../../db/types';
+import type { CatalogSong } from '../../models/content.models';
 
 @Component({
   selector: 'app-other-songs-page',
@@ -21,20 +21,14 @@ export class OtherSongsPage {
   private readonly analytics = inject(Analytics);
   private readonly content = inject(ContentService);
 
-  readonly artists: TypeItems = this.content.artists;
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
   });
-  readonly artist = computed<TypeItem | undefined>(() => {
-    const id = this.artistId();
-    return id ? this.artists[id] : undefined;
-  });
-  readonly artistName = computed(() => this.artist()?.artist.name ?? '');
-  readonly songs = computed<TypeSong[]>(
-    () =>
-      this.artist()
-        ?.getSongsWithoutAlbum()
-        .sort((a, b) => a.name[0].localeCompare(b.name[0])) ?? [],
+  readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
+  readonly songs = computed<CatalogSong[]>(() =>
+    this.content
+      .getSongsWithoutAlbum(this.artistId())
+      .sort((a, b) => a.title.localeCompare(b.title)),
   );
 
   constructor() {

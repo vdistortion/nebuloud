@@ -14,7 +14,7 @@
         @for (song of songs(); track song.id) {
           <article class="video-card">
             <div class="video-card__player">
-              <youtube-player [videoId]="song.clipYouTubeId" placeholderImageQuality="low" />
+              <youtube-player [videoId]="song.videoId" placeholderImageQuality="low" />
             </div>
             <div class="video-card__body">
               <p class="video-card__type">Клип</p>
@@ -23,7 +23,7 @@
                 [routerLink]="'/artist/' + artistId() + '/song/' + song.id"
                 (click)="onClick(`click_video_song_${song.id}_artist_${artistId()}`)"
               >
-                {{ song.name[0] }}
+                {{ song.title }}
               </a>
               @if (yearOfSong(song)) {
                 <span class="video-card__year">{{ yearOfSong(song) }}</span>
