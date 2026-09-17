@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: nebuloud-postgres-dev
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-nebuloud}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nebuloud}
+      POSTGRES_DB: ${POSTGRES_DB:-nebuloud}
+    volumes:
+      - nebuloud_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  directus:
+    image: directus/directus:latest
+    container_name: nebuloud-directus-dev
+    environment:
+      SECRET: ${DIRECTUS_SECRET:-nebuloud-local-secret-change-me-32}
+      DB_CLIENT: pg
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-nebuloud}
+      DB_USER: ${POSTGRES_USER:-nebuloud}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-nebuloud}
+      ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL:-admin@nebuloud.dev}
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD:-change-this-admin-password}
+      PUBLIC_URL: ${DIRECTUS_PUBLIC_URL:-http://localhost:8056}
+      CORS_ENABLED: 'true'
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:4200}
+    ports:
+      - '8056:8055'
+    volumes:
+      - nebuloud_directus_uploads:/directus/uploads
+      - nebuloud_directus_extensions:/directus/extensions
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  nebuloud_postgres_data:
+  nebuloud_directus_uploads:
+  nebuloud_directus_extensions:

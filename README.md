@@ -43,6 +43,26 @@ npm run build
 
 Статические файлы появятся в `dist/nebuloud/`.
 
+## Directus + PostgreSQL
+
+Локальный Directus запускается в отдельном Docker Compose-стеке вместе с PostgreSQL:
+
+```bash
+cp .env.example .env
+docker compose up -d
+```
+
+Админка будет доступна по адресу `http://localhost:8056/`.
+
+Остановить стек:
+
+```bash
+docker compose down
+```
+
+Данные хранятся в Docker volumes и не попадают в репозиторий. Для полного
+сброса локального Directus вместе с базой используется `docker compose down -v`.
+
 ## Структура
 
 ```text

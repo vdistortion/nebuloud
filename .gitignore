@@ -32,6 +32,11 @@ yarn-error.log
 # Project media kept locally and not committed
 /projects/nebuloud/public/artist/
 
+# Local environment secrets
+.env
+.env.*
+!.env.example
+
 # Miscellaneous
 /.angular/cache
 .sass-cache/
