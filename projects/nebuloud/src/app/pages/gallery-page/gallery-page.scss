@@ -47,10 +47,12 @@
   columns: 3 260px;
   column-gap: 1rem;
   margin-top: 2rem;
+  direction: rtl;
 }
 
 .gallery-page__link {
   display: block;
+  direction: ltr;
   margin-bottom: 1rem;
   break-inside: avoid;
   border: 1px solid rgba(255, 68, 68, 0.12);
