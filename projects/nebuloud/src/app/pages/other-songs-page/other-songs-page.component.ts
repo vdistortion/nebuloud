@@ -1,6 +1,8 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Component, computed, effect, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import artists from '../../../db';
@@ -12,31 +14,40 @@ import type { TypeItem, TypeItems, TypeSong } from '../../../db/types';
   templateUrl: './other-songs-page.component.html',
   styleUrl: './other-songs-page.component.scss',
 })
-export class OtherSongsPageComponent implements OnInit {
-  private analytics = inject(Analytics);
-  public artists: TypeItems = artists;
-  public artistName: string = '';
-  public artistId: string | null = null;
-  public songs: TypeSong[] = [];
+export class OtherSongsPageComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly titleService = inject(Title);
+  private readonly artistService = inject(ArtistService);
+  private readonly analytics = inject(Analytics);
 
-  constructor(
-    private route: ActivatedRoute,
-    private titleService: Title,
-    private artistService: ArtistService,
-  ) {
-    this.route.params.subscribe(({ artist }) => {
-      this.artistService.setArtist(artist);
+  readonly artists: TypeItems = artists;
+  readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
+    initialValue: null,
+  });
+  readonly artist = computed<TypeItem | undefined>(() => {
+    const id = this.artistId();
+    return id ? this.artists[id] : undefined;
+  });
+  readonly artistName = computed(() => this.artist()?.artist.name ?? '');
+  readonly songs = computed<TypeSong[]>(
+    () =>
+      this.artist()
+        ?.getSongsWithoutAlbum()
+        .sort((a, b) => a.name[0].localeCompare(b.name[0])) ?? [],
+  );
+
+  constructor() {
+    effect(() => {
+      const artistId = this.artistId() ?? '';
+      this.artistService.setArtist(artistId);
+      this.titleService.setTitle(
+        this.artistName() ? `${this.artistName()} | Песни вне альбомов` : 'Песни вне альбомов',
+      );
     });
-    this.artistId = this.route.snapshot.paramMap.get('artist');
-    if (!this.artistId) return;
-
-    const artist: TypeItem = this.artists[this.artistId];
-    this.artistName = artist.artist.name;
-    this.songs = artist.getSongsWithoutAlbum().sort(artist.sortAsc);
   }
 
-  ngOnInit(): void {
-    this.titleService.setTitle(`${this.artistName} | Другие песни`);
+  formatSongNumber(index: number): string {
+    return String(index + 1).padStart(2, '0');
   }
 
   onClick(event: string) {

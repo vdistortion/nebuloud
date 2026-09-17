@@ -1,48 +1,61 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, computed, effect, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import artists from '../../../db';
-import type { TypeItems } from '../../../db/types';
+import type { TypeItems, TypeStructurePictures } from '../../../db/types';
 
 @Component({
   selector: 'app-gallery-page',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './gallery-page.component.html',
   styleUrl: './gallery-page.component.scss',
 })
-export class GalleryPageComponent implements OnInit {
-  private analytics = inject(Analytics);
-  public artists: TypeItems = artists;
-  protected pictures!: string[];
-  protected path!: string;
-  protected id!: string;
-  protected galleryName: string = '';
-  private artistName: string = '';
+export class GalleryPageComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly titleService = inject(Title);
+  private readonly artistService = inject(ArtistService);
+  private readonly analytics = inject(Analytics);
 
-  constructor(
-    private route: ActivatedRoute,
-    private titleService: Title,
-    private artistService: ArtistService,
-  ) {
-    this.route.params.subscribe(({ artist, gallery }) => {
-      const artistItem = this.artists[artist];
-      this.id = artistItem.artist.id;
-      this.artistName = artistItem.artist.name;
-      this.artistService.setArtist(artist);
+  readonly artists: TypeItems = artists;
+  readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
+    initialValue: null,
+  });
+  readonly galleryId = toSignal(this.route.paramMap.pipe(map((params) => params.get('gallery'))), {
+    initialValue: null,
+  });
+  readonly artist = computed(() => {
+    const id = this.artistId();
+    return id ? this.artists[id]?.artist : undefined;
+  });
+  readonly artistName = computed(() => this.artist()?.name ?? '');
+  readonly gallery = computed<TypeStructurePictures | undefined>(() => {
+    const images = this.artist()?.images;
+    const id = this.galleryId();
+    return images && id !== null ? images[Number(id)] : undefined;
+  });
+  readonly galleryName = computed(() => {
+    const path = this.gallery()?.path ?? [];
+    return path[path.length - 1] ?? 'Галерея';
+  });
+  readonly galleryPath = computed(() => this.gallery()?.path.join('/') ?? '');
+  readonly pictures = computed(() => this.gallery()?.pictures ?? []);
 
-      if (artistItem.artist.images) {
-        const images = artistItem.artist.images[gallery];
-        this.pictures = images.pictures;
-        this.path = images.path.join('/');
-        this.galleryName = images.path[images.path.length - 1];
-      }
+  constructor() {
+    effect(() => {
+      const artistId = this.artistId() ?? '';
+      this.artistService.setArtist(artistId);
+      this.titleService.setTitle(
+        this.artistName() ? `${this.artistName()} | Фото | ${this.galleryName()}` : 'Галерея',
+      );
     });
   }
 
-  ngOnInit(): void {
-    this.titleService.setTitle(`${this.artistName} | Фото | ${this.galleryName}`);
+  imageUrl(picture: string): string {
+    return `./artist/${this.artistId()}/images/${this.galleryPath()}/${picture}`;
   }
 
   onClick(event: string) {

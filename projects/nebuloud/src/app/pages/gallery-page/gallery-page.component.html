@@ -1,20 +1,28 @@
-<div class="gallery-page">
-  <h3>{{ galleryName }}</h3>
-  <div class="gallery-page__images">
-    @for (picture of pictures; track picture) {
-      <a
-        class="gallery-page__link"
-        [href]="'./artist/' + id + '/images/' + path + '/' + picture"
-        target="_blank"
-        rel="noreferrer"
-        (click)="onClick(`click_image_${path}/${picture}_artist_${id}`)"
-      >
-        <img
-          class="gallery-page__image"
-          [src]="'./artist/' + id + '/images/' + path + '/' + picture"
-          [alt]="picture"
-        />
-      </a>
-    }
-  </div>
-</div>
+@if (artistId() && gallery()) {
+  <main class="gallery-page">
+    <a class="gallery-page__back" [routerLink]="'/artist/' + artistId() + '/images'">
+      ← Все фотографии {{ artistName() }}
+    </a>
+    <header class="gallery-page__header">
+      <p class="eyebrow">Галерея</p>
+      <h1>{{ galleryName() }}</h1>
+      <p>{{ pictures().length }} фотографий · {{ artistName() }}</p>
+    </header>
+
+    <div class="gallery-page__images">
+      @for (picture of pictures(); track picture) {
+        <a
+          class="gallery-page__link"
+          [href]="imageUrl(picture)"
+          target="_blank"
+          rel="noreferrer"
+          (click)="onClick(`click_image_${galleryPath()}/${picture}_artist_${artistId()}`)"
+        >
+          <img class="gallery-page__image" [src]="imageUrl(picture)" [alt]="picture" />
+        </a>
+      }
+    </div>
+  </main>
+} @else {
+  <main class="gallery-page gallery-page--empty">Галерея не найдена.</main>
+}
