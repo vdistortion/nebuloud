@@ -1,29 +1,50 @@
-@if (artistName) {
-  <div class="songs-page">
-    <div class="songs-page__item">
-      <h3>
-        <span>Все песни</span>
-        @if (isOtherSongs) {
-          |
-          <a [routerLink]="'other'">Песни, не вошедшие в альбомы</a>
-        }
-      </h3>
-    </div>
-    <div class="songs-page__wrapper">
-      @for (song of songs; track song.id; let i = $index) {
-        <div class="songs-page__item">
-          <div class="songs-page__song">
-            {{ i + 1 }}.
-            <a
-              [class.error]="!song.text.trim()"
-              [routerLink]="'/artist/' + artistId + '/song/' + song.id"
-              (click)="onClick(`click_song_${song.id}_page_songs_artist_${artistId}`)"
-            >
-              {{ song.name[0] }}
-            </a>
-          </div>
-        </div>
+@if (artistName() && artistId()) {
+  <main class="songs-page">
+    <a class="songs-page__back" [routerLink]="'/artist/' + artistId()">← {{ artistName() }}</a>
+
+    <header class="songs-page__header">
+      <div>
+        <p class="eyebrow">Тексты песен</p>
+        <h1>Все песни</h1>
+        <p class="songs-page__subtitle">{{ songs().length }} песен с текстами</p>
+      </div>
+      @if (hasOtherSongs()) {
+        <a class="songs-page__other" [routerLink]="'other'">Песни вне альбомов →</a>
       }
-    </div>
-  </div>
+    </header>
+
+    <label class="songs-search">
+      <span class="visually-hidden">Поиск песни</span>
+      <span aria-hidden="true">⌕</span>
+      <input
+        type="search"
+        placeholder="Найти песню..."
+        [value]="searchQuery()"
+        (input)="onSearch($event)"
+      />
+    </label>
+
+    @if (filteredSongs().length) {
+      <div class="songs-list">
+        @for (song of filteredSongs(); track song.id; let i = $index) {
+          <a
+            class="song-row"
+            [routerLink]="'/artist/' + artistId() + '/song/' + song.id"
+            (click)="onClick(`click_song_${song.id}_page_songs_artist_${artistId()}`)"
+          >
+            <span class="song-row__number">{{ formatSongNumber(i) }}</span>
+            <span class="song-row__name">{{ song.name[0] }}</span>
+            @if (song.name.length > 1) {
+              <span class="song-row__alt">{{ song.name[1] }}</span>
+            }
+            <span class="song-row__arrow" aria-hidden="true">↗</span>
+          </a>
+        }
+      </div>
+    } @else {
+      <p class="songs-page__empty">Песен по этому запросу не найдено.</p>
+    }
+  </main>
+} @else {
+  <main class="songs-page songs-page--empty">Артист не найден.</main>
 }
