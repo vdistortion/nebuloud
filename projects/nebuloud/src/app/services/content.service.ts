@@ -43,6 +43,27 @@ export class ContentService {
     return item && songId ? this.mapSong(item, songId) : undefined;
   }
 
+  getSongs(artistId: string | null | undefined): CatalogSong[] {
+    const item = this.getArtist(artistId);
+    if (!item) return [];
+
+    return Object.keys(item.songs)
+      .map((songId) => this.mapSong(item, songId))
+      .filter((song): song is CatalogSong => Boolean(song));
+  }
+
+  getSongsWithLyrics(artistId: string | null | undefined): CatalogSong[] {
+    return this.getSongs(artistId).filter((song) => song.lyrics.trim());
+  }
+
+  getSongsWithoutAlbum(artistId: string | null | undefined): CatalogSong[] {
+    return this.getSongs(artistId).filter((song) => !song.albums.length);
+  }
+
+  getVideos(artistId: string | null | undefined): CatalogSong[] {
+    return this.getSongs(artistId).filter((song) => Boolean(song.videoId));
+  }
+
   private mapAlbum(item: TypeItem, albumId: string): CatalogAlbum | undefined {
     const album = item.albums[albumId];
     if (!album) return undefined;

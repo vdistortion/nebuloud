@@ -6,9 +6,9 @@ import { YouTubePlayer } from '@angular/youtube-player';
 import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
-import { TrimPipe } from '../../trim.pipe';
 import { ContentService } from '../../services/content.service';
-import type { TypeAlbum, TypeItem, TypeItems, TypeSong } from '../../../db/types';
+import { TrimPipe } from '../../trim.pipe';
+import type { CatalogAlbum, CatalogSong } from '../../models/content.models';
 
 @Component({
   selector: 'app-song-page',
@@ -23,27 +23,23 @@ export class SongPage {
   private readonly analytics = inject(Analytics);
   private readonly content = inject(ContentService);
 
-  readonly artists: TypeItems = this.content.artists;
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
   });
   readonly songId = toSignal(this.route.paramMap.pipe(map((params) => params.get('song'))), {
     initialValue: null,
   });
-  readonly artist = computed<TypeItem | undefined>(() => {
-    const id = this.artistId();
-    return id ? this.artists[id] : undefined;
-  });
-  readonly artistName = computed(() => this.artist()?.artist.name ?? '');
-  readonly song = computed<TypeSong | undefined>(() => {
-    const item = this.artist();
-    const id = this.songId();
-    return item && id ? item.songs[id] : undefined;
-  });
-  readonly albums = computed<TypeAlbum[]>(() => {
-    const item = this.artist();
+  readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
+  readonly song = computed<CatalogSong | undefined>(() =>
+    this.content.getSong(this.artistId(), this.songId()),
+  );
+  readonly albums = computed<CatalogAlbum[]>(() => {
     const song = this.song();
-    return item && song ? song.albums.map((id) => item.albums[id]).filter(Boolean) : [];
+    return song
+      ? song.albums
+          .map((id) => this.content.getAlbum(this.artistId(), id))
+          .filter((album): album is CatalogAlbum => Boolean(album))
+      : [];
   });
 
   constructor() {
@@ -54,7 +50,7 @@ export class SongPage {
 
       this.artistService.setArtist(artistId, '', songId);
       this.titleService.setTitle(
-        song ? `${song.name[0]} | ${this.artistName()}` : 'Песня не найдена',
+        song ? `${song.title} | ${this.artistName()}` : 'Песня не найдена',
       );
     });
   }

@@ -8,10 +8,10 @@
       <article class="lyrics-card">
         <header class="lyrics-card__header">
           <p class="eyebrow">Текст песни</p>
-          <h1>{{ currentSong.name[0] }}</h1>
-          @if (currentSong.name.length > 1) {
-            @for (name of currentSong.name.slice(1); track name) {
-              <p class="lyrics-card__alternative">{{ name }}</p>
+          <h1>{{ currentSong.title }}</h1>
+          @if (currentSong.aliases.length) {
+            @for (alias of currentSong.aliases; track alias) {
+              <p class="lyrics-card__alternative">{{ alias }}</p>
             }
           }
           <p class="lyrics-card__artist">{{ artistName() }}</p>
@@ -19,15 +19,15 @@
             <p class="lyrics-card__authors">Авторы: {{ currentSong.authors }}</p>
           }
         </header>
-        <pre class="lyrics-card__text">{{ currentSong.text | trim }}</pre>
+        <pre class="lyrics-card__text">{{ currentSong.lyrics | trim }}</pre>
       </article>
 
       <aside class="song-sidebar">
-        @if (currentSong.clipYouTubeId) {
+        @if (currentSong.videoId) {
           <section class="video-card">
             <p class="eyebrow">Видео</p>
             <div class="video-card__player">
-              <youtube-player [videoId]="currentSong.clipYouTubeId" placeholderImageQuality="low" />
+              <youtube-player [videoId]="currentSong.videoId" placeholderImageQuality="low" />
             </div>
           </section>
         }

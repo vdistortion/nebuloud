@@ -33,9 +33,9 @@
             (click)="onClick(`click_song_${song.id}_page_songs_artist_${artistId()}`)"
           >
             <span class="song-row__number">{{ formatSongNumber(i) }}</span>
-            <span class="song-row__name">{{ song.name[0] }}</span>
-            @if (song.name.length > 1) {
-              <span class="song-row__alt">{{ song.name[1] }}</span>
+            <span class="song-row__name">{{ song.title }}</span>
+            @if (song.aliases.length) {
+              <span class="song-row__alt">{{ song.aliases[0] }}</span>
             }
             <span class="song-row__arrow" aria-hidden="true">↗</span>
           </a>
