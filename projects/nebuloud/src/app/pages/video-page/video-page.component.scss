@@ -1,40 +1,122 @@
 .video-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 5rem;
+}
+
+.video-page__back {
+  display: inline-block;
+  margin-bottom: 2.5rem;
+  color: #999;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.video-page__back:hover {
+  color: #ff665f;
+}
+
+.video-page__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 68, 68, 0.16);
+}
+
+.video-page__header h1 {
+  margin: 0.6rem 0 0;
+  color: #f2f2f2;
+  font-size: clamp(2.6rem, 7vw, 5rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.video-page__header p:last-child {
+  margin: 1rem 0 0;
+  color: #777;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #ff665f;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.videos-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-gap: 0 2%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
 
-  @media (max-width: 992px) {
-    grid-template-columns: repeat(1, 1fr);
+.video-card {
+  overflow: hidden;
+  border: 1px solid rgba(255, 68, 68, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 68, 68, 0.025);
+}
+
+.video-card__player {
+  aspect-ratio: 16 / 9;
+  background: #161616;
+}
+
+.video-card__player youtube-player {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.video-card__body {
+  padding: 1rem 1.1rem 1.2rem;
+}
+
+.video-card__type {
+  margin: 0 0 0.45rem;
+  color: #ff665f;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.video-card__title {
+  display: block;
+  color: #eee;
+  font-size: 1.15rem;
+  text-decoration: none;
+}
+
+.video-card__title:hover {
+  color: #ff665f;
+}
+
+.video-card__year {
+  display: block;
+  margin-top: 0.3rem;
+  color: #777;
+  font-size: 0.8rem;
+}
+
+.video-page__empty,
+.video-page--empty {
+  color: #888;
+}
+
+.video-page--empty {
+  min-height: 50vh;
+}
+
+@media (max-width: 700px) {
+  .video-page {
+    padding: 2rem 1rem 4rem;
   }
 
-  h3 {
-    grid-column: 1 / -1;
-  }
-
-  &__item {
-    padding-bottom: 28px;
-    text-decoration: none;
-    transition: background-color 0.3s ease;
-    aspect-ratio: 16 / 9;
-  }
-
-  &__title {
-    display: block;
-    font-weight: 700;
-    line-height: 1.1;
-    font-size: 16px;
-    letter-spacing: 0.1em;
-    text-decoration: none;
-    text-transform: uppercase;
-    transition: color 0.3s ease;
-    margin-top: 14px;
-  }
-
-  &__year {
-    display: block;
-    font-weight: 500;
-    line-height: 1.5;
-    font-size: 16px;
-    color: #696c6f;
+  .videos-grid {
+    grid-template-columns: 1fr;
   }
 }

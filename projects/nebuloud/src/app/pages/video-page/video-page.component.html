@@ -1,25 +1,41 @@
-@if (artistName) {
-  <div class="video-page">
-    <h3>Клипы</h3>
-    @for (song of songs; track song.id) {
-      <div class="video-page__item">
-        <div class="video-page__player">
-          <youtube-player
-            [videoId]="song.clipYouTubeId"
-            placeholderImageQuality="low"
-          ></youtube-player>
-        </div>
-        <a
-          class="video-page__title"
-          [routerLink]="'/artist/' + artistId + '/song/' + song.id"
-          (click)="onClick(`click_video_song_${song.id}_artist_${artistId}`)"
-        >
-          {{ song.name }}
-          @if (artist.yearOfSong(song)) {
-            <span class="video-page__year">{{ artist.yearOfSong(song) }}</span>
-          }
-        </a>
+@if (artistName() && artistId()) {
+  <main class="video-page">
+    <a class="video-page__back" [routerLink]="'/artist/' + artistId()">← {{ artistName() }}</a>
+    <header class="video-page__header">
+      <div>
+        <p class="eyebrow">Видеоархив</p>
+        <h1>Клипы</h1>
+        <p>{{ songs().length }} видео {{ artistName() }}</p>
       </div>
+    </header>
+
+    @if (songs().length) {
+      <div class="videos-grid">
+        @for (song of songs(); track song.id) {
+          <article class="video-card">
+            <div class="video-card__player">
+              <youtube-player [videoId]="song.clipYouTubeId" placeholderImageQuality="low" />
+            </div>
+            <div class="video-card__body">
+              <p class="video-card__type">Клип</p>
+              <a
+                class="video-card__title"
+                [routerLink]="'/artist/' + artistId() + '/song/' + song.id"
+                (click)="onClick(`click_video_song_${song.id}_artist_${artistId()}`)"
+              >
+                {{ song.name[0] }}
+              </a>
+              @if (yearOfSong(song)) {
+                <span class="video-card__year">{{ yearOfSong(song) }}</span>
+              }
+            </div>
+          </article>
+        }
+      </div>
+    } @else {
+      <p class="video-page__empty">Для этого артиста видео пока не добавлены.</p>
     }
-  </div>
+  </main>
+} @else {
+  <main class="video-page video-page--empty">Артист не найден.</main>
 }

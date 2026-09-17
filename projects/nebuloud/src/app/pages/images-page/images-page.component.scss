@@ -1,16 +1,105 @@
 .images-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 5rem;
+}
+
+.images-page__back {
+  display: inline-block;
+  margin-bottom: 2.5rem;
+  color: #999;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.images-page__back:hover {
+  color: #ff665f;
+}
+
+.images-page__header {
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 68, 68, 0.16);
+}
+
+.eyebrow {
+  margin: 0;
+  color: #ff665f;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.images-page h1 {
+  margin: 0.6rem 0 0;
+  color: #f2f2f2;
+  font-size: clamp(2.6rem, 7vw, 5rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.images-page__header p:last-child {
+  margin: 1rem 0 0;
+  color: #777;
+}
+
+.galleries-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
 
-  @media (max-width: 992px) {
-    grid-template-columns: repeat(3, 1fr);
+.galleries-grid ::ng-deep .gallery-card {
+  height: 100%;
+  padding: 0.7rem;
+  border: 1px solid rgba(255, 68, 68, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 68, 68, 0.025);
+}
+
+.galleries-grid ::ng-deep .gallery-card:hover {
+  border-color: rgba(255, 68, 68, 0.42);
+  background: rgba(255, 68, 68, 0.08);
+  transform: translateY(-4px);
+}
+
+.galleries-grid ::ng-deep .gallery-card__image {
+  aspect-ratio: 1.35;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #161616;
+}
+
+.galleries-grid ::ng-deep .gallery-card__name {
+  margin-top: 0.8rem;
+  color: #e7e7e7;
+  font-size: 0.9rem;
+  letter-spacing: 0.03em;
+  text-transform: none;
+}
+
+.images-page__empty,
+.images-page--empty {
+  color: #888;
+}
+
+.images-page--empty {
+  min-height: 50vh;
+}
+
+@media (max-width: 800px) {
+  .images-page {
+    padding: 2rem 1rem 4rem;
   }
 
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
+  .galleries-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
 
-  @media (max-width: 480px) {
-    grid-template-columns: repeat(1, 1fr);
+@media (max-width: 500px) {
+  .galleries-grid {
+    grid-template-columns: 1fr;
   }
 }
