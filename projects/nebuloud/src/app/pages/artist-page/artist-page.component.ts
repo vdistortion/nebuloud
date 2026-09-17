@@ -7,7 +7,7 @@ import { AlbumCardComponent } from '../../components/ui/album-card/album-card.co
 import { StreamingListComponent } from '../../components/ui/streaming-list/streaming-list.component';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
-import artists from '../../../db';
+import { ContentService } from '../../services/content.service';
 import type { TypeAlbum, TypeArtist, TypeItem, TypeItems, TypeStreaming } from '../../../db/types';
 
 @Component({
@@ -21,8 +21,9 @@ export class ArtistPageComponent {
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
+  private readonly content = inject(ContentService);
 
-  readonly artists: TypeItems = artists;
+  readonly artists: TypeItems = this.content.artists;
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
   });

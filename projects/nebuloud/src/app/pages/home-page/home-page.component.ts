@@ -3,7 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
-import { artistSummaries } from '../../../db/artist-summaries';
+import { ContentService } from '../../services/content.service';
 import type { TypeArtistSummary } from '../../../db/types';
 
 @Component({
@@ -16,8 +16,9 @@ export class HomePageComponent {
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
+  private readonly content = inject(ContentService);
 
-  readonly artists: TypeArtistSummary[] = artistSummaries;
+  readonly artists: TypeArtistSummary[] = this.content.artistSummaries;
   readonly searchQuery = signal('');
   readonly filteredArtists = computed(() => {
     const query = this.searchQuery().trim().toLocaleLowerCase();

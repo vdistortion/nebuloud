@@ -2,7 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Analytics } from '../../services/analytics.service';
 import { ArtistService } from '../../services/artist.service';
-import artists from '../../../db';
+import { ContentService } from '../../services/content.service';
 
 @Component({
   selector: 'app-header',
@@ -13,10 +13,13 @@ import artists from '../../../db';
 export class HeaderComponent {
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
+  private readonly content = inject(ContentService);
 
   readonly artistId = this.artistService.artistId;
-  readonly artistName = computed(() => artists[this.artistId()]?.artist.name ?? '');
-  readonly isImages = computed(() => Boolean(artists[this.artistId()]?.artist.images?.length));
+  readonly artistName = computed(() => this.content.getArtist(this.artistId())?.artist.name ?? '');
+  readonly isImages = computed(() =>
+    Boolean(this.content.getArtist(this.artistId())?.artist.images?.length),
+  );
 
   onClick(event: string) {
     this.analytics.sendEvent(event, { category: 'UI' });

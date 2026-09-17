@@ -5,7 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
-import artists from '../../../db';
+import { ContentService } from '../../services/content.service';
 import type { TypeItem, TypeItems, TypeSong } from '../../../db/types';
 
 @Component({
@@ -19,8 +19,9 @@ export class OtherSongsPageComponent {
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
+  private readonly content = inject(ContentService);
 
-  readonly artists: TypeItems = artists;
+  readonly artists: TypeItems = this.content.artists;
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
   });
