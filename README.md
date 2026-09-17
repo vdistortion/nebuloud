@@ -1,61 +1,74 @@
 # Nebuloud
 
-[![logo](projects/nebuloud/public/album-card.jpg)]
+Музыкальный каталог на Angular с артистами, альбомами, песнями, текстами,
+видео и фотогалереями.
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.8.
+Текущая версия — статический frontend на локальном TypeScript-каталоге.
+Дальнейшее подключение Directus + PostgreSQL предусмотрено архитектурой, но не
+требуется для разработки интерфейса.
 
-## Development server
+## Документация
 
-To start a local development server, run:
+Главный источник решений и плана проекта:
 
-```bash
-ng serve
+- [ARCHITECTURE.md](ARCHITECTURE.md)
+
+Визуальный референс текущего интерфейса находится вне репозитория:
+
+```text
+/home/v/Desktop/NebuloudProject/new_design/
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Разработка
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Установить зависимости:
 
 ```bash
-ng generate component component-name
+npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Запустить dev-сервер:
 
 ```bash
-ng generate --help
+npm start
 ```
 
-## Building
+Открыть `http://localhost:4200/`.
 
-To build the project run:
+Production-сборка:
 
 ```bash
-ng build
+npm run build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Статические файлы появятся в `dist/nebuloud/`.
 
-## Running unit tests
+## Структура
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
+```text
+projects/nebuloud/src/
+  app/       Angular-страницы, layout, UI и сервисы
+  db/        текущий локальный каталог артистов и контента
+  styles.scss глобальные стили и design tokens
 ```
 
-## Running end-to-end tests
+Основные маршруты:
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
+```text
+/                                      каталог артистов
+/artist/:artist                       профиль артиста
+/artist/:artist/album/:album           альбом
+/artist/:artist/song/:song             песня и текст
+/artist/:artist/songs                  тексты песен
+/artist/:artist/songs/other            песни вне альбомов
+/artist/:artist/video                  видео
+/artist/:artist/images                 фотогалереи
+/artist/:artist/images/:gallery        отдельная галерея
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Локальные изображения
 
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Изображения в `projects/nebuloud/public/artist/` не коммитятся в репозиторий,
+чтобы не раздувать Git-историю. Для локального запуска они должны находиться в
+этом каталоге. Стратегию хранения production-изображений решим при переходе к
+Directus или внешнему файловому хранилищу.
