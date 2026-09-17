@@ -17,6 +17,16 @@ BASE_URL = os.getenv("DIRECTUS_URL", "http://localhost:8056").rstrip("/")
 EMAIL = os.getenv("DIRECTUS_ADMIN_EMAIL", "admin@nebuloud.dev")
 PASSWORD = os.getenv("DIRECTUS_ADMIN_PASSWORD", "change-this-admin-password")
 
+RELATIONS = [
+    ("albums", "artist", "artists", "albums"),
+    ("songs", "artist", "artists", "songs"),
+    ("galleries", "artist", "artists", "galleries"),
+    ("gallery_images", "gallery", "galleries", "images"),
+    ("streaming_links", "artist", "artists", "streaming_links"),
+    ("streaming_links", "album", "albums", "streaming_links"),
+    ("streaming_links", "song", "songs", "streaming_links"),
+]
+
 COLLECTIONS = {
     "artists": {
         "icon": "music_note",
@@ -31,7 +41,7 @@ COLLECTIONS = {
     "albums": {
         "icon": "album",
         "fields": [
-            ("artist", "uuid", {"interface": "input"}, {}),
+            ("artist", "integer", {"interface": "input"}, {}),
             ("slug", "string", {"interface": "input", "required": True}, {}),
             ("title", "string", {"interface": "input", "required": True}, {}),
             ("year", "integer", {"interface": "input"}, {}),
@@ -43,7 +53,7 @@ COLLECTIONS = {
     "songs": {
         "icon": "lyrics",
         "fields": [
-            ("artist", "uuid", {"interface": "input"}, {}),
+            ("artist", "integer", {"interface": "input"}, {}),
             ("slug", "string", {"interface": "input", "required": True}, {}),
             ("title", "string", {"interface": "input", "required": True}, {}),
             ("aliases", "json", {"interface": "input-code", "options": {"language": "json"}}, {}),
@@ -56,7 +66,7 @@ COLLECTIONS = {
     "galleries": {
         "icon": "photo_library",
         "fields": [
-            ("artist", "uuid", {"interface": "input"}, {}),
+            ("artist", "integer", {"interface": "input"}, {}),
             ("slug", "string", {"interface": "input", "required": True}, {}),
             ("title", "string", {"interface": "input", "required": True}, {}),
             ("sort", "integer", {"interface": "input"}, {"default_value": 0}),
@@ -65,7 +75,7 @@ COLLECTIONS = {
     "gallery_images": {
         "icon": "image",
         "fields": [
-            ("gallery", "uuid", {"interface": "input"}, {}),
+            ("gallery", "integer", {"interface": "input"}, {}),
             ("image", "uuid", {"interface": "file", "required": True}, {}),
             ("sort", "integer", {"interface": "input"}, {"default_value": 0}),
         ],
@@ -73,9 +83,9 @@ COLLECTIONS = {
     "streaming_links": {
         "icon": "link",
         "fields": [
-            ("artist", "uuid", {"interface": "input"}, {}),
-            ("album", "uuid", {"interface": "input"}, {}),
-            ("song", "uuid", {"interface": "input"}, {}),
+            ("artist", "integer", {"interface": "input"}, {}),
+            ("album", "integer", {"interface": "input"}, {}),
+            ("song", "integer", {"interface": "input"}, {}),
             ("service", "string", {"interface": "input", "required": True}, {}),
             ("url", "string", {"interface": "input", "required": True}, {}),
             ("sort", "integer", {"interface": "input"}, {"default_value": 0}),
@@ -134,6 +144,30 @@ def main() -> int:
                 {"field": field, "type": field_type, "meta": meta, "schema": schema},
             )
             print(f"  created field: {name}.{field}")
+
+    _, relation_response = request("GET", "/relations", token)
+    existing_relations = {
+        (relation["collection"], relation["field"], relation["related_collection"])
+        for relation in relation_response["data"]
+    }
+    for collection, field, related_collection, one_field in RELATIONS:
+        key = (collection, field, related_collection)
+        if key in existing_relations:
+            print(f"exists relation: {collection}.{field} -> {related_collection}")
+            continue
+        request(
+            "POST",
+            "/relations",
+            token,
+            {
+                "collection": collection,
+                "field": field,
+                "related_collection": related_collection,
+                "meta": {"one_field": one_field},
+                "schema": {"on_delete": "SET NULL", "on_update": "NO ACTION"},
+            },
+        )
+        print(f"created relation: {collection}.{field} -> {related_collection}")
 
     print("Nebuloud Directus content model is ready.")
     return 0
