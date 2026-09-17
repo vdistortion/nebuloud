@@ -329,6 +329,42 @@ DirectusContentSource┘
 
 Страницы не импортируют файлы конкретного артиста напрямую и не знают о формате ответа Directus.
 
+### Контракт будущего Directus
+
+Directus подключается после того, как локальные страницы используют нормализованные модели. На первом этапе не переносим старые TypeScript-файлы в Directus механически.
+
+Минимальная схема:
+
+```text
+artists
+  ├─ albums
+  │    └─ songs
+  ├─ songs
+  ├─ videos
+  └─ galleries
+         └─ gallery_images
+```
+
+Коллекции и ключевые поля:
+
+- `artists`: `slug`, `name`, `image`, `country`, `description`;
+- `albums`: `artist`, `slug`, `title`, `year`, `cover`, `description`, `sort`;
+- `songs`: `artist`, `slug`, `title`, `aliases`, `lyrics`, `authors`, `video_url`, `sort`;
+- `album_songs`: `album`, `song`, `sort` — если одна песня может входить в несколько альбомов;
+- `galleries`: `artist`, `slug`, `title`, `sort`;
+- `gallery_images`: `gallery`, `image`, `sort`;
+- `streaming_links`: `artist` или `album`, `service`, `url`, `sort`.
+
+Правила:
+
+- отображаемое название не является идентификатором;
+- `slug` уникален в пределах артиста и типа сущности;
+- песня может существовать без альбома;
+- одна песня может быть связана с несколькими альбомами;
+- порядок треков и фотографий хранится явно;
+- Directus-ответы преобразуются в `ArtistProfile`, `CatalogAlbum` и `CatalogSong` внутри data layer;
+- страницы не получают Directus SDK напрямую.
+
 ### Что переносим из `kira-sekira`
 
 - разделение `pages / features / layout / ui`;
