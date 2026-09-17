@@ -1,6 +1,10 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
+  "cli": {
+    "analytics": false,
+    "packageManager": "npm"
+  },
   "newProjectRoot": "projects",
   "projects": {
     "nebuloud": {
@@ -8,7 +12,6 @@
       "schematics": {
         "@schematics/angular:component": {
           "style": "scss",
-          "changeDetection": "OnPush",
           "skipTests": true
         },
         "@schematics/angular:class": {
@@ -33,31 +36,30 @@
           "skipTests": true
         }
       },
-      "root": "",
-      "sourceRoot": "src",
+      "root": "projects/nebuloud",
+      "sourceRoot": "projects/nebuloud/src",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "browser": "src/main.ts",
-            "tsConfig": "tsconfig.app.json",
+            "browser": "projects/nebuloud/src/main.ts",
+            "tsConfig": "projects/nebuloud/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
+                "input": "projects/nebuloud/public"
               }
             ],
-            "styles": ["src/styles.scss"],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
+            "styles": ["projects/nebuloud/src/styles.scss"],
+            "server": "projects/nebuloud/src/main.server.ts",
+            "outputMode": "static",
             "security": {
               "allowedHosts": []
             },
-            "allowedCommonJsDependencies": ["photoswipe", "photoswipe/dist/photoswipe-ui-default"],
             "ssr": {
-              "entry": "src/server.ts"
+              "entry": "projects/nebuloud/src/server.ts"
             }
           },
           "configurations": {
@@ -66,7 +68,7 @@
                 {
                   "type": "initial",
                   "maximumWarning": "500kB",
-                  "maximumError": "3MB"
+                  "maximumError": "1MB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -101,9 +103,5 @@
         }
       }
     }
-  },
-  "cli": {
-    "packageManager": "npm",
-    "analytics": false
   }
 }
