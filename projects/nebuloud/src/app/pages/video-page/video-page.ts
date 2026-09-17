@@ -2,20 +2,20 @@ import { Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { YouTubePlayer } from '@angular/youtube-player';
 import { map } from 'rxjs';
-import { GalleryCardComponent } from '../../components/ui/gallery-card/gallery-card.component';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { ContentService } from '../../services/content.service';
-import type { TypeArtist, TypeItems, TypeStructurePictures } from '../../../db/types';
+import type { TypeItem, TypeItems, TypeSong } from '../../../db/types';
 
 @Component({
-  selector: 'app-images-page',
-  imports: [RouterLink, GalleryCardComponent],
-  templateUrl: './images-page.component.html',
-  styleUrl: './images-page.component.scss',
+  selector: 'app-video-page',
+  imports: [RouterLink, YouTubePlayer],
+  templateUrl: './video-page.html',
+  styleUrl: './video-page.scss',
 })
-export class ImagesPageComponent {
+export class VideoPage {
   private readonly route = inject(ActivatedRoute);
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);
@@ -26,19 +26,31 @@ export class ImagesPageComponent {
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
   });
-  readonly artist = computed<TypeArtist | undefined>(() => {
+  readonly artist = computed<TypeItem | undefined>(() => {
     const id = this.artistId();
-    return id ? this.artists[id]?.artist : undefined;
+    return id ? this.artists[id] : undefined;
   });
-  readonly artistName = computed(() => this.artist()?.name ?? '');
-  readonly images = computed<TypeStructurePictures[]>(() => this.artist()?.images ?? []);
+  readonly artistName = computed(() => this.artist()?.artist.name ?? '');
+  readonly songs = computed<TypeSong[]>(
+    () =>
+      this.artist()
+        ?.getAllVideos()
+        .sort((a, b) => {
+          const artist = this.artist();
+          return artist ? artist.yearOfSong(a) - artist.yearOfSong(b) : 0;
+        }) ?? [],
+  );
 
   constructor() {
     effect(() => {
       const artistId = this.artistId() ?? '';
       this.artistService.setArtist(artistId);
-      this.titleService.setTitle(this.artistName() ? `${this.artistName()} | Фото` : 'Фото');
+      this.titleService.setTitle(this.artistName() ? `${this.artistName()} | Клипы` : 'Клипы');
     });
+  }
+
+  yearOfSong(song: TypeSong): number {
+    return this.artist()?.yearOfSong(song) ?? 0;
   }
 
   onClick(event: string) {

@@ -7,10 +7,10 @@ import { ContentService } from '../../services/content.service';
 @Component({
   selector: 'app-header',
   imports: [RouterLink, RouterLinkActive],
-  templateUrl: './header.component.html',
-  styleUrl: './header.component.scss',
+  templateUrl: './header.html',
+  styleUrl: './header.scss',
 })
-export class HeaderComponent {
+export class Header {
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
   private readonly content = inject(ContentService);

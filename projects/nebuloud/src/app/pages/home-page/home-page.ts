@@ -9,10 +9,10 @@ import type { TypeArtistSummary } from '../../../db/types';
 @Component({
   selector: 'app-home-page',
   imports: [RouterLink],
-  templateUrl: './home-page.component.html',
-  styleUrl: './home-page.component.scss',
+  templateUrl: './home-page.html',
+  styleUrl: './home-page.scss',
 })
-export class HomePageComponent {
+export class HomePage {
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);

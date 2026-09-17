@@ -3,8 +3,8 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
-import { AlbumCardComponent } from '../../components/ui/album-card/album-card.component';
-import { StreamingListComponent } from '../../components/ui/streaming-list/streaming-list.component';
+import { AlbumCard } from '../../components/ui/album-card/album-card';
+import { StreamingList } from '../../components/ui/streaming-list/streaming-list';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { ContentService } from '../../services/content.service';
@@ -12,11 +12,11 @@ import type { ArtistProfile } from '../../models/content.models';
 
 @Component({
   selector: 'app-artist-page',
-  imports: [RouterLink, AlbumCardComponent, StreamingListComponent],
-  templateUrl: './artist-page.component.html',
-  styleUrl: './artist-page.component.scss',
+  imports: [RouterLink, AlbumCard, StreamingList],
+  templateUrl: './artist-page.html',
+  styleUrl: './artist-page.scss',
 })
-export class ArtistPageComponent {
+export class ArtistPage {
   private readonly route = inject(ActivatedRoute);
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);

@@ -9,10 +9,10 @@ type TypeStreamingItem = {
 @Component({
   selector: 'app-streaming-list',
   imports: [],
-  templateUrl: './streaming-list.component.html',
-  styleUrl: './streaming-list.component.scss',
+  templateUrl: './streaming-list.html',
+  styleUrl: './streaming-list.scss',
 })
-export class StreamingListComponent {
+export class StreamingList {
   @Input({ required: true }) public streaming: TypeStreaming | undefined;
   @Output() public clickStreaming = new EventEmitter<string>();
 

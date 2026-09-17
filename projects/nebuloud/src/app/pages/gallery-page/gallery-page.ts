@@ -11,10 +11,10 @@ import type { TypeItems, TypeStructurePictures } from '../../../db/types';
 @Component({
   selector: 'app-gallery-page',
   imports: [RouterLink],
-  templateUrl: './gallery-page.component.html',
-  styleUrl: './gallery-page.component.scss',
+  templateUrl: './gallery-page.html',
+  styleUrl: './gallery-page.scss',
 })
-export class GalleryPageComponent {
+export class GalleryPage {
   private readonly route = inject(ActivatedRoute);
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);

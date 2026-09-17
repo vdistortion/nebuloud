@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -9,12 +9,12 @@ import { ContentService } from '../../services/content.service';
 import type { TypeItem, TypeItems, TypeSong } from '../../../db/types';
 
 @Component({
-  selector: 'app-other-songs-page',
+  selector: 'app-songs-page',
   imports: [RouterLink],
-  templateUrl: './other-songs-page.component.html',
-  styleUrl: './other-songs-page.component.scss',
+  templateUrl: './songs-page.html',
+  styleUrl: './songs-page.scss',
 })
-export class OtherSongsPageComponent {
+export class SongsPage {
   private readonly route = inject(ActivatedRoute);
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);
@@ -33,22 +33,41 @@ export class OtherSongsPageComponent {
   readonly songs = computed<TypeSong[]>(
     () =>
       this.artist()
-        ?.getSongsWithoutAlbum()
+        ?.getSongsWithTexts()
         .sort((a, b) => a.name[0].localeCompare(b.name[0])) ?? [],
   );
+  readonly hasOtherSongs = computed(() => Boolean(this.artist()?.getSongsWithoutAlbum().length));
+  readonly searchQuery = signal('');
+  readonly filteredSongs = computed(() => {
+    const query = this.searchQuery().trim().toLocaleLowerCase();
+    return query
+      ? this.songs().filter((song) => song.name.join(' ').toLocaleLowerCase().includes(query))
+      : this.songs();
+  });
 
   constructor() {
     effect(() => {
       const artistId = this.artistId() ?? '';
       this.artistService.setArtist(artistId);
-      this.titleService.setTitle(
-        this.artistName() ? `${this.artistName()} | Песни вне альбомов` : 'Песни вне альбомов',
-      );
+      this.titleService.setTitle(this.artistName() ? `${this.artistName()} | Все песни` : 'Песни');
     });
   }
 
   formatSongNumber(index: number): string {
     return String(index + 1).padStart(2, '0');
+  }
+
+  onSearch(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const query = input.value.trim();
+    this.searchQuery.set(query);
+    const artistId = this.artistId();
+    if (!artistId) return;
+
+    const url = query
+      ? `/artist/${artistId}/songs?q=${encodeURIComponent(query)}`
+      : `/artist/${artistId}/songs`;
+    window.history.replaceState({}, '', url);
   }
 
   onClick(event: string) {

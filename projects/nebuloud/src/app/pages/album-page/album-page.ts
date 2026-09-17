@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
-import { StreamingListComponent } from '../../components/ui/streaming-list/streaming-list.component';
+import { StreamingList } from '../../components/ui/streaming-list/streaming-list';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { TrimPipe } from '../../trim.pipe';
@@ -19,11 +19,11 @@ type AlbumTrack = {
 
 @Component({
   selector: 'app-album-page',
-  imports: [RouterLink, TrimPipe, StreamingListComponent],
-  templateUrl: './album-page.component.html',
-  styleUrl: './album-page.component.scss',
+  imports: [RouterLink, TrimPipe, StreamingList],
+  templateUrl: './album-page.html',
+  styleUrl: './album-page.scss',
 })
-export class AlbumPageComponent {
+export class AlbumPage {
   private readonly route = inject(ActivatedRoute);
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);

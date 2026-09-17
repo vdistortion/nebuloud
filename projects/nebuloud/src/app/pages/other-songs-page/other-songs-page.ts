@@ -2,21 +2,19 @@ import { Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { YouTubePlayer } from '@angular/youtube-player';
 import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
-import { TrimPipe } from '../../trim.pipe';
 import { ContentService } from '../../services/content.service';
-import type { TypeAlbum, TypeItem, TypeItems, TypeSong } from '../../../db/types';
+import type { TypeItem, TypeItems, TypeSong } from '../../../db/types';
 
 @Component({
-  selector: 'app-song-page',
-  imports: [RouterLink, TrimPipe, YouTubePlayer],
-  templateUrl: './song-page.component.html',
-  styleUrl: './song-page.component.scss',
+  selector: 'app-other-songs-page',
+  imports: [RouterLink],
+  templateUrl: './other-songs-page.html',
+  styleUrl: './other-songs-page.scss',
 })
-export class SongPageComponent {
+export class OtherSongsPage {
   private readonly route = inject(ActivatedRoute);
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);
@@ -27,36 +25,30 @@ export class SongPageComponent {
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
   });
-  readonly songId = toSignal(this.route.paramMap.pipe(map((params) => params.get('song'))), {
-    initialValue: null,
-  });
   readonly artist = computed<TypeItem | undefined>(() => {
     const id = this.artistId();
     return id ? this.artists[id] : undefined;
   });
   readonly artistName = computed(() => this.artist()?.artist.name ?? '');
-  readonly song = computed<TypeSong | undefined>(() => {
-    const item = this.artist();
-    const id = this.songId();
-    return item && id ? item.songs[id] : undefined;
-  });
-  readonly albums = computed<TypeAlbum[]>(() => {
-    const item = this.artist();
-    const song = this.song();
-    return item && song ? song.albums.map((id) => item.albums[id]).filter(Boolean) : [];
-  });
+  readonly songs = computed<TypeSong[]>(
+    () =>
+      this.artist()
+        ?.getSongsWithoutAlbum()
+        .sort((a, b) => a.name[0].localeCompare(b.name[0])) ?? [],
+  );
 
   constructor() {
     effect(() => {
       const artistId = this.artistId() ?? '';
-      const songId = this.songId() ?? '';
-      const song = this.song();
-
-      this.artistService.setArtist(artistId, '', songId);
+      this.artistService.setArtist(artistId);
       this.titleService.setTitle(
-        song ? `${song.name[0]} | ${this.artistName()}` : 'Песня не найдена',
+        this.artistName() ? `${this.artistName()} | Песни вне альбомов` : 'Песни вне альбомов',
       );
     });
+  }
+
+  formatSongNumber(index: number): string {
+    return String(index + 1).padStart(2, '0');
   }
 
   onClick(event: string) {

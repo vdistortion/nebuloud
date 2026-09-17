@@ -3,50 +3,40 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./pages/home-page/home-page.component').then((m) => m.HomePageComponent),
+    loadComponent: () => import('./pages/home-page/home-page').then((m) => m.HomePage),
   },
   {
     path: 'artist/:artist',
-    loadComponent: () =>
-      import('./pages/artist-page/artist-page.component').then((m) => m.ArtistPageComponent),
+    loadComponent: () => import('./pages/artist-page/artist-page').then((m) => m.ArtistPage),
   },
   {
     path: 'artist/:artist/video',
-    loadComponent: () =>
-      import('./pages/video-page/video-page.component').then((m) => m.VideoPageComponent),
+    loadComponent: () => import('./pages/video-page/video-page').then((m) => m.VideoPage),
   },
   {
     path: 'artist/:artist/images',
-    loadComponent: () =>
-      import('./pages/images-page/images-page.component').then((m) => m.ImagesPageComponent),
+    loadComponent: () => import('./pages/images-page/images-page').then((m) => m.ImagesPage),
   },
   {
     path: 'artist/:artist/images/:gallery',
-    loadComponent: () =>
-      import('./pages/gallery-page/gallery-page.component').then((m) => m.GalleryPageComponent),
+    loadComponent: () => import('./pages/gallery-page/gallery-page').then((m) => m.GalleryPage),
   },
   {
     path: 'artist/:artist/songs',
-    loadComponent: () =>
-      import('./pages/songs-page/songs-page.component').then((m) => m.SongsPageComponent),
+    loadComponent: () => import('./pages/songs-page/songs-page').then((m) => m.SongsPage),
   },
   {
     path: 'artist/:artist/songs/other',
     loadComponent: () =>
-      import('./pages/other-songs-page/other-songs-page.component').then(
-        (m) => m.OtherSongsPageComponent,
-      ),
+      import('./pages/other-songs-page/other-songs-page').then((m) => m.OtherSongsPage),
   },
   {
     path: 'artist/:artist/song/:song',
-    loadComponent: () =>
-      import('./pages/song-page/song-page.component').then((m) => m.SongPageComponent),
+    loadComponent: () => import('./pages/song-page/song-page').then((m) => m.SongPage),
   },
   {
     path: 'artist/:artist/album/:album',
-    loadComponent: () =>
-      import('./pages/album-page/album-page.component').then((m) => m.AlbumPageComponent),
+    loadComponent: () => import('./pages/album-page/album-page').then((m) => m.AlbumPage),
   },
   {
     path: '**',
