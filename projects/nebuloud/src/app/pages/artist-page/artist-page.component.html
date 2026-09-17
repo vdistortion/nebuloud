@@ -1,18 +1,79 @@
-@if (artistName) {
-  <div class="artist-page">
-    @for (album of albums; track album.id) {
-      <app-album-card
-        [link]="'album/' + album.id"
-        [name]="album.name"
-        [year]="album.year"
-        [image]="album.folder"
-        (click)="onClick(`click_album_${album.id}_artist_${artistId}`)"
-      ></app-album-card>
+@if (artistData() && artistId()) {
+  <main class="artist-page">
+    <section class="artist-hero">
+      <div class="artist-hero__backdrop" aria-hidden="true"></div>
+      <div class="artist-hero__content">
+        <img
+          class="artist-hero__avatar"
+          [src]="'.' + artistData()!.image"
+          [alt]="artistData()!.name"
+        />
+        <div class="artist-hero__info">
+          <p class="eyebrow">Артист</p>
+          <h1>{{ artistData()!.name }}</h1>
+          <p class="artist-hero__countries">{{ artistData()!.country.join(' · ') }}</p>
+          <div class="artist-hero__stats" aria-label="Статистика артиста">
+            <span
+              ><strong>{{ albums().length }}</strong> альбомов</span
+            >
+            <span
+              ><strong>{{ artistData()!.albums.length }}</strong> релизов</span
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <nav class="artist-tabs" aria-label="Разделы артиста">
+      <a class="artist-tabs__link artist-tabs__link--active" [routerLink]="'/artist/' + artistId()">
+        Дискография
+      </a>
+      <a class="artist-tabs__link" [routerLink]="'/artist/' + artistId() + '/songs'"
+        >Тексты песен</a
+      >
+      @if (artistData()!.images?.length) {
+        <a class="artist-tabs__link" [routerLink]="'/artist/' + artistId() + '/images'">Фото</a>
+      }
+      <a class="artist-tabs__link" [routerLink]="'/artist/' + artistId() + '/video'">Видео</a>
+    </nav>
+
+    <section class="artist-section" aria-labelledby="albums-title">
+      <div class="artist-section__heading">
+        <div>
+          <p class="eyebrow">Музыка</p>
+          <h2 id="albums-title">Дискография</h2>
+        </div>
+        <span class="artist-section__count">{{ albums().length }} релизов</span>
+      </div>
+
+      <div class="albums-grid">
+        @for (album of albums(); track album.id) {
+          <app-album-card
+            [link]="'/artist/' + artistId() + '/album/' + album.id"
+            [name]="album.name"
+            [year]="album.year"
+            [image]="album.folder"
+            (click)="onClick(`click_album_${album.id}_artist_${artistId()}`)"
+          ></app-album-card>
+        }
+      </div>
+    </section>
+
+    @if (streaming()) {
+      <section class="streaming-section" aria-labelledby="streaming-title">
+        <div>
+          <p class="eyebrow">Слушать</p>
+          <h2 id="streaming-title">Площадки</h2>
+        </div>
+        <app-streaming-list
+          [streaming]="streaming()"
+          (clickStreaming)="onClick(`click_streaming_${$event}_artist_${artistId()}`)"
+        ></app-streaming-list>
+      </section>
     }
-    <app-streaming-list
-      class="artist-page__streaming-list"
-      [streaming]="streaming"
-      (clickStreaming)="onClick(`click_streaming_${$event}_artist_${artistId}`)"
-    ></app-streaming-list>
-  </div>
+  </main>
+} @else {
+  <main class="artist-page artist-page--empty">
+    <p>Артист не найден.</p>
+  </main>
 }

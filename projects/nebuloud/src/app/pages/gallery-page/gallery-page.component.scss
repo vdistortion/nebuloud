@@ -4,8 +4,14 @@
     grid-gap: 5px;
   }
 
-  &__image {
+  &__link {
     display: inline-block;
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  &__image {
+    display: block;
     width: 100%;
     object-fit: cover;
     object-position: center;

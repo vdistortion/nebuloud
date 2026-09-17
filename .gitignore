@@ -29,6 +29,9 @@ yarn-error.log
 !.vscode/mcp.json
 .history/*
 
+# Project media kept locally and not committed
+/projects/nebuloud/public/artist/
+
 # Miscellaneous
 /.angular/cache
 .sass-cache/

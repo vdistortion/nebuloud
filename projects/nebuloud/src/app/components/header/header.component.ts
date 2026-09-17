@@ -1,7 +1,7 @@
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
+import { ArtistService } from '../../services/artist.service';
 import artists from '../../../db';
 
 @Component({
@@ -11,28 +11,12 @@ import artists from '../../../db';
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
-  private cdr = inject(ChangeDetectorRef);
-  private analytics = inject(Analytics);
-  artistId: string = '';
-  artistName: string = '';
-  isImages: boolean = false;
+  private readonly artistService = inject(ArtistService);
+  private readonly analytics = inject(Analytics);
 
-  constructor(private artistService: ArtistService) {
-    this.artistService.artist$.subscribe((id) => {
-      this.artistId = id;
-      const artistById = artists[id];
-
-      if (artistById) {
-        const { artist } = artistById;
-        this.artistName = artist.name;
-        if (artist.images?.length) this.isImages = true;
-      } else {
-        this.artistName = '';
-      }
-
-      this.cdr.markForCheck();
-    });
-  }
+  readonly artistId = this.artistService.artistId;
+  readonly artistName = computed(() => artists[this.artistId()]?.artist.name ?? '');
+  readonly isImages = computed(() => Boolean(artists[this.artistId()]?.artist.images?.length));
 
   onClick(event: string) {
     this.analytics.sendEvent(event, { category: 'UI' });

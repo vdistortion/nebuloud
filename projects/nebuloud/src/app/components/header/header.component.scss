@@ -1,45 +1,91 @@
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  column-gap: 20px;
-  background-color: rgba(50, 50, 50, 0.5);
-  padding: 10px 20px;
-  margin-bottom: 20px;
+  gap: 1.5rem;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid rgba(255, 68, 68, 0.16);
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(14px);
+}
 
-  @media (max-width: 768px) {
+.header h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+}
+
+.header h2 a {
+  color: #f1f1f1;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.header h2 a:first-child {
+  color: #ff665f;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.header h2 a:hover {
+  color: #ff665f;
+}
+
+.header__menu {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.header__menu a {
+  display: block;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: #999;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.header__menu a:hover,
+.header__menu li.active a {
+  border-color: rgba(255, 68, 68, 0.28);
+  background: rgba(255, 68, 68, 0.08);
+  color: #ff665f;
+}
+
+@media (max-width: 700px) {
+  .header {
+    align-items: flex-start;
     flex-direction: column;
-    row-gap: 20px;
+    gap: 0.8rem;
+    padding: 0.9rem 1rem;
   }
 
-  @media (max-width: 480px) {
-    text-align: center;
+  .header__menu {
+    justify-content: flex-start;
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
   }
 
-  h2 {
-    margin: 0;
-  }
-
-  &__menu {
-    display: flex;
-    column-gap: 10px;
-    justify-content: center;
-    list-style-type: none;
-    padding-left: 0;
-    margin: 0;
-    text-transform: uppercase;
-    font-weight: 500;
-
-    @media (max-width: 480px) {
-      flex-wrap: wrap;
-    }
-
-    li.active {
-      color: var(--hover-text);
-    }
-
-    a {
-      text-decoration: none;
-    }
+  .header__menu a {
+    white-space: nowrap;
   }
 }

@@ -20,7 +20,6 @@
     "@angular/router": "^22.1.0",
     "@angular/ssr": "^22.1.8",
     "@angular/youtube-player": "^22.1.7",
-    "@twogate/ngx-photo-gallery": "^1.8.1",
     "express": "^5.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"

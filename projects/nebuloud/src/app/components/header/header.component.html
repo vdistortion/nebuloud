@@ -1,28 +1,28 @@
-<header class="header">
-  @if (artistId) {
+@if (artistId()) {
+  <header class="header">
     <h2>
-      <a routerLink="" (click)="onClick(`click_header_home_from_${artistId}`)">&#9776;</a>
+      <a routerLink="" (click)="onClick(`click_header_home_from_${artistId()}`)">&#9776;</a>
       <a
-        [routerLink]="'/artist/' + artistId"
-        (click)="onClick(`click_header_artist_from_${artistId}`)"
+        [routerLink]="'/artist/' + artistId()"
+        (click)="onClick(`click_header_artist_from_${artistId()}`)"
       >
-        {{ artistName }}
+        {{ artistName() }}
       </a>
     </h2>
     <ul class="header__menu">
       <li [routerLinkActive]="'active'" [routerLinkActiveOptions]="{ exact: true }">
         <a
-          [routerLink]="'/artist/' + artistId"
-          (click)="onClick(`click_header_albums_from_${artistId}`)"
+          [routerLink]="'/artist/' + artistId()"
+          (click)="onClick(`click_header_albums_from_${artistId()}`)"
         >
           Дискография
         </a>
       </li>
-      @if (isImages) {
+      @if (isImages()) {
         <li [routerLinkActive]="'active'">
           <a
-            [routerLink]="'/artist/' + artistId + '/images'"
-            (click)="onClick(`click_header_images_from_${artistId}`)"
+            [routerLink]="'/artist/' + artistId() + '/images'"
+            (click)="onClick(`click_header_images_from_${artistId()}`)"
           >
             Фото
           </a>
@@ -30,20 +30,20 @@
       }
       <li [routerLinkActive]="'active'">
         <a
-          [routerLink]="'/artist/' + artistId + '/songs'"
-          (click)="onClick(`click_header_songs_from_${artistId}`)"
+          [routerLink]="'/artist/' + artistId() + '/songs'"
+          (click)="onClick(`click_header_songs_from_${artistId()}`)"
         >
           Тексты песен
         </a>
       </li>
       <li [routerLinkActive]="'active'">
         <a
-          [routerLink]="'/artist/' + artistId + '/video'"
-          (click)="onClick(`click_header_video_from_${artistId}`)"
+          [routerLink]="'/artist/' + artistId() + '/video'"
+          (click)="onClick(`click_header_video_from_${artistId()}`)"
         >
           Клипы
         </a>
       </li>
     </ul>
-  }
-</header>
+  </header>
+}

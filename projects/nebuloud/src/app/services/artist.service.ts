@@ -1,17 +1,16 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ArtistService {
-  public artist$: BehaviorSubject<string> = new BehaviorSubject<string>('');
-  public album$: BehaviorSubject<string> = new BehaviorSubject<string>('');
-  public song$: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  readonly artistId = signal('');
+  readonly albumId = signal('');
+  readonly songId = signal('');
 
-  setArtist(artistId: string = '', albumId: string = '', songId: string = '') {
-    this.artist$.next(artistId);
-    this.album$.next(albumId);
-    this.song$.next(songId);
+  setArtist(artistId = '', albumId = '', songId = '') {
+    this.artistId.set(artistId);
+    this.albumId.set(albumId);
+    this.songId.set(songId);
   }
 }

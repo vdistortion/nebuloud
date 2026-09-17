@@ -1,14 +1,20 @@
 <div class="gallery-page">
   <h3>{{ galleryName }}</h3>
-  <div class="gallery-page__images" [photoGalleryGroup]="{ history: true }">
+  <div class="gallery-page__images">
     @for (picture of pictures; track picture) {
-      <img
-        class="gallery-page__image"
-        [photoGallery]="'./artist/' + id + '/images/' + path + '/' + picture"
-        [src]="'./artist/' + id + '/images/' + path + '/' + picture"
-        [alt]="picture"
+      <a
+        class="gallery-page__link"
+        [href]="'./artist/' + id + '/images/' + path + '/' + picture"
+        target="_blank"
+        rel="noreferrer"
         (click)="onClick(`click_image_${path}/${picture}_artist_${id}`)"
-      />
+      >
+        <img
+          class="gallery-page__image"
+          [src]="'./artist/' + id + '/images/' + path + '/' + picture"
+          [alt]="picture"
+        />
+      </a>
     }
   </div>
 </div>
