@@ -26,6 +26,14 @@ const albumResolver = (route: import('@angular/router').ActivatedRouteSnapshot) 
     .catch(() => local.getAlbum(artist, album));
 };
 
+const songResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
+  const directus = inject(DirectusContentSource);
+  const local = inject(ContentService);
+  const artist = route.paramMap.get('artist');
+  const song = route.paramMap.get('song');
+  return directus.getSongBySlug(artist ?? '', song ?? '').catch(() => local.getSong(artist, song));
+};
+
 export const routes: Routes = [
   {
     path: '',
@@ -60,6 +68,7 @@ export const routes: Routes = [
   },
   {
     path: 'artist/:artist/song/:song',
+    resolve: { song: songResolver },
     loadComponent: () => import('./pages/song-page/song-page').then((m) => m.SongPage),
   },
   {

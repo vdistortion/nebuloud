@@ -93,6 +93,43 @@ export class DirectusContentSource {
     return profile?.albums.find((album) => album.id === albumSlug);
   }
 
+  async getSongBySlug(artistSlug: string, songSlug: string): Promise<CatalogSong | undefined> {
+    const artists = await this.items<DirectusItem>('artists', {
+      'filter[slug][_eq]': artistSlug,
+      fields: 'id',
+      limit: '1',
+    });
+    const artist = artists[0];
+    if (!artist) return undefined;
+
+    const songs = await this.items<DirectusItem>('songs', {
+      'filter[artist][_eq]': String(artist.id),
+      'filter[slug][_eq]': songSlug,
+      fields: 'id,slug,title,aliases,lyrics,authors,video_url',
+      limit: '1',
+    });
+    const song = songs[0];
+    if (!song) return undefined;
+
+    const relations = await this.items<DirectusItem>('album_songs', {
+      'filter[song][_eq]': String(song.id),
+      fields: 'album',
+      limit: '-1',
+    });
+    const albumItems = await Promise.all(
+      relations.map((relation) =>
+        this.items<DirectusItem>('albums', {
+          'filter[id][_eq]': String(relation['album']),
+          fields: 'slug',
+          limit: '1',
+        }),
+      ),
+    );
+    const result = this.mapSong(song);
+    result.albums = albumItems.flat().map((album) => String(album['slug'] ?? album.id));
+    return result;
+  }
+
   async getGalleries(slug: string): Promise<CatalogGallery[]> {
     const artists = await this.items<DirectusItem>('artists', {
       'filter[slug][_eq]': slug,
