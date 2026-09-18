@@ -72,7 +72,7 @@ export class DirectusContentSource {
       }),
       this.items<DirectusItem>('galleries', {
         'filter[artist][_eq]': artistId,
-        fields: 'id,slug,title,sort',
+        fields: 'id,slug,title,source_path,sort',
         sort: 'sort',
         limit: '-1',
       }),
@@ -211,7 +211,7 @@ export class DirectusContentSource {
 
     const galleries = await this.items<DirectusItem>('galleries', {
       'filter[artist][_eq]': String(artist.id),
-      fields: 'id,slug,title,sort',
+      fields: 'id,slug,title,source_path,sort',
       sort: 'sort',
       limit: '-1',
     });
@@ -227,8 +227,10 @@ export class DirectusContentSource {
         return {
           id: String(gallery.id),
           title: String(gallery['title'] ?? ''),
-          path: [],
-          pictures: images.map((image) => String(image['image'])),
+          path: String(gallery['source_path'] ?? '')
+            .split('/')
+            .filter(Boolean),
+          pictures: images.map((image) => `/assets/${String(image['image'])}`),
         };
       }),
     );

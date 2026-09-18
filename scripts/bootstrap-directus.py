@@ -82,6 +82,7 @@ COLLECTIONS = {
             ("artist", "integer", {"interface": "input"}, {}),
             ("slug", "string", {"interface": "input", "required": True}, {}),
             ("title", "string", {"interface": "input", "required": True}, {}),
+            ("source_path", "string", {"interface": "input"}, {}),
             ("sort", "integer", {"interface": "input"}, {"default_value": 0}),
         ],
     },
