@@ -25,15 +25,17 @@
 }
 
 .streaming-list__link {
-  display: block;
-  height: 22px;
-  padding: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 28px;
+  padding: 0.65rem 0.8rem;
 }
 
 .streaming-list__logo {
   display: block;
-  width: auto;
-  height: 100%;
+  width: 24px;
+  height: 24px;
   filter: grayscale(1);
   opacity: 0.75;
   transition:
@@ -44,4 +46,10 @@
 .streaming-list__item:hover .streaming-list__logo {
   filter: grayscale(0);
   opacity: 1;
+}
+
+.streaming-list__name {
+  color: #cfcfcf;
+  font-size: 0.78rem;
+  white-space: nowrap;
 }

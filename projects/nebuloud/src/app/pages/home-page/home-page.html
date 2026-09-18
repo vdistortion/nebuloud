@@ -53,7 +53,7 @@
             (click)="onClick(`click_artist_${artist.id}`)"
           >
             <div class="artist-card__image-wrap">
-              <img class="artist-card__image" [src]="'.' + artist.image" [alt]="artist.name" />
+              <img class="artist-card__image" [src]="imageUrl(artist.image)" [alt]="artist.name" />
               <span class="artist-card__arrow" aria-hidden="true">↗</span>
             </div>
             <div class="artist-card__body">

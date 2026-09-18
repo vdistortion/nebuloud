@@ -6,6 +6,7 @@ import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { ContentService } from '../../services/content.service';
+import { AssetUrlService } from '../../services/asset-url.service';
 import type { TypeArtistSummary } from '../../../db/types';
 
 @Component({
@@ -20,6 +21,7 @@ export class HomePage {
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
   private readonly content = inject(ContentService);
+  private readonly assetUrl = inject(AssetUrlService);
 
   readonly artists = toSignal(
     this.route.data.pipe(map((data) => data['artistSummaries'] as TypeArtistSummary[])),
@@ -40,6 +42,10 @@ export class HomePage {
   constructor() {
     this.titleService.setTitle('Nebuloud — каталог артистов');
     this.artistService.setArtist();
+  }
+
+  imageUrl(value: string): string {
+    return this.assetUrl.resolve(value);
   }
 
   onSearch(event: Event) {

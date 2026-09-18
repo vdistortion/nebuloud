@@ -60,10 +60,9 @@
     </section>
 
     @if (streaming()) {
-      <section class="streaming-section" aria-labelledby="streaming-title">
+      <section class="streaming-section" aria-label="Стриминги">
         <div>
           <p class="eyebrow">Слушать</p>
-          <h2 id="streaming-title">Площадки</h2>
         </div>
         <app-streaming-list
           [streaming]="streaming()"

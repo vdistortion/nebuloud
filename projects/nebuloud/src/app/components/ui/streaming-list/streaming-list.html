@@ -9,6 +9,7 @@
           (click)="clickStreaming.emit(item.link)"
         >
           <img class="streaming-list__logo" [src]="'./streaming/' + item.image" [alt]="item.name" />
+          <span class="streaming-list__name">{{ item.name }}</span>
         </a>
       </li>
     }
