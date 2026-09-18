@@ -19,7 +19,7 @@
             <p class="lyrics-card__authors">Авторы: {{ currentSong.authors }}</p>
           }
         </header>
-        <pre class="lyrics-card__text">{{ currentSong.lyrics | trim }}</pre>
+        <pre class="lyrics-card__text">{{ currentSong.lyrics.trim() }}</pre>
       </article>
 
       <aside class="song-sidebar">

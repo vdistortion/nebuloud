@@ -8,7 +8,6 @@ import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { ContentService } from '../../services/content.service';
 import { DIRECTUS_URL } from '../../config';
-import { TrimPipe } from '../../trim.pipe';
 import type { CatalogAlbum } from '../../models/content.models';
 
 type AlbumTrack = {
@@ -20,7 +19,7 @@ type AlbumTrack = {
 
 @Component({
   selector: 'app-album-page',
-  imports: [RouterLink, TrimPipe, StreamingList],
+  imports: [RouterLink, StreamingList],
   templateUrl: './album-page.html',
   styleUrl: './album-page.scss',
 })

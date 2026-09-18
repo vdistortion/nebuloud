@@ -7,12 +7,11 @@ import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { ContentService } from '../../services/content.service';
-import { TrimPipe } from '../../trim.pipe';
 import type { CatalogAlbum, CatalogSong } from '../../models/content.models';
 
 @Component({
   selector: 'app-song-page',
-  imports: [RouterLink, TrimPipe, YouTubePlayer],
+  imports: [RouterLink, YouTubePlayer],
   templateUrl: './song-page.html',
   styleUrl: './song-page.scss',
 })

@@ -58,7 +58,7 @@
     @if (currentAlbum.info) {
       <section class="album-info">
         <p class="eyebrow">Об альбоме</p>
-        <pre>{{ currentAlbum.info | trim }}</pre>
+        <pre>{{ currentAlbum.info.trim() }}</pre>
       </section>
     }
 
