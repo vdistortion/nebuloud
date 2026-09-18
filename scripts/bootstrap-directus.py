@@ -21,6 +21,8 @@ RELATIONS = [
     ("albums", "artist", "artists", "albums"),
     ("songs", "artist", "artists", "songs"),
     ("galleries", "artist", "artists", "galleries"),
+    ("album_songs", "album", "albums", "songs"),
+    ("album_songs", "song", "songs", "albums"),
     ("gallery_images", "gallery", "galleries", "images"),
     ("streaming_links", "artist", "artists", "streaming_links"),
     ("streaming_links", "album", "albums", "streaming_links"),
@@ -69,6 +71,14 @@ COLLECTIONS = {
             ("artist", "integer", {"interface": "input"}, {}),
             ("slug", "string", {"interface": "input", "required": True}, {}),
             ("title", "string", {"interface": "input", "required": True}, {}),
+            ("sort", "integer", {"interface": "input"}, {"default_value": 0}),
+        ],
+    },
+    "album_songs": {
+        "icon": "queue_music",
+        "fields": [
+            ("album", "integer", {"interface": "input"}, {}),
+            ("song", "integer", {"interface": "input"}, {}),
             ("sort", "integer", {"interface": "input"}, {"default_value": 0}),
         ],
     },
