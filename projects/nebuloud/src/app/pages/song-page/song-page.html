@@ -47,7 +47,11 @@
               }
             </div>
           } @else {
-            <a class="song-meta__album" [routerLink]="'/artist/' + artistId() + '/songs/other'">
+            <a
+              class="song-meta__album"
+              [routerLink]="'/artist/' + artistId() + '/songs'"
+              [queryParams]="{ other: true }"
+            >
               <span>Песни вне альбомов</span>
             </a>
           }

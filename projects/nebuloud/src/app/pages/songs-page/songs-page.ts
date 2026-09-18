@@ -49,6 +49,8 @@ export class SongsPage {
   });
 
   constructor() {
+    this.showOtherOnly.set(this.route.snapshot.queryParamMap.get('other') === 'true');
+
     effect(() => {
       const artistId = this.artistId() ?? '';
       this.artistService.setArtist(artistId);
