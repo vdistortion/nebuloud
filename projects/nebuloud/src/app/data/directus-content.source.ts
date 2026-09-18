@@ -1,0 +1,176 @@
+import { Injectable } from '@angular/core';
+import type {
+  ArtistProfile,
+  CatalogAlbum,
+  CatalogGallery,
+  CatalogSong,
+} from '../models/content.models';
+import type { TypeStreaming } from '../../db/types';
+
+interface DirectusItem {
+  id: number | string;
+  [key: string]: unknown;
+}
+
+interface DirectusResponse<T> {
+  data: T;
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+export class DirectusContentSource {
+  private readonly baseUrl = 'http://localhost:8056';
+
+  async getArtistProfile(slug: string): Promise<ArtistProfile | undefined> {
+    const artists = await this.items<DirectusItem>('artists', {
+      'filter[slug][_eq]': slug,
+      fields: 'id,slug,name,image,country,description',
+      limit: '1',
+    });
+    const artist = artists[0];
+    if (!artist) return undefined;
+
+    const artistId = String(artist.id);
+    const [albums, songs, galleries, artistLinks] = await Promise.all([
+      this.items<DirectusItem>('albums', {
+        'filter[artist][_eq]': artistId,
+        fields: 'id,slug,title,year,cover,description,sort',
+        sort: 'sort',
+        limit: '-1',
+      }),
+      this.items<DirectusItem>('songs', {
+        'filter[artist][_eq]': artistId,
+        fields: 'id,slug,title,aliases,lyrics,authors,video_url,sort',
+        sort: 'sort',
+        limit: '-1',
+      }),
+      this.items<DirectusItem>('galleries', {
+        'filter[artist][_eq]': artistId,
+        fields: 'id,slug,title,sort',
+        sort: 'sort',
+        limit: '-1',
+      }),
+      this.items<DirectusItem>('streaming_links', {
+        'filter[artist][_eq]': artistId,
+        fields: 'service,url,sort',
+        sort: 'sort',
+        limit: '-1',
+      }),
+    ]);
+
+    const songModels = songs.map((song) => this.mapSong(song));
+    const albumModels = await Promise.all(albums.map((album) => this.mapAlbum(album, songModels)));
+
+    return {
+      id: String(artist.id),
+      name: String(artist['name'] ?? ''),
+      image: String(artist['image'] ?? ''),
+      country: Array.isArray(artist['country']) ? artist['country'].map(String) : [],
+      albums: albumModels,
+      hasImages: galleries.length > 0,
+      streaming: this.mapStreaming(artistLinks),
+    };
+  }
+
+  async getGalleries(slug: string): Promise<CatalogGallery[]> {
+    const artists = await this.items<DirectusItem>('artists', {
+      'filter[slug][_eq]': slug,
+      fields: 'id',
+      limit: '1',
+    });
+    const artist = artists[0];
+    if (!artist) return [];
+
+    const galleries = await this.items<DirectusItem>('galleries', {
+      'filter[artist][_eq]': String(artist.id),
+      fields: 'id,slug,title,sort',
+      sort: 'sort',
+      limit: '-1',
+    });
+
+    return Promise.all(
+      galleries.map(async (gallery) => {
+        const images = await this.items<DirectusItem>('gallery_images', {
+          'filter[gallery][_eq]': String(gallery.id),
+          fields: 'image,sort',
+          sort: 'sort',
+          limit: '-1',
+        });
+        return {
+          id: String(gallery.id),
+          title: String(gallery['title'] ?? ''),
+          path: [],
+          pictures: images.map((image) => String(image['image'])),
+        };
+      }),
+    );
+  }
+
+  private async mapAlbum(item: DirectusItem, songs: CatalogSong[]): Promise<CatalogAlbum> {
+    const [albumSongs, links] = await Promise.all([
+      this.items<DirectusItem>('album_songs', {
+        'filter[album][_eq]': String(item.id),
+        fields: 'song,sort',
+        sort: 'sort',
+        limit: '-1',
+      }),
+      this.items<DirectusItem>('streaming_links', {
+        'filter[album][_eq]': String(item.id),
+        fields: 'service,url,sort',
+        sort: 'sort',
+        limit: '-1',
+      }),
+    ]);
+    const songIds = new Set(albumSongs.map((relation) => String(relation['song'])));
+
+    return {
+      id: String(item.id),
+      name: String(item['title'] ?? ''),
+      year: Number(item['year'] ?? 0),
+      cover: item['cover'] ? `/assets/${item['cover']}` : undefined,
+      info: item['description'] ? String(item['description']) : undefined,
+      songs: songs.filter((song) => songIds.has(song.id)),
+      streaming: this.mapStreaming(links),
+    };
+  }
+
+  private mapSong(item: DirectusItem): CatalogSong {
+    return {
+      id: String(item.id),
+      title: String(item['title'] ?? ''),
+      aliases: Array.isArray(item['aliases']) ? item['aliases'].map(String) : [],
+      lyrics: String(item['lyrics'] ?? ''),
+      albums: [],
+      authors: item['authors'] ? String(item['authors']) : undefined,
+      videoId: this.youtubeId(item['video_url']),
+    };
+  }
+
+  private mapStreaming(value: unknown): TypeStreaming | undefined {
+    if (!Array.isArray(value)) return undefined;
+    const links = value as DirectusItem[];
+    const result: Record<string, string> = {};
+    for (const link of links) {
+      if (link['service'] && link['url']) result[String(link['service'])] = String(link['url']);
+    }
+    return Object.keys(result).length ? (result as TypeStreaming) : undefined;
+  }
+
+  private youtubeId(value: unknown): string | undefined {
+    if (!value) return undefined;
+    const url = String(value);
+    const match = url.match(/[?&]v=([^&]+)/) ?? url.match(/youtu\.be\/([^?]+)/);
+    return match?.[1] ?? url;
+  }
+
+  private async items<T extends DirectusItem>(
+    collection: string,
+    query: Record<string, string>,
+  ): Promise<T[]> {
+    const params = new URLSearchParams(query);
+    const response = await fetch(`${this.baseUrl}/items/${collection}?${params}`);
+    if (!response.ok) throw new Error(`Directus request failed: ${response.status}`);
+    return ((await response.json()) as DirectusResponse<T[]>).data;
+  }
+}
