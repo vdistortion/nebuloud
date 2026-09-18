@@ -17,6 +17,16 @@ BASE_URL = os.getenv("DIRECTUS_URL", "http://localhost:8056").rstrip("/")
 EMAIL = os.getenv("DIRECTUS_ADMIN_EMAIL", "admin@nebuloud.dev")
 PASSWORD = os.getenv("DIRECTUS_ADMIN_PASSWORD", "change-this-admin-password")
 
+PUBLIC_COLLECTIONS = [
+    "artists",
+    "albums",
+    "songs",
+    "galleries",
+    "gallery_images",
+    "album_songs",
+    "streaming_links",
+]
+
 RELATIONS = [
     ("albums", "artist", "artists", "albums"),
     ("songs", "artist", "artists", "songs"),
@@ -178,6 +188,37 @@ def main() -> int:
             },
         )
         print(f"created relation: {collection}.{field} -> {related_collection}")
+
+    _, policies_response = request("GET", "/policies?limit=-1", token)
+    public_policy = next(
+        policy for policy in policies_response["data"] if policy.get("name") == "$t:public_label"
+    )
+    public_policy_id = public_policy["id"]
+    _, permissions_response = request("GET", "/permissions?limit=-1", token)
+    public_reads = {
+        permission["collection"]
+        for permission in permissions_response["data"]
+        if permission.get("policy") == public_policy_id and permission.get("action") == "read"
+    }
+    for collection in PUBLIC_COLLECTIONS:
+        if collection in public_reads:
+            print(f"exists public read: {collection}")
+            continue
+        request(
+            "POST",
+            "/permissions",
+            token,
+            {
+                "policy": public_policy_id,
+                "collection": collection,
+                "action": "read",
+                "permissions": {},
+                "validation": {},
+                "presets": None,
+                "fields": ["*"],
+            },
+        )
+        print(f"created public read: {collection}")
 
     print("Nebuloud Directus content model is ready.")
     return 0
