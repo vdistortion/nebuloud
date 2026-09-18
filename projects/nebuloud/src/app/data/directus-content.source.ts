@@ -130,6 +130,57 @@ export class DirectusContentSource {
     return result;
   }
 
+  async getSongs(artistSlug: string): Promise<CatalogSong[]> {
+    const artists = await this.items<DirectusItem>('artists', {
+      'filter[slug][_eq]': artistSlug,
+      fields: 'id',
+      limit: '1',
+    });
+    const artist = artists[0];
+    if (!artist) return [];
+
+    const songs = await this.items<DirectusItem>('songs', {
+      'filter[artist][_eq]': String(artist.id),
+      fields: 'id,slug,title,aliases,lyrics,authors,video_url,sort',
+      sort: 'sort',
+      limit: '-1',
+    });
+
+    return Promise.all(
+      songs.map(async (song) => {
+        const relations = await this.items<DirectusItem>('album_songs', {
+          'filter[song][_eq]': String(song.id),
+          fields: 'album',
+          limit: '-1',
+        });
+        const albumItems = await Promise.all(
+          relations.map((relation) =>
+            this.items<DirectusItem>('albums', {
+              'filter[id][_eq]': String(relation['album']),
+              fields: 'slug',
+              limit: '1',
+            }),
+          ),
+        );
+        const model = this.mapSong(song);
+        model.albums = albumItems.flat().map((album) => String(album['slug'] ?? album.id));
+        return model;
+      }),
+    );
+  }
+
+  async getSongsWithLyrics(artistSlug: string): Promise<CatalogSong[]> {
+    return (await this.getSongs(artistSlug)).filter((song) => song.lyrics.trim());
+  }
+
+  async getSongsWithoutAlbum(artistSlug: string): Promise<CatalogSong[]> {
+    return (await this.getSongs(artistSlug)).filter((song) => !song.albums.length);
+  }
+
+  async getVideos(artistSlug: string): Promise<CatalogSong[]> {
+    return (await this.getSongs(artistSlug)).filter((song) => Boolean(song.videoId));
+  }
+
   async getGalleries(slug: string): Promise<CatalogGallery[]> {
     const artists = await this.items<DirectusItem>('artists', {
       'filter[slug][_eq]': slug,

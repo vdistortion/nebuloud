@@ -25,10 +25,15 @@ export class OtherSongsPage {
     initialValue: null,
   });
   readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
+  readonly resolvedSongs = toSignal(
+    this.route.data.pipe(map((data) => data['songs'] as CatalogSong[])),
+    { initialValue: [] },
+  );
   readonly songs = computed<CatalogSong[]>(() =>
-    this.content
-      .getSongsWithoutAlbum(this.artistId())
-      .sort((a, b) => a.title.localeCompare(b.title)),
+    (this.resolvedSongs().length
+      ? this.resolvedSongs()
+      : this.content.getSongsWithoutAlbum(this.artistId())
+    ).sort((a, b) => a.title.localeCompare(b.title)),
   );
 
   constructor() {

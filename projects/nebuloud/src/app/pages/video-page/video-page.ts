@@ -26,8 +26,15 @@ export class VideoPage {
     initialValue: null,
   });
   readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
+  readonly resolvedSongs = toSignal(
+    this.route.data.pipe(map((data) => data['videos'] as CatalogSong[])),
+    { initialValue: [] },
+  );
   readonly songs = computed<CatalogSong[]>(() =>
-    this.content.getVideos(this.artistId()).sort((a, b) => this.yearOfSong(a) - this.yearOfSong(b)),
+    (this.resolvedSongs().length
+      ? this.resolvedSongs()
+      : this.content.getVideos(this.artistId())
+    ).sort((a, b) => this.yearOfSong(a) - this.yearOfSong(b)),
   );
 
   constructor() {

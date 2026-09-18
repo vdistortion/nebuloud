@@ -34,6 +34,27 @@ const songResolver = (route: import('@angular/router').ActivatedRouteSnapshot) =
   return directus.getSongBySlug(artist ?? '', song ?? '').catch(() => local.getSong(artist, song));
 };
 
+const songsResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
+  const directus = inject(DirectusContentSource);
+  const local = inject(ContentService);
+  const artist = route.paramMap.get('artist') ?? '';
+  return directus.getSongsWithLyrics(artist).catch(() => local.getSongsWithLyrics(artist));
+};
+
+const otherSongsResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
+  const directus = inject(DirectusContentSource);
+  const local = inject(ContentService);
+  const artist = route.paramMap.get('artist') ?? '';
+  return directus.getSongsWithoutAlbum(artist).catch(() => local.getSongsWithoutAlbum(artist));
+};
+
+const videosResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
+  const directus = inject(DirectusContentSource);
+  const local = inject(ContentService);
+  const artist = route.paramMap.get('artist') ?? '';
+  return directus.getVideos(artist).catch(() => local.getVideos(artist));
+};
+
 export const routes: Routes = [
   {
     path: '',
@@ -47,6 +68,7 @@ export const routes: Routes = [
   },
   {
     path: 'artist/:artist/video',
+    resolve: { videos: videosResolver },
     loadComponent: () => import('./pages/video-page/video-page').then((m) => m.VideoPage),
   },
   {
@@ -59,10 +81,12 @@ export const routes: Routes = [
   },
   {
     path: 'artist/:artist/songs',
+    resolve: { songs: songsResolver },
     loadComponent: () => import('./pages/songs-page/songs-page').then((m) => m.SongsPage),
   },
   {
     path: 'artist/:artist/songs/other',
+    resolve: { songs: otherSongsResolver },
     loadComponent: () =>
       import('./pages/other-songs-page/other-songs-page').then((m) => m.OtherSongsPage),
   },
