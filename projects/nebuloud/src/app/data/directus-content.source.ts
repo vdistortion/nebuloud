@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { DIRECTUS_URL } from '../config';
 import type {
   ArtistProfile,
   CatalogAlbum,
@@ -20,7 +21,7 @@ interface DirectusResponse<T> {
   providedIn: 'root',
 })
 export class DirectusContentSource {
-  private readonly baseUrl = 'http://localhost:8056';
+  private readonly baseUrl = inject(DIRECTUS_URL);
   private readonly profileCache = new Map<string, Promise<ArtistProfile | undefined>>();
 
   async getArtistSummaries(): Promise<TypeArtistSummary[]> {
