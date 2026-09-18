@@ -31,10 +31,7 @@ export class VideoPage {
     { initialValue: [] },
   );
   readonly songs = computed<CatalogSong[]>(() =>
-    (this.resolvedSongs().length
-      ? this.resolvedSongs()
-      : this.content.getVideos(this.artistId())
-    ).sort((a, b) => this.yearOfSong(a) - this.yearOfSong(b)),
+    this.resolvedSongs().sort((a, b) => this.yearOfSong(a) - this.yearOfSong(b)),
   );
 
   constructor() {

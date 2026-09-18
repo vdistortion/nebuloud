@@ -33,9 +33,7 @@ export class ArtistPage {
     { initialValue: undefined },
   );
 
-  readonly artistProfile = computed<ArtistProfile | undefined>(
-    () => this.resolvedArtistProfile() ?? this.content.getArtistProfile(this.artistId()),
-  );
+  readonly artistProfile = computed<ArtistProfile | undefined>(() => this.resolvedArtistProfile());
   readonly artistName = computed(() => this.artistProfile()?.name ?? '');
   readonly albums = computed(() => this.artistProfile()?.albums ?? []);
   readonly streaming = computed(() => this.artistProfile()?.streaming);

@@ -30,10 +30,7 @@ export class SongsPage {
     { initialValue: [] },
   );
   readonly songs = computed<CatalogSong[]>(() =>
-    (this.resolvedSongs().length
-      ? this.resolvedSongs()
-      : this.content.getSongsWithLyrics(this.artistId())
-    ).sort((a, b) => a.title.localeCompare(b.title)),
+    this.resolvedSongs().sort((a, b) => a.title.localeCompare(b.title)),
   );
   readonly hasOtherSongs = computed(() => this.songs().some((song) => !song.albums.length));
   readonly showOtherOnly = signal(false);

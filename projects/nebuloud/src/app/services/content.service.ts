@@ -1,24 +1,110 @@
 import { inject, Injectable } from '@angular/core';
 import type { TypeItem } from '../../db/types';
-import { LocalContentSource } from '../data/local-content.source';
 import type {
   ArtistProfile,
   CatalogAlbum,
   CatalogGallery,
   CatalogSong,
 } from '../models/content.models';
-
+import { DirectusContentSource } from '../data/directus-content.source';
+import { LocalContentSource } from '../data/local-content.source';
 @Injectable({
   providedIn: 'root',
 })
 export class ContentService {
   /** The source can later be replaced with a Directus-backed implementation. */
   private readonly source = inject(LocalContentSource);
+  private readonly directus = inject(DirectusContentSource);
 
   readonly artistSummaries = this.source.artistSummaries;
 
   getArtist(id: string | null | undefined): TypeItem | undefined {
     return this.source.getArtist(id);
+  }
+
+  async getArtistSummaries() {
+    return this.withFallback(
+      () => this.directus.getArtistSummaries(),
+      () => this.artistSummaries,
+      'artist summaries',
+    );
+  }
+
+  async getArtistProfileAsync(id: string) {
+    return this.withFallback(
+      () => this.directus.getArtistProfile(id),
+      () => this.getArtistProfile(id),
+      `artist profile: ${id}`,
+    );
+  }
+
+  async getAlbumAsync(artist: string, album: string) {
+    return this.withFallback(
+      () => this.directus.getAlbumBySlug(artist, album),
+      () => this.getAlbum(artist, album),
+      `album: ${artist}/${album}`,
+    );
+  }
+
+  async getSongAsync(artist: string, song: string) {
+    return this.withFallback(
+      () => this.directus.getSongBySlug(artist, song),
+      () => this.getSong(artist, song),
+      `song: ${artist}/${song}`,
+    );
+  }
+
+  async getSongsAsync(artist: string) {
+    return this.withFallback(
+      () => this.directus.getSongsWithLyrics(artist),
+      () => this.getSongsWithLyrics(artist),
+      `songs: ${artist}`,
+    );
+  }
+
+  async getOtherSongsAsync(artist: string) {
+    return this.withFallback(
+      () => this.directus.getSongsWithoutAlbum(artist),
+      () => this.getSongsWithoutAlbum(artist),
+      `songs without album: ${artist}`,
+    );
+  }
+
+  async getVideosAsync(artist: string) {
+    return this.withFallback(
+      () => this.directus.getVideos(artist),
+      () => this.getVideos(artist),
+      `videos: ${artist}`,
+    );
+  }
+
+  async getGalleriesAsync(artist: string) {
+    return this.withFallback(
+      () => this.directus.getGalleries(artist),
+      () => this.getGalleries(artist),
+      `galleries: ${artist}`,
+    );
+  }
+
+  async getGalleryAsync(artist: string, gallery: string) {
+    return this.withFallback(
+      () => this.directus.getGalleryById(artist, gallery),
+      () => this.getGallery(artist, gallery),
+      `gallery: ${artist}/${gallery}`,
+    );
+  }
+
+  private async withFallback<T>(
+    remote: () => Promise<T>,
+    local: () => T,
+    label: string,
+  ): Promise<T> {
+    try {
+      return await remote();
+    } catch (error) {
+      console.warn(`[ContentService] Directus unavailable for ${label}; using local source`, error);
+      return local();
+    }
   }
 
   getArtistProfile(id: string | null | undefined): ArtistProfile | undefined {

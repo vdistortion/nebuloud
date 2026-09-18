@@ -43,9 +43,7 @@ export class AlbumPage {
     { initialValue: undefined },
   );
   readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
-  readonly album = computed<CatalogAlbum | undefined>(
-    () => this.resolvedAlbum() ?? this.content.getAlbum(this.artistId(), this.albumId()),
-  );
+  readonly album = computed<CatalogAlbum | undefined>(() => this.resolvedAlbum());
   readonly songs = computed<AlbumTrack[]>(
     () =>
       this.album()?.songs.map((song) => ({

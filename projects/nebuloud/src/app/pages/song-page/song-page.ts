@@ -34,9 +34,7 @@ export class SongPage {
     { initialValue: undefined },
   );
   readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
-  readonly song = computed<CatalogSong | undefined>(
-    () => this.resolvedSong() ?? this.content.getSong(this.artistId(), this.songId()),
-  );
+  readonly song = computed<CatalogSong | undefined>(() => this.resolvedSong());
   readonly albums = computed<CatalogAlbum[]>(() => {
     const song = this.song();
     return song

@@ -1,67 +1,38 @@
 import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { ContentService } from './services/content.service';
-import { DirectusContentSource } from './data/directus-content.source';
 
-const artistSummariesResolver = () => {
-  const directus = inject(DirectusContentSource);
-  const local = inject(ContentService);
-  return directus.getArtistSummaries().catch(() => local.artistSummaries);
-};
+const artistSummariesResolver = () => inject(ContentService).getArtistSummaries();
 
-const artistProfileResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
-  const directus = inject(DirectusContentSource);
-  const local = inject(ContentService);
-  const slug = route.paramMap.get('artist') ?? '';
-  return directus.getArtistProfile(slug).catch(() => local.getArtistProfile(slug));
-};
+const artistProfileResolver = (route: import('@angular/router').ActivatedRouteSnapshot) =>
+  inject(ContentService).getArtistProfileAsync(route.paramMap.get('artist') ?? '');
 
-const albumResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
-  const directus = inject(DirectusContentSource);
-  const local = inject(ContentService);
-  const artist = route.paramMap.get('artist');
-  const album = route.paramMap.get('album');
-  return directus
-    .getAlbumBySlug(artist ?? '', album ?? '')
-    .catch(() => local.getAlbum(artist, album));
-};
+const albumResolver = (route: import('@angular/router').ActivatedRouteSnapshot) =>
+  inject(ContentService).getAlbumAsync(
+    route.paramMap.get('artist') ?? '',
+    route.paramMap.get('album') ?? '',
+  );
 
-const songResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
-  const directus = inject(DirectusContentSource);
-  const local = inject(ContentService);
-  const artist = route.paramMap.get('artist');
-  const song = route.paramMap.get('song');
-  return directus.getSongBySlug(artist ?? '', song ?? '').catch(() => local.getSong(artist, song));
-};
+const songResolver = (route: import('@angular/router').ActivatedRouteSnapshot) =>
+  inject(ContentService).getSongAsync(
+    route.paramMap.get('artist') ?? '',
+    route.paramMap.get('song') ?? '',
+  );
 
-const songsResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
-  const directus = inject(DirectusContentSource);
-  const local = inject(ContentService);
-  const artist = route.paramMap.get('artist') ?? '';
-  return directus.getSongsWithLyrics(artist).catch(() => local.getSongsWithLyrics(artist));
-};
+const songsResolver = (route: import('@angular/router').ActivatedRouteSnapshot) =>
+  inject(ContentService).getSongsAsync(route.paramMap.get('artist') ?? '');
 
-const videosResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
-  const directus = inject(DirectusContentSource);
-  const local = inject(ContentService);
-  const artist = route.paramMap.get('artist') ?? '';
-  return directus.getVideos(artist).catch(() => local.getVideos(artist));
-};
+const videosResolver = (route: import('@angular/router').ActivatedRouteSnapshot) =>
+  inject(ContentService).getVideosAsync(route.paramMap.get('artist') ?? '');
 
-const galleriesResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
-  const directus = inject(DirectusContentSource);
-  const local = inject(ContentService);
-  const artist = route.paramMap.get('artist') ?? '';
-  return directus.getGalleries(artist).catch(() => local.getGalleries(artist));
-};
+const galleriesResolver = (route: import('@angular/router').ActivatedRouteSnapshot) =>
+  inject(ContentService).getGalleriesAsync(route.paramMap.get('artist') ?? '');
 
-const galleryResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
-  const directus = inject(DirectusContentSource);
-  const local = inject(ContentService);
-  const artist = route.paramMap.get('artist') ?? '';
-  const gallery = route.paramMap.get('gallery') ?? '';
-  return directus.getGalleryById(artist, gallery).catch(() => local.getGallery(artist, gallery));
-};
+const galleryResolver = (route: import('@angular/router').ActivatedRouteSnapshot) =>
+  inject(ContentService).getGalleryAsync(
+    route.paramMap.get('artist') ?? '',
+    route.paramMap.get('gallery') ?? '',
+  );
 
 export const routes: Routes = [
   {

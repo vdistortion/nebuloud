@@ -34,9 +34,7 @@ export class GalleryPage {
     this.route.data.pipe(map((data) => data['gallery'] as CatalogGallery | undefined)),
     { initialValue: undefined },
   );
-  readonly gallery = computed(
-    () => this.resolvedGallery() ?? this.content.getGallery(this.artistId(), this.galleryId()),
-  );
+  readonly gallery = computed(() => this.resolvedGallery());
   readonly galleryName = computed(() => this.gallery()?.title ?? 'Галерея');
   readonly galleryPath = computed(() => this.gallery()?.path.join('/') ?? '');
   readonly pictures = computed(() => this.gallery()?.pictures ?? []);

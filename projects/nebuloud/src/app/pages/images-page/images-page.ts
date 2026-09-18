@@ -32,11 +32,7 @@ export class ImagesPage {
     this.route.data.pipe(map((data) => data['galleries'] as CatalogGallery[])),
     { initialValue: [] },
   );
-  readonly images = computed(() =>
-    this.resolvedImages().length
-      ? this.resolvedImages()
-      : this.content.getGalleries(this.artistId()),
-  );
+  readonly images = computed(() => this.resolvedImages());
 
   constructor() {
     effect(() => {
