@@ -54,6 +54,8 @@ docker compose up -d
 
 Админка будет доступна по адресу `http://localhost:8056/`.
 
+Будущий временный production-адрес Directus: `https://api.nebuloud.zvalentin.com`.
+
 Создать базовые коллекции и поля Nebuloud:
 
 ```bash
