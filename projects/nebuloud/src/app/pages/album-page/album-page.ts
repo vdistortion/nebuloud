@@ -36,9 +36,13 @@ export class AlbumPage {
   readonly albumId = toSignal(this.route.paramMap.pipe(map((params) => params.get('album'))), {
     initialValue: null,
   });
+  readonly resolvedAlbum = toSignal(
+    this.route.data.pipe(map((data) => data['album'] as CatalogAlbum | undefined)),
+    { initialValue: undefined },
+  );
   readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
-  readonly album = computed<CatalogAlbum | undefined>(() =>
-    this.content.getAlbum(this.artistId(), this.albumId()),
+  readonly album = computed<CatalogAlbum | undefined>(
+    () => this.resolvedAlbum() ?? this.content.getAlbum(this.artistId(), this.albumId()),
   );
   readonly songs = computed<AlbumTrack[]>(
     () =>

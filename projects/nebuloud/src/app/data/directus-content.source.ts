@@ -88,6 +88,11 @@ export class DirectusContentSource {
     };
   }
 
+  async getAlbumBySlug(artistSlug: string, albumSlug: string): Promise<CatalogAlbum | undefined> {
+    const profile = await this.getArtistProfile(artistSlug);
+    return profile?.albums.find((album) => album.id === albumSlug);
+  }
+
   async getGalleries(slug: string): Promise<CatalogGallery[]> {
     const artists = await this.items<DirectusItem>('artists', {
       'filter[slug][_eq]': slug,
@@ -140,19 +145,21 @@ export class DirectusContentSource {
     const songIds = new Set(albumSongs.map((relation) => String(relation['song'])));
 
     return {
-      id: String(item.id),
+      id: String(item['slug'] ?? item.id),
+      sourceId: String(item.id),
       name: String(item['title'] ?? ''),
       year: Number(item['year'] ?? 0),
       cover: item['cover'] ? `/assets/${item['cover']}` : undefined,
       info: item['description'] ? String(item['description']) : undefined,
-      songs: songs.filter((song) => songIds.has(song.id)),
+      songs: songs.filter((song) => song.sourceId && songIds.has(song.sourceId)),
       streaming: this.mapStreaming(links),
     };
   }
 
   private mapSong(item: DirectusItem): CatalogSong {
     return {
-      id: String(item.id),
+      id: String(item['slug'] ?? item.id),
+      sourceId: String(item.id),
       title: String(item['title'] ?? ''),
       aliases: Array.isArray(item['aliases']) ? item['aliases'].map(String) : [],
       lyrics: String(item['lyrics'] ?? ''),

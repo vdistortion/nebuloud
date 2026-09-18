@@ -2,6 +2,7 @@ import type { TypeStreaming } from '../../db/types';
 
 export interface CatalogSong {
   id: string;
+  sourceId?: string;
   title: string;
   aliases: string[];
   lyrics: string;
@@ -13,6 +14,7 @@ export interface CatalogSong {
 
 export interface CatalogAlbum {
   id: string;
+  sourceId?: string;
   name: string;
   year: number;
   cover?: string;

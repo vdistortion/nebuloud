@@ -16,6 +16,16 @@ const artistProfileResolver = (route: import('@angular/router').ActivatedRouteSn
   return directus.getArtistProfile(slug).catch(() => local.getArtistProfile(slug));
 };
 
+const albumResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
+  const directus = inject(DirectusContentSource);
+  const local = inject(ContentService);
+  const artist = route.paramMap.get('artist');
+  const album = route.paramMap.get('album');
+  return directus
+    .getAlbumBySlug(artist ?? '', album ?? '')
+    .catch(() => local.getAlbum(artist, album));
+};
+
 export const routes: Routes = [
   {
     path: '',
@@ -54,6 +64,7 @@ export const routes: Routes = [
   },
   {
     path: 'artist/:artist/album/:album',
+    resolve: { album: albumResolver },
     loadComponent: () => import('./pages/album-page/album-page').then((m) => m.AlbumPage),
   },
   {
