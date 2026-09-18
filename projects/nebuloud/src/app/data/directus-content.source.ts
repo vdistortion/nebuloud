@@ -5,7 +5,7 @@ import type {
   CatalogGallery,
   CatalogSong,
 } from '../models/content.models';
-import type { TypeStreaming } from '../../db/types';
+import type { TypeArtistSummary, TypeStreaming } from '../../db/types';
 
 interface DirectusItem {
   id: number | string;
@@ -21,6 +21,21 @@ interface DirectusResponse<T> {
 })
 export class DirectusContentSource {
   private readonly baseUrl = 'http://localhost:8056';
+
+  async getArtistSummaries(): Promise<TypeArtistSummary[]> {
+    const artists = await this.items<DirectusItem>('artists', {
+      fields: 'id,slug,name,country,image',
+      sort: 'sort',
+      limit: '-1',
+    });
+
+    return artists.map((artist) => ({
+      id: String(artist['slug']),
+      name: String(artist['name'] ?? ''),
+      image: artist['image'] ? `/assets/${artist['image']}` : '/album-card.jpg',
+      country: Array.isArray(artist['country']) ? artist['country'].map(String) : [],
+    }));
+  }
 
   async getArtistProfile(slug: string): Promise<ArtistProfile | undefined> {
     const artists = await this.items<DirectusItem>('artists', {

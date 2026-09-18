@@ -1,8 +1,18 @@
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
+import { ContentService } from './services/content.service';
+import { DirectusContentSource } from './data/directus-content.source';
+
+const artistSummariesResolver = () => {
+  const directus = inject(DirectusContentSource);
+  const local = inject(ContentService);
+  return directus.getArtistSummaries().catch(() => local.artistSummaries);
+};
 
 export const routes: Routes = [
   {
     path: '',
+    resolve: { artistSummaries: artistSummariesResolver },
     loadComponent: () => import('./pages/home-page/home-page').then((m) => m.HomePage),
   },
   {

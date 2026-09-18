@@ -1,6 +1,8 @@
 import { computed, Component, inject, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { ContentService } from '../../services/content.service';
@@ -14,18 +16,22 @@ import type { TypeArtistSummary } from '../../../db/types';
 })
 export class HomePage {
   private readonly titleService = inject(Title);
+  private readonly route = inject(ActivatedRoute);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
   private readonly content = inject(ContentService);
 
-  readonly artists: TypeArtistSummary[] = this.content.artistSummaries;
+  readonly artists = toSignal(
+    this.route.data.pipe(map((data) => data['artistSummaries'] as TypeArtistSummary[])),
+    { initialValue: this.content.artistSummaries },
+  );
   readonly searchQuery = signal('');
   readonly filteredArtists = computed(() => {
     const query = this.searchQuery().trim().toLocaleLowerCase();
 
-    if (!query) return this.artists;
+    if (!query) return this.artists();
 
-    return this.artists.filter((artist) => {
+    return this.artists().filter((artist) => {
       const haystack = [artist.name, ...artist.country].join(' ').toLocaleLowerCase();
       return haystack.includes(query);
     });
