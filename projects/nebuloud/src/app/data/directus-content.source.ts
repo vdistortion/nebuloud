@@ -23,6 +23,8 @@ interface DirectusResponse<T> {
 export class DirectusContentSource {
   private readonly baseUrl = inject(DIRECTUS_URL);
   private readonly profileCache = new Map<string, Promise<ArtistProfile | undefined>>();
+  private readonly songsCache = new Map<string, Promise<CatalogSong[]>>();
+  private readonly galleriesCache = new Map<string, Promise<CatalogGallery[]>>();
 
   async getArtistSummaries(): Promise<TypeArtistSummary[]> {
     const artists = await this.items<DirectusItem>('artists', {
@@ -105,43 +107,20 @@ export class DirectusContentSource {
   }
 
   async getSongBySlug(artistSlug: string, songSlug: string): Promise<CatalogSong | undefined> {
-    const artists = await this.items<DirectusItem>('artists', {
-      'filter[slug][_eq]': artistSlug,
-      fields: 'id',
-      limit: '1',
-    });
-    const artist = artists[0];
-    if (!artist) return undefined;
-
-    const songs = await this.items<DirectusItem>('songs', {
-      'filter[artist][_eq]': String(artist.id),
-      'filter[slug][_eq]': songSlug,
-      fields: 'id,slug,title,aliases,lyrics,authors,video_url',
-      limit: '1',
-    });
-    const song = songs[0];
-    if (!song) return undefined;
-
-    const relations = await this.items<DirectusItem>('album_songs', {
-      'filter[song][_eq]': String(song.id),
-      fields: 'album',
-      limit: '-1',
-    });
-    const albumItems = await Promise.all(
-      relations.map((relation) =>
-        this.items<DirectusItem>('albums', {
-          'filter[id][_eq]': String(relation['album']),
-          fields: 'slug',
-          limit: '1',
-        }),
-      ),
-    );
-    const result = this.mapSong(song);
-    result.albums = albumItems.flat().map((album) => String(album['slug'] ?? album.id));
-    return result;
+    const songs = await this.getSongs(artistSlug);
+    return songs.find((song) => song.id === songSlug);
   }
 
-  async getSongs(artistSlug: string): Promise<CatalogSong[]> {
+  getSongs(artistSlug: string): Promise<CatalogSong[]> {
+    const cached = this.songsCache.get(artistSlug);
+    if (cached) return cached;
+
+    const request = this.loadSongs(artistSlug);
+    this.songsCache.set(artistSlug, request);
+    return request;
+  }
+
+  private async loadSongs(artistSlug: string): Promise<CatalogSong[]> {
     const artists = await this.items<DirectusItem>('artists', {
       'filter[slug][_eq]': artistSlug,
       fields: 'id',
@@ -206,7 +185,16 @@ export class DirectusContentSource {
     return galleries.find((gallery) => gallery.id === galleryId);
   }
 
-  async getGalleries(slug: string): Promise<CatalogGallery[]> {
+  getGalleries(slug: string): Promise<CatalogGallery[]> {
+    const cached = this.galleriesCache.get(slug);
+    if (cached) return cached;
+
+    const request = this.loadGalleries(slug);
+    this.galleriesCache.set(slug, request);
+    return request;
+  }
+
+  private async loadGalleries(slug: string): Promise<CatalogGallery[]> {
     const artists = await this.items<DirectusItem>('artists', {
       'filter[slug][_eq]': slug,
       fields: 'id',
