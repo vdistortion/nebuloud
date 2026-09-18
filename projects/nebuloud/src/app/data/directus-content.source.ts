@@ -21,6 +21,7 @@ interface DirectusResponse<T> {
 })
 export class DirectusContentSource {
   private readonly baseUrl = 'http://localhost:8056';
+  private readonly profileCache = new Map<string, Promise<ArtistProfile | undefined>>();
 
   async getArtistSummaries(): Promise<TypeArtistSummary[]> {
     const artists = await this.items<DirectusItem>('artists', {
@@ -37,7 +38,16 @@ export class DirectusContentSource {
     }));
   }
 
-  async getArtistProfile(slug: string): Promise<ArtistProfile | undefined> {
+  getArtistProfile(slug: string): Promise<ArtistProfile | undefined> {
+    const cached = this.profileCache.get(slug);
+    if (cached) return cached;
+
+    const request = this.loadArtistProfile(slug);
+    this.profileCache.set(slug, request);
+    return request;
+  }
+
+  private async loadArtistProfile(slug: string): Promise<ArtistProfile | undefined> {
     const artists = await this.items<DirectusItem>('artists', {
       'filter[slug][_eq]': slug,
       fields: 'id,slug,name,image,country,description',
@@ -146,27 +156,36 @@ export class DirectusContentSource {
       limit: '-1',
     });
 
-    return Promise.all(
-      songs.map(async (song) => {
-        const relations = await this.items<DirectusItem>('album_songs', {
-          'filter[song][_eq]': String(song.id),
-          fields: 'album',
+    if (!songs.length) return [];
+
+    const relations = await this.items<DirectusItem>('album_songs', {
+      'filter[song][_in]': songs.map((song) => String(song.id)).join(','),
+      fields: 'song,album',
+      limit: '-1',
+    });
+    const albumIds = [...new Set(relations.map((relation) => String(relation['album'])))].join(',');
+    const albums = albumIds
+      ? await this.items<DirectusItem>('albums', {
+          'filter[id][_in]': albumIds,
+          fields: 'id,slug',
           limit: '-1',
-        });
-        const albumItems = await Promise.all(
-          relations.map((relation) =>
-            this.items<DirectusItem>('albums', {
-              'filter[id][_eq]': String(relation['album']),
-              fields: 'slug',
-              limit: '1',
-            }),
-          ),
-        );
-        const model = this.mapSong(song);
-        model.albums = albumItems.flat().map((album) => String(album['slug'] ?? album.id));
-        return model;
-      }),
+        })
+      : [];
+    const albumSlugs = new Map(
+      albums.map((album) => [String(album.id), String(album['slug'] ?? album.id)]),
     );
+    const songAlbums = new Map<string, string[]>();
+    for (const relation of relations) {
+      const songId = String(relation['song']);
+      const albumSlug = albumSlugs.get(String(relation['album']));
+      if (albumSlug) songAlbums.set(songId, [...(songAlbums.get(songId) ?? []), albumSlug]);
+    }
+
+    return songs.map((song) => {
+      const model = this.mapSong(song);
+      model.albums = songAlbums.get(String(song.id)) ?? [];
+      return model;
+    });
   }
 
   async getSongsWithLyrics(artistSlug: string): Promise<CatalogSong[]> {
