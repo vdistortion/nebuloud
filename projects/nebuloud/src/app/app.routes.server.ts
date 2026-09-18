@@ -44,13 +44,6 @@ export const serverRoutes: ServerRoute[] = [
     },
   },
   {
-    path: 'artist/:artist/songs/other',
-    renderMode: RenderMode.Prerender,
-    getPrerenderParams: async () => {
-      return Object.keys(artists).map((id) => ({ artist: id }));
-    },
-  },
-  {
     path: 'artist/:artist/song/:song',
     renderMode: RenderMode.Prerender,
     getPrerenderParams: async () => {

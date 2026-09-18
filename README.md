@@ -117,7 +117,7 @@ projects/nebuloud/src/
 /artist/:artist/album/:album           альбом
 /artist/:artist/song/:song             песня и текст
 /artist/:artist/songs                  тексты песен
-/artist/:artist/songs/other            песни вне альбомов
+/artist/:artist/songs?other=true          фильтр песен вне альбомов
 /artist/:artist/video                  видео
 /artist/:artist/images                 фотогалереи
 /artist/:artist/images/:gallery        отдельная галерея

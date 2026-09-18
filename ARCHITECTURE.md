@@ -234,7 +234,7 @@ geval.nebuloud.ru
 /artist/:artist/albums                 дискография артиста
 /artist/:artist/album/:album           альбом и треклист
 /artist/:artist/songs                  песни с текстами
-/artist/:artist/songs/other            песни вне альбомов
+/artist/:artist/songs?other=true          фильтр песен вне альбомов
 /artist/:artist/song/:song             текст и информация о песне
 /artist/:artist/video                  видео артиста
 /artist/:artist/images                 список галерей/фотографий

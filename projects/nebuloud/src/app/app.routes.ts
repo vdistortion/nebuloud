@@ -41,13 +41,6 @@ const songsResolver = (route: import('@angular/router').ActivatedRouteSnapshot) 
   return directus.getSongsWithLyrics(artist).catch(() => local.getSongsWithLyrics(artist));
 };
 
-const otherSongsResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
-  const directus = inject(DirectusContentSource);
-  const local = inject(ContentService);
-  const artist = route.paramMap.get('artist') ?? '';
-  return directus.getSongsWithoutAlbum(artist).catch(() => local.getSongsWithoutAlbum(artist));
-};
-
 const videosResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
   const directus = inject(DirectusContentSource);
   const local = inject(ContentService);
@@ -100,12 +93,6 @@ export const routes: Routes = [
     path: 'artist/:artist/songs',
     resolve: { songs: songsResolver },
     loadComponent: () => import('./pages/songs-page/songs-page').then((m) => m.SongsPage),
-  },
-  {
-    path: 'artist/:artist/songs/other',
-    resolve: { songs: otherSongsResolver },
-    loadComponent: () =>
-      import('./pages/other-songs-page/other-songs-page').then((m) => m.OtherSongsPage),
   },
   {
     path: 'artist/:artist/song/:song',
