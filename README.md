@@ -56,6 +56,10 @@ docker compose up -d
 
 Будущий временный production-адрес Directus: `https://api.nebuloud.zvalentin.com`.
 
+URL Directus задаётся в `projects/nebuloud/public/config.js`. Для production при
+деплое нужно заменить значение `directusUrl` на `https://api.nebuloud.zvalentin.com`;
+пересобирать Angular для смены API-адреса не потребуется.
+
 Создать базовые коллекции и поля Nebuloud:
 
 ```bash
