@@ -127,6 +127,10 @@
   text-decoration: none;
 }
 
+.song-meta__album:last-child {
+  border-bottom: 0;
+}
+
 .song-meta__album:hover {
   color: #ff665f;
 }

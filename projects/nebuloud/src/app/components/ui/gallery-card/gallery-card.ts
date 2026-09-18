@@ -17,6 +17,7 @@ export class GalleryCard {
   private readonly directusUrl = inject(DIRECTUS_URL);
 
   imageUrl(value: string): string {
+    if (value.startsWith('http://') || value.startsWith('https://')) return value;
     return value.startsWith('/assets/') ? `${this.directusUrl}${value}` : `.${value}`;
   }
 }
