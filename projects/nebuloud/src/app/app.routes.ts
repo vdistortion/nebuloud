@@ -9,6 +9,13 @@ const artistSummariesResolver = () => {
   return directus.getArtistSummaries().catch(() => local.artistSummaries);
 };
 
+const artistProfileResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
+  const directus = inject(DirectusContentSource);
+  const local = inject(ContentService);
+  const slug = route.paramMap.get('artist') ?? '';
+  return directus.getArtistProfile(slug).catch(() => local.getArtistProfile(slug));
+};
+
 export const routes: Routes = [
   {
     path: '',
@@ -17,6 +24,7 @@ export const routes: Routes = [
   },
   {
     path: 'artist/:artist',
+    resolve: { artistProfile: artistProfileResolver },
     loadComponent: () => import('./pages/artist-page/artist-page').then((m) => m.ArtistPage),
   },
   {
