@@ -25,6 +25,7 @@ PUBLIC_COLLECTIONS = [
     "gallery_images",
     "album_songs",
     "streaming_links",
+    "directus_files",
 ]
 
 RELATIONS = [
