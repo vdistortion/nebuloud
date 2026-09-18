@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DIRECTUS_URL } from '../../../config';
 
 @Component({
   selector: 'app-gallery-card',
@@ -13,4 +14,9 @@ export class GalleryCard {
   @Input() public image: string | undefined;
   @Input() public year: number = 0;
   @Input() public thumbnail: boolean = false;
+  private readonly directusUrl = inject(DIRECTUS_URL);
+
+  imageUrl(value: string): string {
+    return value.startsWith('/assets/') ? `${this.directusUrl}${value}` : `.${value}`;
+  }
 }

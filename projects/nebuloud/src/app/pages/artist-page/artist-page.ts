@@ -8,6 +8,7 @@ import { StreamingList } from '../../components/ui/streaming-list/streaming-list
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { ContentService } from '../../services/content.service';
+import { DIRECTUS_URL } from '../../config';
 import type { ArtistProfile } from '../../models/content.models';
 
 @Component({
@@ -22,6 +23,7 @@ export class ArtistPage {
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
   private readonly content = inject(ContentService);
+  private readonly directusUrl = inject(DIRECTUS_URL);
 
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
@@ -46,6 +48,10 @@ export class ArtistPage {
       this.artistService.setArtist(id ?? '');
       this.titleService.setTitle(name ? `${name} | Дискография` : 'Артист не найден');
     });
+  }
+
+  imageUrl(value: string): string {
+    return value.startsWith('/assets/') ? `${this.directusUrl}${value}` : `.${value}`;
   }
 
   onClick(event: string) {

@@ -5,7 +5,7 @@
     <section class="album-hero">
       <div class="album-hero__cover">
         @if (currentAlbum.cover) {
-          <img [src]="'.' + currentAlbum.cover" [alt]="currentAlbum.name" />
+          <img [src]="imageUrl(currentAlbum.cover!)" [alt]="currentAlbum.name" />
         }
       </div>
       <div class="album-hero__details">

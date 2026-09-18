@@ -5,7 +5,7 @@
       <div class="artist-hero__content">
         <img
           class="artist-hero__avatar"
-          [src]="'.' + artistProfile()!.image"
+          [src]="imageUrl(artistProfile()!.image)"
           [alt]="artistProfile()!.name"
         />
         <div class="artist-hero__info">

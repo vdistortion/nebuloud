@@ -93,7 +93,7 @@ export class DirectusContentSource {
     return {
       id: String(artist.id),
       name: String(artist['name'] ?? ''),
-      image: String(artist['image'] ?? ''),
+      image: artist['image'] ? `/assets/${artist['image']}` : '/album-card.jpg',
       country: Array.isArray(artist['country']) ? artist['country'].map(String) : [],
       albums: albumModels,
       hasImages: galleries.length > 0,

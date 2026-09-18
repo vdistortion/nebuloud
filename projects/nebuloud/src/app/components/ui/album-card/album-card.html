@@ -1,6 +1,6 @@
 <a class="album-card" [class.thumbnail]="thumbnail" [routerLink]="link">
   <div class="album-card__image">
-    <img [src]="'.' + folder" [alt]="name" class="album-card__img" />
+    <img [src]="folder" [alt]="name" class="album-card__img" />
   </div>
   <div class="album-card__name">{{ name }}</div>
   @if (year) {
