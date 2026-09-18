@@ -29,7 +29,6 @@ export class DirectusContentSource {
   async getArtistSummaries(): Promise<TypeArtistSummary[]> {
     const artists = await this.items<DirectusItem>('artists', {
       fields: 'id,slug,name,country,image',
-      sort: 'sort',
       limit: '-1',
     });
 
