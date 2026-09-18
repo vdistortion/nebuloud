@@ -7,7 +7,7 @@ import { StreamingList } from '../../components/ui/streaming-list/streaming-list
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { ContentService } from '../../services/content.service';
-import { DIRECTUS_URL } from '../../config';
+import { AssetUrlService } from '../../services/asset-url.service';
 import type { CatalogAlbum } from '../../models/content.models';
 
 type AlbumTrack = {
@@ -29,7 +29,7 @@ export class AlbumPage {
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
   private readonly content = inject(ContentService);
-  private readonly directusUrl = inject(DIRECTUS_URL);
+  private readonly assetUrl = inject(AssetUrlService);
 
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
@@ -67,7 +67,7 @@ export class AlbumPage {
   }
 
   imageUrl(value: string): string {
-    return value.startsWith('/assets/') ? `${this.directusUrl}${value}` : `.${value}`;
+    return this.assetUrl.resolve(value);
   }
 
   getTime(duration: number): string {

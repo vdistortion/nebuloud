@@ -1,6 +1,6 @@
 import { Component, inject, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DIRECTUS_URL } from '../../../config';
+import { AssetUrlService } from '../../../services/asset-url.service';
 
 @Component({
   selector: 'app-album-card',
@@ -14,13 +14,9 @@ export class AlbumCard {
   @Input() public image: string | undefined;
   @Input() public year: number = 0;
   @Input() public thumbnail: boolean = false;
-  private readonly directusUrl = inject(DIRECTUS_URL);
+  private readonly assetUrl = inject(AssetUrlService);
 
   get folder() {
-    return this.imageUrl(this.image ?? '/album-card.jpg');
-  }
-
-  imageUrl(value: string): string {
-    return value.startsWith('/assets/') ? `${this.directusUrl}${value}` : `.${value}`;
+    return this.assetUrl.resolve(this.image);
   }
 }
