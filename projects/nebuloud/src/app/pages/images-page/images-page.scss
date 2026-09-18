@@ -50,35 +50,6 @@
   margin-top: 2rem;
 }
 
-.galleries-grid ::ng-deep .gallery-card {
-  height: 100%;
-  padding: 0.7rem;
-  border: 1px solid rgba(255, 68, 68, 0.14);
-  border-radius: 10px;
-  background: rgba(255, 68, 68, 0.025);
-}
-
-.galleries-grid ::ng-deep .gallery-card:hover {
-  border-color: rgba(255, 68, 68, 0.42);
-  background: rgba(255, 68, 68, 0.08);
-  transform: translateY(-4px);
-}
-
-.galleries-grid ::ng-deep .gallery-card__image {
-  aspect-ratio: 1.35;
-  overflow: hidden;
-  border-radius: 6px;
-  background: #161616;
-}
-
-.galleries-grid ::ng-deep .gallery-card__name {
-  margin-top: 0.8rem;
-  color: #e7e7e7;
-  font-size: 0.9rem;
-  letter-spacing: 0.03em;
-  text-transform: none;
-}
-
 .images-page__empty,
 .images-page--empty {
   color: #888;
