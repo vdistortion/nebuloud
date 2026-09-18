@@ -6,10 +6,21 @@
       <div>
         <p class="eyebrow">Тексты песен</p>
         <h1>Все песни</h1>
-        <p class="songs-page__subtitle">{{ songs().length }} песен с текстами</p>
+        <p class="songs-page__subtitle">{{ filteredSongs().length }} песен с текстами</p>
       </div>
       @if (hasOtherSongs()) {
-        <a class="songs-page__other" [routerLink]="'other'">Песни вне альбомов →</a>
+        <div class="songs-filters" aria-label="Фильтр песен">
+          <button
+            type="button"
+            [class.active]="!showOtherOnly()"
+            (click)="showOtherOnly.set(false)"
+          >
+            Все песни
+          </button>
+          <button type="button" [class.active]="showOtherOnly()" (click)="showOtherOnly.set(true)">
+            Вне альбомов
+          </button>
+        </div>
       }
     </header>
 

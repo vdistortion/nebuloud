@@ -44,15 +44,15 @@
 }
 
 .gallery-page__images {
-  columns: 3 260px;
-  column-gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 900px;
   margin-top: 2rem;
 }
 
 .gallery-page__link {
   display: block;
-  margin-bottom: 1rem;
-  break-inside: avoid;
   border: 1px solid rgba(255, 68, 68, 0.12);
   border-radius: 8px;
   overflow: hidden;

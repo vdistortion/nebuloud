@@ -35,17 +35,17 @@ export class SongsPage {
       : this.content.getSongsWithLyrics(this.artistId())
     ).sort((a, b) => a.title.localeCompare(b.title)),
   );
-  readonly hasOtherSongs = computed(
-    () => this.content.getSongsWithoutAlbum(this.artistId()).length > 0,
-  );
+  readonly hasOtherSongs = computed(() => this.songs().some((song) => !song.albums.length));
+  readonly showOtherOnly = signal(false);
   readonly searchQuery = signal('');
   readonly filteredSongs = computed(() => {
     const query = this.searchQuery().trim().toLocaleLowerCase();
-    return query
-      ? this.songs().filter((song) =>
-          [song.title, ...song.aliases].join(' ').toLocaleLowerCase().includes(query),
-        )
-      : this.songs();
+    return this.songs().filter((song) => {
+      const matchesFilter = !this.showOtherOnly() || !song.albums.length;
+      const matchesQuery =
+        !query || [song.title, ...song.aliases].join(' ').toLocaleLowerCase().includes(query);
+      return matchesFilter && matchesQuery;
+    });
   });
 
   constructor() {
