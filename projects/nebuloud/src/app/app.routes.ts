@@ -55,6 +55,21 @@ const videosResolver = (route: import('@angular/router').ActivatedRouteSnapshot)
   return directus.getVideos(artist).catch(() => local.getVideos(artist));
 };
 
+const galleriesResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
+  const directus = inject(DirectusContentSource);
+  const local = inject(ContentService);
+  const artist = route.paramMap.get('artist') ?? '';
+  return directus.getGalleries(artist).catch(() => local.getGalleries(artist));
+};
+
+const galleryResolver = (route: import('@angular/router').ActivatedRouteSnapshot) => {
+  const directus = inject(DirectusContentSource);
+  const local = inject(ContentService);
+  const artist = route.paramMap.get('artist') ?? '';
+  const gallery = route.paramMap.get('gallery') ?? '';
+  return directus.getGalleryById(artist, gallery).catch(() => local.getGallery(artist, gallery));
+};
+
 export const routes: Routes = [
   {
     path: '',
@@ -73,10 +88,12 @@ export const routes: Routes = [
   },
   {
     path: 'artist/:artist/images',
+    resolve: { galleries: galleriesResolver },
     loadComponent: () => import('./pages/images-page/images-page').then((m) => m.ImagesPage),
   },
   {
     path: 'artist/:artist/images/:gallery',
+    resolve: { gallery: galleryResolver },
     loadComponent: () => import('./pages/gallery-page/gallery-page').then((m) => m.GalleryPage),
   },
   {

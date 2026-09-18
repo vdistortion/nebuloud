@@ -7,6 +7,7 @@ import { GalleryCard } from '../../components/ui/gallery-card/gallery-card';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { ContentService } from '../../services/content.service';
+import type { CatalogGallery } from '../../models/content.models';
 
 @Component({
   selector: 'app-images-page',
@@ -25,7 +26,15 @@ export class ImagesPage {
     initialValue: null,
   });
   readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
-  readonly images = computed(() => this.content.getGalleries(this.artistId()));
+  readonly resolvedImages = toSignal(
+    this.route.data.pipe(map((data) => data['galleries'] as CatalogGallery[])),
+    { initialValue: [] },
+  );
+  readonly images = computed(() =>
+    this.resolvedImages().length
+      ? this.resolvedImages()
+      : this.content.getGalleries(this.artistId()),
+  );
 
   constructor() {
     effect(() => {
@@ -37,9 +46,11 @@ export class ImagesPage {
 
   imageUrl(galleryId: string): string {
     const gallery = this.images().find((item) => item.id === galleryId);
-    return gallery
-      ? `/artist/${this.artistId()}/images/${gallery.path.join('/')}/${gallery.pictures[0]}`
-      : '';
+    if (!gallery) return '';
+    const picture = gallery.pictures[0];
+    return picture.startsWith('/assets/')
+      ? `http://localhost:8056${picture}`
+      : `/artist/${this.artistId()}/images/${gallery.path.join('/')}/${picture}`;
   }
 
   onClick(event: string) {

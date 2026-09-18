@@ -6,6 +6,7 @@ import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { ContentService } from '../../services/content.service';
+import type { CatalogGallery } from '../../models/content.models';
 
 @Component({
   selector: 'app-gallery-page',
@@ -27,7 +28,13 @@ export class GalleryPage {
     initialValue: null,
   });
   readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
-  readonly gallery = computed(() => this.content.getGallery(this.artistId(), this.galleryId()));
+  readonly resolvedGallery = toSignal(
+    this.route.data.pipe(map((data) => data['gallery'] as CatalogGallery | undefined)),
+    { initialValue: undefined },
+  );
+  readonly gallery = computed(
+    () => this.resolvedGallery() ?? this.content.getGallery(this.artistId(), this.galleryId()),
+  );
   readonly galleryName = computed(() => this.gallery()?.title ?? 'Галерея');
   readonly galleryPath = computed(() => this.gallery()?.path.join('/') ?? '');
   readonly pictures = computed(() => this.gallery()?.pictures ?? []);
@@ -43,7 +50,9 @@ export class GalleryPage {
   }
 
   imageUrl(picture: string): string {
-    return `./artist/${this.artistId()}/images/${this.galleryPath()}/${picture}`;
+    return picture.startsWith('/assets/')
+      ? `http://localhost:8056${picture}`
+      : `./artist/${this.artistId()}/images/${this.galleryPath()}/${picture}`;
   }
 
   onClick(event: string) {

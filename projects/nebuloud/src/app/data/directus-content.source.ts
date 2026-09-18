@@ -200,6 +200,11 @@ export class DirectusContentSource {
     return (await this.getSongs(artistSlug)).filter((song) => Boolean(song.videoId));
   }
 
+  async getGalleryById(artistSlug: string, galleryId: string): Promise<CatalogGallery | undefined> {
+    const galleries = await this.getGalleries(artistSlug);
+    return galleries.find((gallery) => gallery.id === galleryId);
+  }
+
   async getGalleries(slug: string): Promise<CatalogGallery[]> {
     const artists = await this.items<DirectusItem>('artists', {
       'filter[slug][_eq]': slug,
