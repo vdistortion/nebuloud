@@ -500,6 +500,7 @@ artists
 - [x] сохранить единый `ContentService` для страниц;
 - [x] настроить отдельный Directus + PostgreSQL стек;
 - [ ] проверить permissions и SSR/SSG без fallback;
+- [x] получать prerender-маршруты из Directus;
 - [ ] перенести production URL и reverse proxy на `api.nebuloud.zvalentin.com`;
 - [ ] решить судьбу локальной `db` после сверки и backup Directus.
 
