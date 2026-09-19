@@ -4,17 +4,25 @@ type DirectusItem = { id: number | string; slug?: string };
 type DirectusResponse<T> = { data: T[] };
 
 const directusUrl = (process.env['DIRECTUS_URL'] ?? 'http://localhost:8056').replace(/\/$/, '');
+const requestCache = new Map<string, Promise<DirectusItem[]>>();
 
 async function items<T extends DirectusItem>(
   collection: string,
   query: Record<string, string> = {},
 ): Promise<T[]> {
   const params = new URLSearchParams({ ...query, limit: '-1' });
-  const response = await fetch(`${directusUrl}/items/${collection}?${params}`);
-  if (!response.ok) {
-    throw new Error(`Directus prerender request failed: ${response.status} ${collection}`);
-  }
-  return ((await response.json()) as DirectusResponse<T>).data;
+  const url = `${directusUrl}/items/${collection}?${params}`;
+  const cached = requestCache.get(url);
+  if (cached) return (await cached) as T[];
+
+  const request = fetch(url).then(async (response) => {
+    if (!response.ok) {
+      throw new Error(`Directus prerender request failed: ${response.status} ${collection}`);
+    }
+    return ((await response.json()) as DirectusResponse<T>).data;
+  });
+  requestCache.set(url, request as Promise<DirectusItem[]>);
+  return (await request) as T[];
 }
 
 const artistSlugs = async () => {
