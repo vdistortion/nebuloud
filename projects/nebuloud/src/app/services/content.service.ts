@@ -8,6 +8,7 @@ import type {
 import { DirectusContentSource } from '../data/directus-content.source';
 import { LocalContentSource } from '../data/local-content.source';
 import type { ContentSource } from '../data/content-source';
+import { CONTENT_MODE } from '../config';
 @Injectable({
   providedIn: 'root',
 })
@@ -15,6 +16,7 @@ export class ContentService {
   /** The source can later be replaced with a Directus-backed implementation. */
   private readonly source = inject(LocalContentSource);
   private readonly directus: ContentSource = inject(DirectusContentSource);
+  private readonly mode = inject(CONTENT_MODE);
 
   readonly artistSummaries: ArtistSummary[] = this.source.artistSummaries;
 
@@ -95,9 +97,12 @@ export class ContentService {
     local: () => T,
     label: string,
   ): Promise<T> {
+    if (this.mode === 'local') return local();
+
     try {
       return await remote();
     } catch (error) {
+      if (this.mode === 'directus') throw error;
       console.warn(`[ContentService] Directus unavailable for ${label}; using local source`, error);
       return local();
     }
