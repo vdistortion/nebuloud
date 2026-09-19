@@ -16,9 +16,9 @@ export class Header {
   private readonly content = inject(ContentService);
 
   readonly artistId = this.artistService.artistId;
-  readonly artistName = computed(() => this.content.getArtist(this.artistId())?.artist.name ?? '');
+  readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
   readonly isImages = computed(() =>
-    Boolean(this.content.getArtist(this.artistId())?.artist.images?.length),
+    Boolean(this.content.getArtistProfile(this.artistId())?.hasImages),
   );
 
   onClick(event: string) {
