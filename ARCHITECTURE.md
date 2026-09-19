@@ -6,7 +6,7 @@
 
 **Дата фиксации:** 2026-09-18
 
-**Текущее техническое состояние:** приложение собирает 824 prerender-маршрута, но production-сборка завершается ошибкой из-за initial bundle размером около 2.72 MB при лимите 1 MB. Библиотека `@twogate/ngx-photo-gallery` удалена; оставшийся размер, вероятнее всего, связан с импортом большого локального каталога текстов в клиентский bundle. Это отдельная задача оптимизации данных, а не причина возвращаться к Nx или backend.
+**Текущее техническое состояние:** приложение собирает 818 prerender-маршрутов и проходит строгий initial bundle budget 1 MB. Локальный fallback загружается лениво; Directus является основным источником контента.
 
 ---
 
@@ -504,6 +504,7 @@ artists
 - [x] добавить скрипт сверки локального каталога и Directus;
 - [x] загружать локальный fallback лениво, не включая всю `db` в initial client bundle;
 - [x] вернуть строгий initial bundle budget после lazy loading local fallback;
+- [x] подготовить production Compose для схемы Caddy + Garage + Directus + PostgreSQL;
 - [ ] перенести production URL и reverse proxy на `api.nebuloud.zvalentin.com`;
 - [ ] решить судьбу локальной `db` после сверки и backup Directus.
 

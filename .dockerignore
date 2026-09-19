@@ -1,0 +1,9 @@
+.git
+.angular
+dist
+node_modules
+projects/nebuloud/public/artist
+*.log
+.env
+.env.*
+!.env.example

@@ -43,6 +43,29 @@ npm run build
 
 Статические файлы появятся в `dist/nebuloud/`.
 
+## Production на VPS
+
+Для VPS предусмотрен отдельный compose-файл:
+
+```bash
+docker compose -f compose.production.yaml up -d db directus
+docker compose -f compose.production.yaml build web
+docker compose -f compose.production.yaml up -d web
+```
+
+Production-схема рассчитана на общие сети из `/home/v/Projects/vps-infra/`:
+
+```text
+nebuloud.zvalentin.com        → web/nginx → Angular SSG
+api.nebuloud.zvalentin.com    → directus:8055
+Directus → PostgreSQL
+Directus → Garage (сеть garage)
+```
+
+Перед запуском должны существовать внешние Docker-сети `caddy` и `garage`, а
+production-секреты должны быть заданы в `.env` на VPS. Caddy подключается через
+лейблы compose и сам выпускает HTTPS-сертификаты.
+
 ## Directus + PostgreSQL
 
 Локальный Directus запускается в отдельном Docker Compose-стеке вместе с PostgreSQL:
