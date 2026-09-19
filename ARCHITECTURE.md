@@ -503,6 +503,7 @@ artists
 - [x] получать prerender-маршруты из Directus;
 - [x] добавить скрипт сверки локального каталога и Directus;
 - [x] загружать локальный fallback лениво, не включая всю `db` в initial client bundle;
+- [x] вернуть строгий initial bundle budget после lazy loading local fallback;
 - [ ] перенести production URL и reverse proxy на `api.nebuloud.zvalentin.com`;
 - [ ] решить судьбу локальной `db` после сверки и backup Directus.
 
