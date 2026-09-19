@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import type { TypeItem } from '../../db/types';
 import type {
+  ArtistSummary,
   ArtistProfile,
   CatalogAlbum,
   CatalogGallery,
@@ -16,7 +17,7 @@ export class ContentService {
   private readonly source = inject(LocalContentSource);
   private readonly directus = inject(DirectusContentSource);
 
-  readonly artistSummaries = this.source.artistSummaries;
+  readonly artistSummaries: ArtistSummary[] = this.source.artistSummaries;
 
   getArtist(id: string | null | undefined): TypeItem | undefined {
     return this.source.getArtist(id);

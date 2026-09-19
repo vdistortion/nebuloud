@@ -1,12 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import { DIRECTUS_URL } from '../config';
 import type {
+  ArtistSummary,
   ArtistProfile,
   CatalogAlbum,
   CatalogGallery,
   CatalogSong,
+  StreamingLinks,
 } from '../models/content.models';
-import type { TypeArtistSummary, TypeStreaming } from '../../db/types';
 
 interface DirectusItem {
   id: number | string;
@@ -26,7 +27,7 @@ export class DirectusContentSource {
   private readonly songsCache = new Map<string, Promise<CatalogSong[]>>();
   private readonly galleriesCache = new Map<string, Promise<CatalogGallery[]>>();
 
-  async getArtistSummaries(): Promise<TypeArtistSummary[]> {
+  async getArtistSummaries(): Promise<ArtistSummary[]> {
     const artists = await this.items<DirectusItem>('artists', {
       fields: 'id,slug,name,country,image',
       limit: '-1',
@@ -271,14 +272,14 @@ export class DirectusContentSource {
     };
   }
 
-  private mapStreaming(value: unknown): TypeStreaming | undefined {
+  private mapStreaming(value: unknown): StreamingLinks | undefined {
     if (!Array.isArray(value)) return undefined;
     const links = value as DirectusItem[];
     const result: Record<string, string> = {};
     for (const link of links) {
       if (link['service'] && link['url']) result[String(link['service'])] = String(link['url']);
     }
-    return Object.keys(result).length ? (result as TypeStreaming) : undefined;
+    return Object.keys(result).length ? (result as StreamingLinks) : undefined;
   }
 
   private youtubeId(value: unknown): string | undefined {

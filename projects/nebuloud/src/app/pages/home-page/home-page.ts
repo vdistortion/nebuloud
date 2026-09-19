@@ -7,7 +7,7 @@ import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { ContentService } from '../../services/content.service';
 import { AssetUrlService } from '../../services/asset-url.service';
-import type { TypeArtistSummary } from '../../../db/types';
+import type { ArtistSummary } from '../../models/content.models';
 
 @Component({
   selector: 'app-home-page',
@@ -24,7 +24,7 @@ export class HomePage {
   private readonly assetUrl = inject(AssetUrlService);
 
   readonly artists = toSignal(
-    this.route.data.pipe(map((data) => data['artistSummaries'] as TypeArtistSummary[])),
+    this.route.data.pipe(map((data) => data['artistSummaries'] as ArtistSummary[])),
     { initialValue: this.content.artistSummaries },
   );
   readonly searchQuery = signal('');

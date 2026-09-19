@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import type { TypeStreaming, TypeStreamingList } from '../../../../db/types';
+import type { StreamingLinks, StreamingService } from '../../../models/content.models';
 
-type TypeStreamingItem = {
+type StreamingItem = {
   name: string;
   image: string;
 };
@@ -13,10 +13,10 @@ type TypeStreamingItem = {
   styleUrl: './streaming-list.scss',
 })
 export class StreamingList {
-  @Input({ required: true }) public streaming: TypeStreaming | undefined;
+  @Input({ required: true }) public streaming: StreamingLinks | undefined;
   @Output() public clickStreaming = new EventEmitter<string>();
 
-  protected readonly streamingList: Record<TypeStreamingList, TypeStreamingItem> = {
+  protected readonly streamingList: Record<StreamingService, StreamingItem> = {
     spotify: {
       name: 'Spotify',
       image: 'spotify.svg',
@@ -50,8 +50,8 @@ export class StreamingList {
   get list() {
     if (!this.streaming) return [];
 
-    const list: [TypeStreamingList, string][] = Object.entries(this.streaming) as [
-      TypeStreamingList,
+    const list: [StreamingService, string][] = Object.entries(this.streaming) as [
+      StreamingService,
       string,
     ][];
 

@@ -1,4 +1,20 @@
-import type { TypeStreaming } from '../../db/types';
+export type StreamingService =
+  | 'spotify'
+  | 'bandcamp'
+  | 'soundcloud'
+  | 'amazonMusic'
+  | 'youtubeMusic'
+  | 'appleMusic'
+  | 'yandexMusic';
+
+export type StreamingLinks = Partial<Record<StreamingService, string>>;
+
+export interface ArtistSummary {
+  id: string;
+  name: string;
+  image: string;
+  country: string[];
+}
 
 export interface CatalogSong {
   id: string;
@@ -20,7 +36,7 @@ export interface CatalogAlbum {
   cover?: string;
   info?: string;
   songs: CatalogSong[];
-  streaming?: TypeStreaming;
+  streaming?: StreamingLinks;
 }
 
 export interface CatalogGallery {
@@ -35,7 +51,7 @@ export interface ArtistProfile {
   name: string;
   image: string;
   country: string[];
-  streaming?: TypeStreaming;
+  streaming?: StreamingLinks;
   albums: CatalogAlbum[];
   hasImages: boolean;
 }
