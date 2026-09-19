@@ -31,26 +31,29 @@
 
       <div class="tracklist">
         @for (song of songs(); track song.id || song.name; let i = $index) {
-          <div class="track" [class.track--muted]="!song.id || !song.isText">
-            <span class="track__number">{{ formatTrackNumber(i) }}</span>
-            <div class="track__name">
-              @if (song.id && song.isText) {
-                <a
-                  [routerLink]="'/artist/' + artistId() + '/song/' + song.id"
-                  (click)="
-                    onClick(`click_song_${song.id}_album_${currentAlbum.id}_artist_${artistId()}`)
-                  "
-                >
-                  {{ song.name }}
-                </a>
-              } @else {
-                <span>{{ song.name }}</span>
+          @if (song.id && song.isText) {
+            <a
+              class="track track--link"
+              [routerLink]="'/artist/' + artistId() + '/song/' + song.id"
+              (click)="
+                onClick(`click_song_${song.id}_album_${currentAlbum.id}_artist_${artistId()}`)
+              "
+            >
+              <span class="track__number">{{ formatTrackNumber(i) }}</span>
+              <span class="track__name">{{ song.name }}</span>
+              @if (song.duration) {
+                <span class="track__duration">{{ getTime(song.duration) }}</span>
+              }
+            </a>
+          } @else {
+            <div class="track track--muted">
+              <span class="track__number">{{ formatTrackNumber(i) }}</span>
+              <span class="track__name">{{ song.name }}</span>
+              @if (song.duration) {
+                <span class="track__duration">{{ getTime(song.duration) }}</span>
               }
             </div>
-            @if (song.duration) {
-              <span class="track__duration">{{ getTime(song.duration) }}</span>
-            }
-          </div>
+          }
         }
       </div>
     </section>
