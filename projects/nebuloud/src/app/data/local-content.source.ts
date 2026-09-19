@@ -10,11 +10,12 @@ import type {
   CatalogSong,
   StreamingLinks,
 } from '../models/content.models';
+import type { ContentSource } from './content-source';
 
 @Injectable({
   providedIn: 'root',
 })
-export class LocalContentSource {
+export class LocalContentSource implements ContentSource {
   readonly artists: TypeItems = artists;
   readonly artistSummaries: ArtistSummary[] = artistSummaries;
 
@@ -22,7 +23,7 @@ export class LocalContentSource {
     return id ? this.artists[id] : undefined;
   }
 
-  getArtistProfile(id: string | null | undefined): ArtistProfile | undefined {
+  getArtistProfileSync(id: string | null | undefined): ArtistProfile | undefined {
     const item = this.getArtist(id);
     if (!item) return undefined;
 
@@ -39,17 +40,17 @@ export class LocalContentSource {
     };
   }
 
-  getAlbum(artistId: string | null | undefined, albumId: string | null | undefined) {
+  getAlbumSync(artistId: string | null | undefined, albumId: string | null | undefined) {
     const item = this.getArtist(artistId);
     return item && albumId ? this.mapAlbum(item, albumId) : undefined;
   }
 
-  getSong(artistId: string | null | undefined, songId: string | null | undefined) {
+  getSongSync(artistId: string | null | undefined, songId: string | null | undefined) {
     const item = this.getArtist(artistId);
     return item && songId ? this.mapSong(item, songId) : undefined;
   }
 
-  getSongs(artistId: string | null | undefined): CatalogSong[] {
+  getSongsSync(artistId: string | null | undefined): CatalogSong[] {
     const item = this.getArtist(artistId);
     if (!item) return [];
     return Object.keys(item.songs)
@@ -57,19 +58,47 @@ export class LocalContentSource {
       .filter((song): song is CatalogSong => Boolean(song));
   }
 
-  getSongsWithLyrics(artistId: string | null | undefined) {
-    return this.getSongs(artistId).filter((song) => song.lyrics.trim());
+  getSongsWithLyricsSync(artistId: string | null | undefined) {
+    return this.getSongsSync(artistId).filter((song) => song.lyrics.trim());
   }
 
-  getSongsWithoutAlbum(artistId: string | null | undefined) {
-    return this.getSongs(artistId).filter((song) => !song.albums.length);
+  getSongsWithoutAlbumSync(artistId: string | null | undefined) {
+    return this.getSongsSync(artistId).filter((song) => !song.albums.length);
   }
 
-  getVideos(artistId: string | null | undefined) {
-    return this.getSongs(artistId).filter((song) => Boolean(song.videoId));
+  getVideosSync(artistId: string | null | undefined) {
+    return this.getSongsSync(artistId).filter((song) => Boolean(song.videoId));
   }
 
-  getGalleries(artistId: string | null | undefined): CatalogGallery[] {
+  async getArtistSummaries() {
+    return this.artistSummaries;
+  }
+  async getArtistProfile(slug: string) {
+    return this.getArtistProfileSync(slug);
+  }
+  async getAlbumBySlug(artist: string, album: string) {
+    return this.getAlbumSync(artist, album);
+  }
+  async getSongBySlug(artist: string, song: string) {
+    return this.getSongSync(artist, song);
+  }
+  async getSongsWithLyrics(artist: string) {
+    return this.getSongsWithLyricsSync(artist);
+  }
+  async getSongsWithoutAlbum(artist: string) {
+    return this.getSongsWithoutAlbumSync(artist);
+  }
+  async getVideos(artist: string) {
+    return this.getVideosSync(artist);
+  }
+  async getGalleries(artist: string) {
+    return this.getGalleriesSync(artist);
+  }
+  async getGalleryById(artist: string, gallery: string) {
+    return this.getGallerySync(artist, gallery);
+  }
+
+  getGalleriesSync(artistId: string | null | undefined): CatalogGallery[] {
     return (this.getArtist(artistId)?.artist.images ?? []).map((gallery, index) => ({
       id: String(index),
       title: gallery.path.at(-1) ?? 'Галерея',
@@ -78,8 +107,8 @@ export class LocalContentSource {
     }));
   }
 
-  getGallery(artistId: string | null | undefined, galleryId: string | null | undefined) {
-    return this.getGalleries(artistId).find((gallery) => gallery.id === galleryId);
+  getGallerySync(artistId: string | null | undefined, galleryId: string | null | undefined) {
+    return this.getGalleriesSync(artistId).find((gallery) => gallery.id === galleryId);
   }
 
   private mapAlbum(item: TypeItem, albumId: string): CatalogAlbum | undefined {
