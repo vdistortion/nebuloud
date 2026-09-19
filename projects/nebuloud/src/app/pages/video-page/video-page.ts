@@ -6,7 +6,7 @@ import { YouTubePlayer } from '@angular/youtube-player';
 import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
-import { ContentService } from '../../services/content.service';
+import type { ArtistProfile } from '../../models/content.models';
 import type { CatalogSong } from '../../models/content.models';
 
 @Component({
@@ -20,12 +20,15 @@ export class VideoPage {
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
-  private readonly content = inject(ContentService);
 
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
   });
-  readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
+  readonly resolvedArtistProfile = toSignal(
+    this.route.data.pipe(map((data) => data['artistProfile'] as ArtistProfile | undefined)),
+    { initialValue: undefined },
+  );
+  readonly artistName = computed(() => this.resolvedArtistProfile()?.name ?? '');
   readonly resolvedSongs = toSignal(
     this.route.data.pipe(map((data) => data['videos'] as CatalogSong[])),
     { initialValue: [] },
@@ -43,8 +46,9 @@ export class VideoPage {
   }
 
   yearOfSong(song: CatalogSong): number {
+    const albums = this.resolvedArtistProfile()?.albums ?? [];
     return Math.min(
-      ...song.albums.map((albumId) => this.content.getAlbum(this.artistId(), albumId)?.year ?? 0),
+      ...song.albums.map((albumId) => albums.find((album) => album.id === albumId)?.year ?? 0),
     );
   }
 

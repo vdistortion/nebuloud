@@ -5,8 +5,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
-import { ContentService } from '../../services/content.service';
 import { AssetUrlService } from '../../services/asset-url.service';
+import type { ArtistProfile } from '../../models/content.models';
 import type { CatalogGallery } from '../../models/content.models';
 
 @Component({
@@ -20,7 +20,6 @@ export class GalleryPage {
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
-  private readonly content = inject(ContentService);
   private readonly assetUrl = inject(AssetUrlService);
 
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
@@ -29,7 +28,11 @@ export class GalleryPage {
   readonly galleryId = toSignal(this.route.paramMap.pipe(map((params) => params.get('gallery'))), {
     initialValue: null,
   });
-  readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
+  readonly resolvedArtistProfile = toSignal(
+    this.route.data.pipe(map((data) => data['artistProfile'] as ArtistProfile | undefined)),
+    { initialValue: undefined },
+  );
+  readonly artistName = computed(() => this.resolvedArtistProfile()?.name ?? '');
   readonly resolvedGallery = toSignal(
     this.route.data.pipe(map((data) => data['gallery'] as CatalogGallery | undefined)),
     { initialValue: undefined },

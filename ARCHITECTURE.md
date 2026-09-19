@@ -502,6 +502,7 @@ artists
 - [x] проверить permissions и SSR/SSG без fallback;
 - [x] получать prerender-маршруты из Directus;
 - [x] добавить скрипт сверки локального каталога и Directus;
+- [x] загружать локальный fallback лениво, не включая всю `db` в initial client bundle;
 - [ ] перенести production URL и reverse proxy на `api.nebuloud.zvalentin.com`;
 - [ ] решить судьбу локальной `db` после сверки и backup Directus.
 

@@ -6,8 +6,8 @@ import { map } from 'rxjs';
 import { StreamingList } from '../../components/ui/streaming-list/streaming-list';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
-import { ContentService } from '../../services/content.service';
 import { AssetUrlService } from '../../services/asset-url.service';
+import type { ArtistProfile } from '../../models/content.models';
 import type { CatalogAlbum } from '../../models/content.models';
 
 type AlbumTrack = {
@@ -28,7 +28,6 @@ export class AlbumPage {
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
-  private readonly content = inject(ContentService);
   private readonly assetUrl = inject(AssetUrlService);
 
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
@@ -41,7 +40,11 @@ export class AlbumPage {
     this.route.data.pipe(map((data) => data['album'] as CatalogAlbum | undefined)),
     { initialValue: undefined },
   );
-  readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
+  readonly resolvedArtistProfile = toSignal(
+    this.route.data.pipe(map((data) => data['artistProfile'] as ArtistProfile | undefined)),
+    { initialValue: undefined },
+  );
+  readonly artistName = computed(() => this.resolvedArtistProfile()?.name ?? '');
   readonly album = computed<CatalogAlbum | undefined>(() => this.resolvedAlbum());
   readonly songs = computed<AlbumTrack[]>(
     () =>

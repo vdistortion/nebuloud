@@ -6,8 +6,8 @@ import { map } from 'rxjs';
 import { GalleryCard } from '../../components/ui/gallery-card/gallery-card';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
-import { ContentService } from '../../services/content.service';
 import { AssetUrlService } from '../../services/asset-url.service';
+import type { ArtistProfile } from '../../models/content.models';
 import type { CatalogGallery } from '../../models/content.models';
 
 @Component({
@@ -21,13 +21,16 @@ export class ImagesPage {
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
-  private readonly content = inject(ContentService);
   private readonly assetUrl = inject(AssetUrlService);
 
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
   });
-  readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
+  readonly resolvedArtistProfile = toSignal(
+    this.route.data.pipe(map((data) => data['artistProfile'] as ArtistProfile | undefined)),
+    { initialValue: undefined },
+  );
+  readonly artistName = computed(() => this.resolvedArtistProfile()?.name ?? '');
   readonly resolvedImages = toSignal(
     this.route.data.pipe(map((data) => data['galleries'] as CatalogGallery[])),
     { initialValue: [] },

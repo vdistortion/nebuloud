@@ -6,7 +6,7 @@ import { YouTubePlayer } from '@angular/youtube-player';
 import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
-import { ContentService } from '../../services/content.service';
+import type { ArtistProfile } from '../../models/content.models';
 import type { CatalogAlbum, CatalogSong } from '../../models/content.models';
 
 @Component({
@@ -20,7 +20,6 @@ export class SongPage {
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
-  private readonly content = inject(ContentService);
 
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
@@ -32,13 +31,18 @@ export class SongPage {
     this.route.data.pipe(map((data) => data['song'] as CatalogSong | undefined)),
     { initialValue: undefined },
   );
-  readonly artistName = computed(() => this.content.getArtistProfile(this.artistId())?.name ?? '');
+  readonly resolvedArtistProfile = toSignal(
+    this.route.data.pipe(map((data) => data['artistProfile'] as ArtistProfile | undefined)),
+    { initialValue: undefined },
+  );
+  readonly artistName = computed(() => this.resolvedArtistProfile()?.name ?? '');
   readonly song = computed<CatalogSong | undefined>(() => this.resolvedSong());
   readonly albums = computed<CatalogAlbum[]>(() => {
     const song = this.song();
+    const profile = this.resolvedArtistProfile();
     return song
       ? song.albums
-          .map((id) => this.content.getAlbum(this.artistId(), id))
+          .map((id) => profile?.albums.find((album) => album.id === id))
           .filter((album): album is CatalogAlbum => Boolean(album))
       : [];
   });

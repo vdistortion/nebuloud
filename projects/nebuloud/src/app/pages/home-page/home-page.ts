@@ -5,7 +5,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
-import { ContentService } from '../../services/content.service';
 import { AssetUrlService } from '../../services/asset-url.service';
 import type { ArtistSummary } from '../../models/content.models';
 
@@ -20,12 +19,11 @@ export class HomePage {
   private readonly route = inject(ActivatedRoute);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
-  private readonly content = inject(ContentService);
   private readonly assetUrl = inject(AssetUrlService);
 
   readonly artists = toSignal(
     this.route.data.pipe(map((data) => data['artistSummaries'] as ArtistSummary[])),
-    { initialValue: this.content.artistSummaries },
+    { initialValue: [] },
   );
   readonly searchQuery = signal('');
   readonly filteredArtists = computed(() => {
