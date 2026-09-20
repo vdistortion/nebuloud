@@ -109,6 +109,15 @@ python scripts/bootstrap-directus.py
 
 Скрипт идемпотентный: существующие коллекции, поля и relations не пересоздаются.
 
+Настроить webhook Flow и Telegram-уведомление:
+
+```bash
+python scripts/bootstrap-suggestion-flow.py
+```
+
+Скрипт использует `DIRECTUS_ADMIN_*`, `TELEGRAM_BOT_TOKEN` и
+`TELEGRAM_CHAT_ID` из окружения. Telegram-токен не хранится в репозитории.
+
 Импортировать текстовый каталог из локальной `db`:
 
 ```bash
