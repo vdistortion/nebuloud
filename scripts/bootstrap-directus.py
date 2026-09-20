@@ -27,6 +27,7 @@ PUBLIC_COLLECTIONS = [
     "streaming_links",
     "directus_files",
 ]
+PUBLIC_CREATE_COLLECTIONS = ["content_suggestions"]
 
 RELATIONS = [
     ("albums", "artist", "artists", "albums"),
@@ -111,6 +112,29 @@ COLLECTIONS = {
             ("service", "string", {"interface": "input", "required": True}, {}),
             ("url", "string", {"interface": "input", "required": True}, {}),
             ("sort", "integer", {"interface": "input"}, {"default_value": 0}),
+        ],
+    },
+    "content_suggestions": {
+        "icon": "feedback",
+        "fields": [
+            ("kind", "string", {"interface": "select-dropdown", "options": {"choices": [
+                {"text": "Исправление текста", "value": "correction"},
+                {"text": "Новый текст", "value": "new_lyrics"},
+            ]}, "required": True}, {}),
+            ("artist_slug", "string", {"interface": "input", "required": True}, {}),
+            ("song_slug", "string", {"interface": "input", "required": True}, {}),
+            ("song_title", "string", {"interface": "input"}, {}),
+            ("page_url", "string", {"interface": "input", "required": True}, {}),
+            ("current_lyrics", "text", {"interface": "input-multiline"}, {}),
+            ("proposed_lyrics", "text", {"interface": "input-multiline", "required": True}, {}),
+            ("comment", "text", {"interface": "input-multiline"}, {}),
+            ("source_url", "string", {"interface": "input"}, {}),
+            ("contact", "string", {"interface": "input"}, {}),
+            ("status", "string", {"interface": "select-dropdown", "options": {"choices": [
+                {"text": "Ожидает проверки", "value": "pending"},
+                {"text": "Принято", "value": "approved"},
+                {"text": "Отклонено", "value": "rejected"},
+            ]}, "default": "pending"}, {"default_value": "pending"}),
         ],
     },
 }
@@ -221,6 +245,38 @@ def main() -> int:
             },
         )
         print(f"created public read: {collection}")
+
+    for collection in PUBLIC_CREATE_COLLECTIONS:
+        existing_create = any(
+            permission.get("policy") == public_policy_id
+            and permission.get("collection") == collection
+            and permission.get("action") == "create"
+            for permission in permissions_response["data"]
+        )
+        if existing_create:
+            print(f"exists public create: {collection}")
+            continue
+        try:
+            request(
+                "POST",
+                "/permissions",
+                token,
+                {
+                    "policy": public_policy_id,
+                    "collection": collection,
+                    "action": "create",
+                    "permissions": {},
+                    "validation": {},
+                    "presets": {"status": "pending"},
+                    "fields": [
+                        "kind", "artist_slug", "song_slug", "song_title", "page_url",
+                        "current_lyrics", "proposed_lyrics", "comment", "source_url", "contact",
+                    ],
+                },
+            )
+            print(f"created public create: {collection}")
+        except RuntimeError as error:
+            print(f"warning: public create permission for {collection} was not configured: {error}")
 
     print("Nebuloud Directus content model is ready.")
     return 0
