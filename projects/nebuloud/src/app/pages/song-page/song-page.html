@@ -53,22 +53,6 @@
                   class="suggestion-form"
                   (submit)="$event.preventDefault(); submitSuggestion()"
                 >
-                  <div class="suggestion-form__types">
-                    <button
-                      type="button"
-                      [class.active]="suggestionKind() === 'correction'"
-                      (click)="suggestionKind.set('correction')"
-                    >
-                      Исправление
-                    </button>
-                    <button
-                      type="button"
-                      [class.active]="suggestionKind() === 'new_lyrics'"
-                      (click)="suggestionKind.set('new_lyrics')"
-                    >
-                      Новый текст
-                    </button>
-                  </div>
                   <textarea
                     required
                     placeholder="Введите исправленный или новый текст"

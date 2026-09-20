@@ -132,21 +132,9 @@
   margin-top: 1.25rem;
 }
 
-.suggestion-form__types {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.suggestion-form__types button,
 .suggestion-form__submit {
   padding: 0.65rem 0.85rem;
   font-size: 0.82rem;
-}
-
-.suggestion-form__types button.active {
-  border-color: #ff4444;
-  color: #fff;
-  background: rgba(255, 68, 68, 0.2);
 }
 
 .suggestion-form textarea,

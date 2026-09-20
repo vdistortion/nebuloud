@@ -49,7 +49,6 @@ export class SongPage {
       : [];
   });
   readonly suggestionOpen = signal(false);
-  readonly suggestionKind = signal<'correction' | 'new_lyrics'>('correction');
   readonly suggestionText = signal('');
   readonly suggestionComment = signal('');
   readonly suggestionSource = signal('');
@@ -84,7 +83,7 @@ export class SongPage {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          kind: this.suggestionKind(),
+          kind: song.lyrics.trim() ? 'correction' : 'new_lyrics',
           artist_slug: artistId,
           song_slug: song.id,
           song_title: song.title,
