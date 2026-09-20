@@ -36,8 +36,14 @@ export const CONTENT_MODE = new InjectionToken<'directus' | 'fallback' | 'local'
 
 export const SUGGESTION_WEBHOOK_URL = new InjectionToken<string>('SUGGESTION_WEBHOOK_URL', {
   providedIn: 'root',
-  factory: () =>
-    globalThis.__NEBULOUD_CONFIG__?.suggestionWebhookUrl ??
-    (typeof process !== 'undefined' ? process.env['SUGGESTION_WEBHOOK_URL'] : undefined) ??
-    '',
+  factory: () => {
+    const configured =
+      globalThis.__NEBULOUD_CONFIG__?.suggestionWebhookUrl ??
+      (typeof process !== 'undefined' ? process.env['SUGGESTION_WEBHOOK_URL'] : undefined);
+    if (configured) return configured;
+
+    return globalThis.location?.hostname === 'nebuloud.zvalentin.com'
+      ? 'https://api.nebuloud.zvalentin.com/flows/trigger/f1866803-f7b3-4dd1-9d59-bec46289c5e5'
+      : '';
+  },
 });
