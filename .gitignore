@@ -32,6 +32,9 @@ yarn-error.log
 # Project media kept locally and not committed
 /projects/nebuloud/public/artist/
 
+# Legacy local catalog kept outside Git and used only for migration/offline mode
+/projects/nebuloud/src/db/
+
 # Local environment secrets
 .env
 .env.*
