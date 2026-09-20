@@ -89,7 +89,33 @@ export class DirectusContentSource implements ContentSource {
     ]);
 
     const songModels = songs.map((song) => this.mapSong(song));
-    const albumModels = await Promise.all(albums.map((album) => this.mapAlbum(album, songModels)));
+    const albumIds = albums.map((album) => String(album.id)).join(',');
+    const [albumSongs, albumLinks] = await Promise.all([
+      albumIds
+        ? this.items<DirectusItem>('album_songs', {
+            'filter[album][_in]': albumIds,
+            fields: 'album,song,sort',
+            sort: 'sort',
+            limit: '-1',
+          })
+        : Promise.resolve([]),
+      albumIds
+        ? this.items<DirectusItem>('streaming_links', {
+            'filter[album][_in]': albumIds,
+            fields: 'album,service,url,sort',
+            sort: 'sort',
+            limit: '-1',
+          })
+        : Promise.resolve([]),
+    ]);
+    const albumModels = albums.map((album) =>
+      this.mapAlbum(
+        album,
+        songModels,
+        albumSongs.filter((relation) => String(relation['album']) === String(album.id)),
+        albumLinks.filter((link) => String(link['album']) === String(album.id)),
+      ),
+    );
 
     return {
       id: String(artist.id),
@@ -231,22 +257,16 @@ export class DirectusContentSource implements ContentSource {
     );
   }
 
-  private async mapAlbum(item: DirectusItem, songs: CatalogSong[]): Promise<CatalogAlbum> {
-    const [albumSongs, links] = await Promise.all([
-      this.items<DirectusItem>('album_songs', {
-        'filter[album][_eq]': String(item.id),
-        fields: 'song,sort',
-        sort: 'sort',
-        limit: '-1',
-      }),
-      this.items<DirectusItem>('streaming_links', {
-        'filter[album][_eq]': String(item.id),
-        fields: 'service,url,sort',
-        sort: 'sort',
-        limit: '-1',
-      }),
-    ]);
-    const songIds = new Set(albumSongs.map((relation) => String(relation['song'])));
+  private mapAlbum(
+    item: DirectusItem,
+    songs: CatalogSong[],
+    albumSongs: DirectusItem[],
+    links: DirectusItem[],
+  ): CatalogAlbum {
+    const albumSongIds = [...albumSongs]
+      .sort((a, b) => Number(a['sort'] ?? 0) - Number(b['sort'] ?? 0))
+      .map((relation) => String(relation['song']));
+    const songsBySourceId = new Map(songs.map((song) => [song.sourceId, song]));
 
     return {
       id: String(item['slug'] ?? item.id),
@@ -255,7 +275,9 @@ export class DirectusContentSource implements ContentSource {
       year: Number(item['year'] ?? 0),
       cover: item['cover'] ? `/assets/${item['cover']}` : undefined,
       info: item['description'] ? String(item['description']) : undefined,
-      songs: songs.filter((song) => song.sourceId && songIds.has(song.sourceId)),
+      songs: albumSongIds
+        .map((songId) => songsBySourceId.get(songId))
+        .filter((song): song is CatalogSong => Boolean(song)),
       streaming: this.mapStreaming(links),
     };
   }
