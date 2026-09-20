@@ -47,6 +47,12 @@ npm run build
 
 Статические файлы появятся в `dist/nebuloud/`.
 
+Проверить доступность production-сайта и Directus:
+
+```bash
+./scripts/smoke-production.sh
+```
+
 ## Production на VPS
 
 Для VPS предусмотрен отдельный compose-файл:

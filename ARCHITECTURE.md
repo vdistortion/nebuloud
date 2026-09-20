@@ -505,7 +505,9 @@ artists
 - [x] загружать локальный fallback лениво, не включая всю `db` в initial client bundle;
 - [x] вернуть строгий initial bundle budget после lazy loading local fallback;
 - [x] подготовить production Compose для схемы Caddy + Garage + Directus + PostgreSQL;
-- [ ] перенести production URL и reverse proxy на `api.nebuloud.zvalentin.com`;
+- [x] перенести production URL и reverse proxy на `api.nebuloud.zvalentin.com`;
+- [x] развернуть первый production web-контейнер на VPS;
+- [x] проверить публичные production-маршруты и Directus Assets;
 - [ ] решить судьбу локальной `db` после сверки и backup Directus.
 
 ### Этап 5 — заготовка движка
