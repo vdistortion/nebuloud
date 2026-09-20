@@ -36,5 +36,8 @@ export const CONTENT_MODE = new InjectionToken<'directus' | 'fallback' | 'local'
 
 export const SUGGESTION_WEBHOOK_URL = new InjectionToken<string>('SUGGESTION_WEBHOOK_URL', {
   providedIn: 'root',
-  factory: () => globalThis.__NEBULOUD_CONFIG__?.suggestionWebhookUrl ?? '',
+  factory: () =>
+    globalThis.__NEBULOUD_CONFIG__?.suggestionWebhookUrl ??
+    (typeof process !== 'undefined' ? process.env['SUGGESTION_WEBHOOK_URL'] : undefined) ??
+    '',
 });
