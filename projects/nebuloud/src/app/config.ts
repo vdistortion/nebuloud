@@ -11,9 +11,15 @@ declare global {
 }
 
 function getDirectusUrl(): string {
+  const productionUrl =
+    globalThis.location?.hostname === 'nebuloud.zvalentin.com'
+      ? 'https://api.nebuloud.zvalentin.com'
+      : undefined;
+
   return (
     globalThis.__NEBULOUD_CONFIG__?.directusUrl ??
     (typeof process !== 'undefined' ? process.env['DIRECTUS_URL'] : undefined) ??
+    productionUrl ??
     'http://localhost:8056'
   );
 }
