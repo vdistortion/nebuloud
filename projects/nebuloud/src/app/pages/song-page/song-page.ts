@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -6,6 +6,7 @@ import { YouTubePlayer } from '@angular/youtube-player';
 import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
+import { SUGGESTION_WEBHOOK_URL } from '../../config';
 import type { ArtistProfile } from '../../models/content.models';
 import type { CatalogAlbum, CatalogSong } from '../../models/content.models';
 
@@ -20,6 +21,7 @@ export class SongPage {
   private readonly titleService = inject(Title);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
+  readonly suggestionWebhookUrl = inject(SUGGESTION_WEBHOOK_URL);
 
   readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
     initialValue: null,
@@ -46,6 +48,13 @@ export class SongPage {
           .filter((album): album is CatalogAlbum => Boolean(album))
       : [];
   });
+  readonly suggestionOpen = signal(false);
+  readonly suggestionKind = signal<'correction' | 'new_lyrics'>('correction');
+  readonly suggestionText = signal('');
+  readonly suggestionComment = signal('');
+  readonly suggestionSource = signal('');
+  readonly suggestionContact = signal('');
+  readonly suggestionState = signal<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
   constructor() {
     effect(() => {
@@ -62,5 +71,35 @@ export class SongPage {
 
   onClick(event: string) {
     this.analytics.sendEvent(event, { category: 'UI' });
+  }
+
+  async submitSuggestion() {
+    const song = this.song();
+    const artistId = this.artistId();
+    if (!song || !artistId || !this.suggestionWebhookUrl || !this.suggestionText().trim()) return;
+
+    this.suggestionState.set('sending');
+    try {
+      const response = await fetch(this.suggestionWebhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: this.suggestionKind(),
+          artist_slug: artistId,
+          song_slug: song.id,
+          song_title: song.title,
+          page_url: globalThis.location.href,
+          current_lyrics: song.lyrics,
+          proposed_lyrics: this.suggestionText().trim(),
+          comment: this.suggestionComment().trim(),
+          source_url: this.suggestionSource().trim(),
+          contact: this.suggestionContact().trim(),
+        }),
+      });
+      if (!response.ok) throw new Error(`Suggestion request failed: ${response.status}`);
+      this.suggestionState.set('sent');
+    } catch {
+      this.suggestionState.set('error');
+    }
   }
 }

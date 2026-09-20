@@ -5,6 +5,7 @@ declare global {
     | {
         directusUrl?: string;
         contentMode?: 'directus' | 'fallback' | 'local';
+        suggestionWebhookUrl?: string;
       }
     | undefined;
 }
@@ -31,4 +32,9 @@ export const CONTENT_MODE = new InjectionToken<'directus' | 'fallback' | 'local'
       (typeof process !== 'undefined' ? process.env['CONTENT_MODE'] : undefined);
     return mode === 'directus' || mode === 'local' ? mode : 'fallback';
   },
+});
+
+export const SUGGESTION_WEBHOOK_URL = new InjectionToken<string>('SUGGESTION_WEBHOOK_URL', {
+  providedIn: 'root',
+  factory: () => globalThis.__NEBULOUD_CONFIG__?.suggestionWebhookUrl ?? '',
 });

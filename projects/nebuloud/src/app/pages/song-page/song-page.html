@@ -20,6 +20,96 @@
           }
         </header>
         <pre class="lyrics-card__text">{{ currentSong.lyrics.trim() }}</pre>
+
+        @if (suggestionWebhookUrl) {
+          <section class="suggestion-box">
+            @if (!suggestionOpen()) {
+              <button
+                class="suggestion-box__toggle"
+                type="button"
+                (click)="suggestionOpen.set(true)"
+              >
+                Предложить исправление текста
+              </button>
+            } @else {
+              <div class="suggestion-box__header">
+                <div>
+                  <p class="eyebrow">Помочь каталогу</p>
+                  <h2>Предложение по тексту</h2>
+                </div>
+                <button
+                  type="button"
+                  class="suggestion-box__close"
+                  (click)="suggestionOpen.set(false)"
+                >
+                  Закрыть
+                </button>
+              </div>
+
+              @if (suggestionState() === 'sent') {
+                <p class="suggestion-box__success">Спасибо! Предложение отправлено на проверку.</p>
+              } @else {
+                <form
+                  class="suggestion-form"
+                  (submit)="$event.preventDefault(); submitSuggestion()"
+                >
+                  <div class="suggestion-form__types">
+                    <button
+                      type="button"
+                      [class.active]="suggestionKind() === 'correction'"
+                      (click)="suggestionKind.set('correction')"
+                    >
+                      Исправление
+                    </button>
+                    <button
+                      type="button"
+                      [class.active]="suggestionKind() === 'new_lyrics'"
+                      (click)="suggestionKind.set('new_lyrics')"
+                    >
+                      Новый текст
+                    </button>
+                  </div>
+                  <textarea
+                    required
+                    placeholder="Введите исправленный или новый текст"
+                    [value]="suggestionText()"
+                    (input)="suggestionText.set($any($event.target).value)"
+                  ></textarea>
+                  <input
+                    placeholder="Комментарий или источник"
+                    [value]="suggestionComment()"
+                    (input)="suggestionComment.set($any($event.target).value)"
+                  />
+                  <input
+                    type="url"
+                    placeholder="Ссылка на источник (необязательно)"
+                    [value]="suggestionSource()"
+                    (input)="suggestionSource.set($any($event.target).value)"
+                  />
+                  <input
+                    placeholder="Контакт (необязательно)"
+                    [value]="suggestionContact()"
+                    (input)="suggestionContact.set($any($event.target).value)"
+                  />
+                  @if (suggestionState() === 'error') {
+                    <p class="suggestion-box__error">
+                      Не удалось отправить предложение. Попробуйте ещё раз.
+                    </p>
+                  }
+                  <button
+                    class="suggestion-form__submit"
+                    type="submit"
+                    [disabled]="suggestionState() === 'sending'"
+                  >
+                    {{
+                      suggestionState() === 'sending' ? 'Отправляем...' : 'Отправить предложение'
+                    }}
+                  </button>
+                </form>
+              }
+            }
+          </section>
+        }
       </article>
 
       <aside class="song-sidebar">
