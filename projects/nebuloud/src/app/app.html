@@ -1,3 +1,6 @@
+@if (navigationLoading()) {
+  <div class="navigation-progress" role="progressbar" aria-label="Загрузка страницы"></div>
+}
 <app-header></app-header>
 <div class="wrapper">
   <router-outlet></router-outlet>
