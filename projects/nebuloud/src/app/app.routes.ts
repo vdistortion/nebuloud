@@ -47,32 +47,32 @@ export const routes: Routes = [
   },
   {
     path: 'artist/:artist/video',
-    resolve: { videos: videosResolver },
+    resolve: { artistProfile: artistProfileResolver, videos: videosResolver },
     loadComponent: () => import('./pages/video-page/video-page').then((m) => m.VideoPage),
   },
   {
     path: 'artist/:artist/images',
-    resolve: { galleries: galleriesResolver },
+    resolve: { artistProfile: artistProfileResolver, galleries: galleriesResolver },
     loadComponent: () => import('./pages/images-page/images-page').then((m) => m.ImagesPage),
   },
   {
     path: 'artist/:artist/images/:gallery',
-    resolve: { gallery: galleryResolver },
+    resolve: { artistProfile: artistProfileResolver, gallery: galleryResolver },
     loadComponent: () => import('./pages/gallery-page/gallery-page').then((m) => m.GalleryPage),
   },
   {
     path: 'artist/:artist/songs',
-    resolve: { songs: songsResolver },
+    resolve: { artistProfile: artistProfileResolver, songs: songsResolver },
     loadComponent: () => import('./pages/songs-page/songs-page').then((m) => m.SongsPage),
   },
   {
     path: 'artist/:artist/song/:song',
-    resolve: { song: songResolver },
+    resolve: { artistProfile: artistProfileResolver, song: songResolver },
     loadComponent: () => import('./pages/song-page/song-page').then((m) => m.SongPage),
   },
   {
     path: 'artist/:artist/album/:album',
-    resolve: { album: albumResolver },
+    resolve: { artistProfile: artistProfileResolver, album: albumResolver },
     loadComponent: () => import('./pages/album-page/album-page').then((m) => m.AlbumPage),
   },
   {
