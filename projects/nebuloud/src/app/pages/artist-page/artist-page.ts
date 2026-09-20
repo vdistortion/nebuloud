@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject } from '@angular/core';
-import { Title } from '@angular/platform-browser';
+
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -7,6 +7,7 @@ import { AlbumCard } from '../../components/ui/album-card/album-card';
 import { StreamingList } from '../../components/ui/streaming-list/streaming-list';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
+import { SeoService } from '../../services/seo.service';
 import { AssetUrlService } from '../../services/asset-url.service';
 import type { ArtistProfile } from '../../models/content.models';
 
@@ -18,7 +19,7 @@ import type { ArtistProfile } from '../../models/content.models';
 })
 export class ArtistPage {
   private readonly route = inject(ActivatedRoute);
-  private readonly titleService = inject(Title);
+  private readonly seo = inject(SeoService);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
   private readonly assetUrl = inject(AssetUrlService);
@@ -42,7 +43,12 @@ export class ArtistPage {
       const name = this.artistName();
 
       this.artistService.setArtist(id ?? '');
-      this.titleService.setTitle(name ? `${name} | Дискография` : 'Артист не найден');
+      this.seo.set({
+        title: name ? `${name} | Дискография` : 'Артист не найден',
+        description: name
+          ? `Дискография, песни, видео и фотографии артиста ${name}.`
+          : 'Артист не найден',
+      });
     });
   }
 

@@ -1,11 +1,12 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Title } from '@angular/platform-browser';
+
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { YouTubePlayer } from '@angular/youtube-player';
 import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
+import { SeoService } from '../../services/seo.service';
 import { SUGGESTION_WEBHOOK_URL } from '../../config';
 import type { ArtistProfile } from '../../models/content.models';
 import type { CatalogAlbum, CatalogSong } from '../../models/content.models';
@@ -18,7 +19,7 @@ import type { CatalogAlbum, CatalogSong } from '../../models/content.models';
 })
 export class SongPage {
   private readonly route = inject(ActivatedRoute);
-  private readonly titleService = inject(Title);
+  private readonly seo = inject(SeoService);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
   readonly suggestionWebhookUrl = inject(SUGGESTION_WEBHOOK_URL);
@@ -62,9 +63,12 @@ export class SongPage {
       const song = this.song();
 
       this.artistService.setArtist(artistId, '', songId);
-      this.titleService.setTitle(
-        song ? `${song.title} | ${this.artistName()}` : 'Песня не найдена',
-      );
+      this.seo.set({
+        title: song ? `${song.title} | ${this.artistName()}` : 'Песня не найдена',
+        description: song
+          ? `Текст песни «${song.title}» — ${this.artistName()}.`
+          : 'Песня не найдена',
+      });
     });
   }
 

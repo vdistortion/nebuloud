@@ -1,11 +1,12 @@
 import { Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Title } from '@angular/platform-browser';
+
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { StreamingList } from '../../components/ui/streaming-list/streaming-list';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
+import { SeoService } from '../../services/seo.service';
 import { AssetUrlService } from '../../services/asset-url.service';
 import type { ArtistProfile } from '../../models/content.models';
 import type { CatalogAlbum } from '../../models/content.models';
@@ -25,7 +26,7 @@ type AlbumTrack = {
 })
 export class AlbumPage {
   private readonly route = inject(ActivatedRoute);
-  private readonly titleService = inject(Title);
+  private readonly seo = inject(SeoService);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
   private readonly assetUrl = inject(AssetUrlService);
@@ -63,9 +64,12 @@ export class AlbumPage {
       const album = this.album();
 
       this.artistService.setArtist(artistId, albumId);
-      this.titleService.setTitle(
-        album ? `${album.name} (${album.year}) | ${this.artistName()}` : 'Альбом не найден',
-      );
+      this.seo.set({
+        title: album ? `${album.name} (${album.year}) | ${this.artistName()}` : 'Альбом не найден',
+        description: album
+          ? `${album.name} — альбом артиста ${this.artistName()}.`
+          : 'Альбом не найден',
+      });
     });
   }
 

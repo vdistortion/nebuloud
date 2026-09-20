@@ -1,10 +1,11 @@
 import { computed, Component, inject, signal } from '@angular/core';
-import { Title } from '@angular/platform-browser';
+
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
+import { SeoService } from '../../services/seo.service';
 import { AssetUrlService } from '../../services/asset-url.service';
 import type { ArtistSummary } from '../../models/content.models';
 
@@ -15,7 +16,7 @@ import type { ArtistSummary } from '../../models/content.models';
   styleUrl: './home-page.scss',
 })
 export class HomePage {
-  private readonly titleService = inject(Title);
+  private readonly seo = inject(SeoService);
   private readonly route = inject(ActivatedRoute);
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
@@ -38,7 +39,10 @@ export class HomePage {
   });
 
   constructor() {
-    this.titleService.setTitle('Nebuloud — каталог артистов');
+    this.seo.set({
+      title: 'Nebuloud — каталог артистов',
+      description: 'Музыкальный каталог артистов, альбомов, песен и текстов.',
+    });
     this.artistService.setArtist();
   }
 
