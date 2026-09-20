@@ -8,9 +8,8 @@ RUN npm ci
 COPY . .
 
 ARG DIRECTUS_URL=https://api.nebuloud.zvalentin.com
-ENV DIRECTUS_URL=${DIRECTUS_URL} CONTENT_MODE=directus
 RUN sed -i "s#http://localhost:8056#${DIRECTUS_URL}#; s/contentMode: 'fallback'/contentMode: 'directus'/" projects/nebuloud/public/config.js
-RUN npm run build
+RUN DIRECTUS_URL=${DIRECTUS_URL} CONTENT_MODE=directus npm run build
 
 FROM nginx:alpine
 
