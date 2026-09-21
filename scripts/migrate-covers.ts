@@ -10,7 +10,8 @@ const publicRoot = resolve('projects/nebuloud/public');
 async function request(path: string, options: RequestInit = {}) {
   const response = await fetch(`${baseUrl}${path}`, options);
   const payload = await response.json();
-  if (!response.ok) throw new Error(`${options.method ?? 'GET'} ${path}: ${JSON.stringify(payload)}`);
+  if (!response.ok)
+    throw new Error(`${options.method ?? 'GET'} ${path}: ${JSON.stringify(payload)}`);
   return payload.data;
 }
 
@@ -24,17 +25,25 @@ async function login() {
 }
 
 async function findFile(token: string, title: string) {
-  const params = new URLSearchParams({ 'filter[title][_eq]': title, limit: '1' });
-  const files = await request(`/files?${params}`, { headers: { Authorization: `Bearer ${token}` } });
+  const params = new URLSearchParams({
+    'filter[title][_eq]': title,
+    fields: 'id,title,storage',
+    limit: '1',
+  });
+  const files = await request(`/files?${params}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   return files[0];
 }
 
 async function upload(token: string, filePath: string, title: string) {
   const existing = await findFile(token, title);
-  if (existing) return existing;
+  if (existing?.storage === 'garage') return existing;
 
   const form = new FormData();
   const buffer = await readFile(filePath);
+  if (existing) form.append('id', String(existing.id));
+  form.append('storage', 'garage');
   form.append('title', title);
   form.append('file', new Blob([buffer]), basename(filePath));
 

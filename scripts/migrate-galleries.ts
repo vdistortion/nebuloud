@@ -39,15 +39,21 @@ async function findOne(token: string, collection: string, filters: Record<string
 }
 
 async function upload(token: string, filePath: string, title: string) {
-  const params = new URLSearchParams({ 'filter[title][_eq]': title, limit: '1' });
+  const params = new URLSearchParams({
+    'filter[title][_eq]': title,
+    fields: 'id,title,storage',
+    limit: '1',
+  });
   const existing = (
     await request(`/files?${params}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
   )[0];
-  if (existing) return existing;
+  if (existing?.storage === 'garage') return existing;
 
   const form = new FormData();
+  if (existing) form.append('id', String(existing.id));
+  form.append('storage', 'garage');
   form.append('title', title);
   form.append('file', new Blob([await readFile(filePath)]), basename(filePath));
   return request('/files', {

@@ -25,6 +25,11 @@ docker run --rm \
   -v "$BACKUP_DIR":/backup \
   alpine:latest sh -c "tar czf /backup/garage-data-$STAMP.tar.gz -C /data ."
 
+docker run --rm \
+  -v nebuloud_nebuloud_directus_uploads:/data:ro \
+  -v "$BACKUP_DIR":/backup \
+  alpine:latest sh -c "tar czf /backup/directus-uploads-$STAMP.tar.gz -C /data ."
+
 # Keep the production environment recoverable, but restrict the backup file.
 cp .env "$BACKUP_DIR/env-$STAMP"
 chmod 600 "$BACKUP_DIR/env-$STAMP"
