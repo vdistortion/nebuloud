@@ -9,17 +9,40 @@ const publicRoot = resolve('projects/nebuloud/public');
 
 type Item = Record<string, any>;
 
+let accessToken = '';
+
+async function loginRaw() {
+  const response = await fetch(`${baseUrl}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(`POST /auth/login: ${JSON.stringify(payload)}`);
+  accessToken = payload.data.access_token as string;
+  return accessToken;
+}
+
 async function request(path: string, options: RequestInit = {}) {
-  for (let attempt = 0; attempt < 5; attempt++) {
+  for (let attempt = 0; attempt < 6; attempt++) {
     try {
-      const response = await fetch(`${baseUrl}${path}`, options);
+      const headers = new Headers(options.headers);
+      if (accessToken && !path.startsWith('/auth/'))
+        headers.set('Authorization', `Bearer ${accessToken}`);
+      const response = await fetch(`${baseUrl}${path}`, { ...options, headers });
       const payload = await response.json();
       if (response.ok) return payload.data;
-      if (![429, 502, 503, 504].includes(response.status) || attempt === 4) {
+      const expired =
+        response.status === 401 && payload?.errors?.[0]?.extensions?.code === 'TOKEN_EXPIRED';
+      if (expired && !path.startsWith('/auth/')) {
+        await loginRaw();
+        continue;
+      }
+      if (![429, 502, 503, 504].includes(response.status) || attempt === 5) {
         throw new Error(`${options.method ?? 'GET'} ${path}: ${JSON.stringify(payload)}`);
       }
     } catch (error) {
-      if (attempt === 4 || (error instanceof Error && error.message.startsWith('POST '))) {
+      if (attempt === 5 || (error instanceof Error && error.message.startsWith('POST /auth/'))) {
         throw error;
       }
     }
@@ -28,12 +51,7 @@ async function request(path: string, options: RequestInit = {}) {
 }
 
 async function login() {
-  const data = await request('/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  });
-  return data.access_token as string;
+  return loginRaw();
 }
 
 async function findOne(token: string, collection: string, filters: Record<string, string>) {
