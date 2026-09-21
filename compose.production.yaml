@@ -35,8 +35,7 @@ services:
       PUBLIC_URL: https://api.nebuloud.zvalentin.com
       CORS_ENABLED: 'true'
       CORS_ORIGIN: https://nebuloud.zvalentin.com
-      STORAGE_LOCATIONS: local,garage
-      STORAGE_DEFAULT_LOCATION: garage
+      STORAGE_LOCATIONS: garage,local
       STORAGE_GARAGE_DRIVER: s3
       STORAGE_GARAGE_KEY: ${GARAGE_ACCESS_KEY_ID}
       STORAGE_GARAGE_SECRET: ${GARAGE_SECRET_ACCESS_KEY}
@@ -51,6 +50,8 @@ services:
       - internal
       - caddy
       - garage
+    volumes:
+      - nebuloud_directus_uploads:/directus/uploads
     labels:
       caddy: api.nebuloud.zvalentin.com
       caddy.reverse_proxy: '{{upstreams 8055}}'
@@ -70,6 +71,7 @@ services:
 
 volumes:
   nebuloud_postgres_data:
+  nebuloud_directus_uploads:
 
 networks:
   internal:
