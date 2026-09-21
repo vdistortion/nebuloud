@@ -53,6 +53,15 @@ npm run build
 ./scripts/smoke-production.sh
 ```
 
+Создать production backup на VPS:
+
+```bash
+./scripts/backup-production.sh
+```
+
+Скрипт сохраняет PostgreSQL dump, volumes Garage и production `.env` в
+`/root/backups/nebuloud/`. Backup нужно дополнительно копировать за пределы VPS.
+
 ## Production на VPS
 
 Для VPS предусмотрен отдельный compose-файл:
