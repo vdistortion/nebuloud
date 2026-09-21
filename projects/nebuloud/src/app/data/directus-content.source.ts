@@ -317,8 +317,15 @@ export class DirectusContentSource implements ContentSource {
     query: Record<string, string>,
   ): Promise<T[]> {
     const params = new URLSearchParams(query);
-    const response = await fetch(`${this.baseUrl}/items/${collection}?${params}`);
-    if (!response.ok) throw new Error(`Directus request failed: ${response.status}`);
-    return ((await response.json()) as DirectusResponse<T[]>).data;
+    const url = `${this.baseUrl}/items/${collection}?${params}`;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const response = await fetch(url);
+      if (response.ok) return ((await response.json()) as DirectusResponse<T[]>).data;
+      if (![429, 502, 503, 504].includes(response.status) || attempt === 3) {
+        throw new Error(`Directus request failed: ${response.status}`);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 500 * 2 ** attempt));
+    }
+    return [];
   }
 }
