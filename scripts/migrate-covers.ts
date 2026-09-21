@@ -8,11 +8,15 @@ const password = process.env.DIRECTUS_ADMIN_PASSWORD ?? 'change-this-admin-passw
 const publicRoot = resolve('projects/nebuloud/public');
 
 async function request(path: string, options: RequestInit = {}) {
-  const response = await fetch(`${baseUrl}${path}`, options);
-  const payload = await response.json();
-  if (!response.ok)
-    throw new Error(`${options.method ?? 'GET'} ${path}: ${JSON.stringify(payload)}`);
-  return payload.data;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const response = await fetch(`${baseUrl}${path}`, options);
+    const payload = await response.json();
+    if (response.ok) return payload.data;
+    if (![429, 502, 503, 504].includes(response.status) || attempt === 4) {
+      throw new Error(`${options.method ?? 'GET'} ${path}: ${JSON.stringify(payload)}`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** attempt));
+  }
 }
 
 async function login() {
