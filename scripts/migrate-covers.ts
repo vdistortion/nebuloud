@@ -39,12 +39,14 @@ async function findFile(token: string, title: string) {
 async function upload(token: string, filePath: string, title: string) {
   const existing = await findFile(token, title);
   if (existing?.storage === 'garage') return existing;
+  const garageTitle = `${title} [garage]`;
+  const migrated = await findFile(token, garageTitle);
+  if (migrated?.storage === 'garage') return migrated;
 
   const form = new FormData();
   const buffer = await readFile(filePath);
-  if (existing) form.append('id', String(existing.id));
   form.append('storage', 'garage');
-  form.append('title', title);
+  form.append('title', garageTitle);
   form.append('file', new Blob([buffer]), basename(filePath));
 
   return request('/files', {

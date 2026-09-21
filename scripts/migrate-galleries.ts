@@ -50,11 +50,20 @@ async function upload(token: string, filePath: string, title: string) {
     })
   )[0];
   if (existing?.storage === 'garage') return existing;
+  const garageTitle = `${title} [garage]`;
+  const migrated = (
+    await request(
+      `/files?${new URLSearchParams({ 'filter[title][_eq]': garageTitle, limit: '1' })}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    )
+  )[0];
+  if (migrated?.storage === 'garage') return migrated;
 
   const form = new FormData();
-  if (existing) form.append('id', String(existing.id));
   form.append('storage', 'garage');
-  form.append('title', title);
+  form.append('title', garageTitle);
   form.append('file', new Blob([await readFile(filePath)]), basename(filePath));
   return request('/files', {
     method: 'POST',
@@ -102,9 +111,18 @@ async function main() {
         );
         const existingImage = await findOne(token, 'gallery_images', {
           gallery: String(directusGallery.id),
-          image: String(file.id),
+          sort: String(sort),
         });
-        if (!existingImage) {
+        if (existingImage) {
+          await request(`/items/gallery_images/${existingImage.id}`, {
+            method: 'PATCH',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ image: file.id, sort }),
+          });
+        } else {
           await request('/items/gallery_images', {
             method: 'POST',
             headers: {
