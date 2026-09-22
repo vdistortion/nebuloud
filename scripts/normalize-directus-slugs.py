@@ -7,9 +7,7 @@ from collections import defaultdict
 BASE = os.getenv('DIRECTUS_URL', 'http://localhost:8056').rstrip('/')
 EMAIL = os.getenv('DIRECTUS_ADMIN_EMAIL', '')
 PASSWORD = os.getenv('DIRECTUS_ADMIN_PASSWORD', '')
-RU = str.maketrans(dict(zip('абвгдеёжзийклмнопрстуфхцчшщъыьэюя', 'abvgdeyozhziyklmnoprstufkhc chshshchyeyuya'.replace(' ','')) ))
-# Explicit table keeps the policy readable; Ukrainian markers use DSTU system B.
-RU.update(str.maketrans({'ж':'zh','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ю':'yu','я':'ya','й':'y','ы':'y','ё':'yo','ь':'','ъ':''}))
+RU = str.maketrans({'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya'})
 UK = str.maketrans({'а':'a','б':'b','в':'v','г':'h','ґ':'g','д':'d','е':'e','є':'ye','ж':'zh','з':'z','и':'y','і':'i','ї':'yi','й':'i','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ь':'','ю':'iu','я':'ia'})
 DE = str.maketrans({'ä':'ae','ö':'oe','ü':'ue','ß':'ss'})
 SKIP_SONG_IDS = {'168', '487'}
