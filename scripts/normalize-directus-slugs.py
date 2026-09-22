@@ -23,7 +23,10 @@ def slugify(value: str) -> str:
     return re.sub('-+', '-', re.sub('[^a-z0-9]+', '-', s)).strip('-')
 
 def request(method, path, token, body=None):
-    req=urllib.request.Request(BASE+path, data=json.dumps(body,ensure_ascii=False).encode() if body is not None else None, headers={'Content-Type':'application/json','Authorization':f'Bearer {token}'}, method=method)
+    headers={'Content-Type':'application/json'}
+    if token:
+        headers['Authorization']=f'Bearer {token}'
+    req=urllib.request.Request(BASE+path, data=json.dumps(body,ensure_ascii=False).encode() if body is not None else None, headers=headers, method=method)
     with urllib.request.urlopen(req) as response: return json.load(response)['data']
 
 def main():
