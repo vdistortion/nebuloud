@@ -13,8 +13,8 @@ routes=(
   '/artist/master/song/master/'
   '/artist/master/songs/'
   '/artist/master/video/'
-  '/artist/shmely/images/'
-  '/artist/shmely/images/1/'
+  '/artist/shmeli/images/'
+  '/artist/shmeli/images/1/'
 )
 
 for route in "${routes[@]}"; do
