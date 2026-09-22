@@ -62,6 +62,53 @@ function getSongId(reference: unknown): string | undefined {
   return undefined;
 }
 
+function slugifyLabel(value: string): string {
+  const transliteration: Record<string, string> = {
+    а: 'a',
+    б: 'b',
+    в: 'v',
+    г: 'g',
+    д: 'd',
+    е: 'e',
+    ё: 'yo',
+    ж: 'zh',
+    з: 'z',
+    и: 'i',
+    й: 'y',
+    к: 'k',
+    л: 'l',
+    м: 'm',
+    н: 'n',
+    о: 'o',
+    п: 'p',
+    р: 'r',
+    с: 's',
+    т: 't',
+    у: 'u',
+    ф: 'f',
+    х: 'kh',
+    ц: 'ts',
+    ч: 'ch',
+    ш: 'sh',
+    щ: 'shch',
+    ъ: '',
+    ы: 'y',
+    ь: '',
+    э: 'e',
+    ю: 'yu',
+    я: 'ya',
+  };
+  const text = value
+    .toLocaleLowerCase()
+    .split('')
+    .map((char) => transliteration[char] ?? char)
+    .join('');
+  return text
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-+/g, '-');
+}
+
 async function main() {
   const token = await login();
   const artistEntries = Object.entries(artists as Record<string, any>);
@@ -119,7 +166,24 @@ async function main() {
 
       for (const [trackIndex, reference] of album.songs.entries()) {
         const sourceSongId = getSongId(reference);
-        const songId = sourceSongId ? songIds.get(sourceSongId) : undefined;
+        let songId = sourceSongId ? songIds.get(sourceSongId) : undefined;
+        if (!songId && reference && typeof reference === 'object' && !Array.isArray(reference)) {
+          const title = String((reference as { name: string }).name);
+          const placeholder = await createIfMissing(
+            token,
+            'songs',
+            { artist: artistId, title },
+            {
+              artist: artist.id,
+              slug: `${slugifyLabel(title)}-${album.id}`,
+              title,
+              aliases: [],
+              lyrics: '',
+              sort: trackIndex,
+            },
+          );
+          songId = String(placeholder.id);
+        }
         if (!songId) continue;
 
         await createIfMissing(
