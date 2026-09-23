@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import artists from '../../db';
 import { artistSummaries } from '../../db/artist-summaries';
-import type { TypeItem, TypeItems } from '../../db/types';
+import type { TypeAlbum, TypeItem, TypeItems } from '../../db/types';
 import type {
   ArtistProfile,
   ArtistSummary,
@@ -123,16 +123,37 @@ export class LocalContentSource implements ContentSource {
       info: album.info,
       streaming: album.streaming as StreamingLinks | undefined,
       songs: album.songs
-        .map((reference) =>
-          typeof reference === 'string'
-            ? reference
-            : Array.isArray(reference)
-              ? reference[0]
-              : null,
-        )
-        .filter((songId): songId is string => Boolean(songId))
-        .map((songId) => this.mapSong(item, songId))
+        .map((reference) => this.mapAlbumTrack(item, reference))
         .filter((song): song is CatalogSong => Boolean(song)),
+    };
+  }
+
+  private mapAlbumTrack(
+    item: TypeItem,
+    reference: TypeAlbum['songs'][number],
+  ): CatalogSong | undefined {
+    const songId =
+      typeof reference === 'string'
+        ? reference
+        : Array.isArray(reference)
+          ? reference[0]
+          : undefined;
+    const overrideTitle = Array.isArray(reference)
+      ? reference[1].name[0]
+      : typeof reference === 'object'
+        ? reference.name
+        : undefined;
+    const song = songId ? this.mapSong(item, songId) : undefined;
+
+    if (song) return overrideTitle ? { ...song, title: overrideTitle } : song;
+    if (!overrideTitle) return undefined;
+
+    return {
+      id: '',
+      title: overrideTitle,
+      aliases: [],
+      lyrics: '',
+      albums: [],
     };
   }
 

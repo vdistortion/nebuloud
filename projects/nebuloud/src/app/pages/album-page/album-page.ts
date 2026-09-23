@@ -16,6 +16,7 @@ type AlbumTrack = {
   id: string;
   duration: number;
   isText: boolean;
+  authors?: string;
 };
 
 @Component({
@@ -54,6 +55,7 @@ export class AlbumPage {
         name: song.title,
         duration: song.duration ?? 0,
         isText: Boolean(song.lyrics.trim()),
+        authors: song.authors,
       })) ?? [],
   );
 

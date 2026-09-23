@@ -40,7 +40,12 @@
               "
             >
               <span class="track__number">{{ formatTrackNumber(i) }}</span>
-              <span class="track__name">{{ song.name }}</span>
+              <span class="track__name">
+                {{ song.name }}
+                @if (song.authors) {
+                  <small class="track__authors">{{ song.authors }}</small>
+                }
+              </span>
               @if (song.duration) {
                 <span class="track__duration">{{ getTime(song.duration) }}</span>
               }
@@ -48,7 +53,13 @@
           } @else {
             <div class="track track--muted">
               <span class="track__number">{{ formatTrackNumber(i) }}</span>
-              <span class="track__name">{{ song.name }}</span>
+              <span class="track__name">
+                {{ song.name }}
+                @if (song.authors) {
+                  <small class="track__authors">{{ song.authors }}</small>
+                }
+                <small class="track__status">текст отсутствует</small>
+              </span>
               @if (song.duration) {
                 <span class="track__duration">{{ getTime(song.duration) }}</span>
               }

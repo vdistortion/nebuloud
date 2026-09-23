@@ -140,6 +140,9 @@
 }
 
 .track__name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
   color: #e5e5e5;
   font-size: 1rem;
 }
@@ -150,6 +153,18 @@
 
 .track--muted .track__name {
   color: #888;
+}
+
+.track__status {
+  color: #666;
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
+.track__authors {
+  color: #777;
+  font-size: 0.72rem;
+  font-weight: 400;
 }
 
 .track__duration {
