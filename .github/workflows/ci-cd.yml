@@ -20,8 +20,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -34,7 +34,7 @@ jobs:
           sed -i "s#http://localhost:8056#${DIRECTUS_URL}#; s#suggestionWebhookUrl: ''#suggestionWebhookUrl: '${SUGGESTION_WEBHOOK_URL}'#" projects/nebuloud/public/config.js
           npm run build
       - name: Upload production static files
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: nebuloud-browser
@@ -45,7 +45,7 @@ jobs:
   deploy:
     name: Deploy production
     needs: verify
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     env:
       VPS_HOST: ${{ secrets.VPS_HOST }}
@@ -54,7 +54,7 @@ jobs:
       VPS_APP_PATH: ${{ secrets.VPS_APP_PATH }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Download production static files
         uses: actions/download-artifact@v4
         with:

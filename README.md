@@ -110,6 +110,11 @@ docker compose -f compose.production.yaml up -d web
 GitHub Actions один раз. На VPS передаётся готовый `dist/nebuloud/browser`, и
 там собирается только небольшой nginx-образ со статикой.
 
+Тот же workflow можно запустить вручную через `Actions → CI/CD → Run
+workflow`. Такой запуск пересобирает SSG из текущих данных Directus и
+деплоит результат без нового коммита. Это нужно после изменений контента,
+которые были сделаны непосредственно в Directus.
+
 Production-схема рассчитана на общие сети из `/home/v/Projects/vps-infra/`:
 
 ```text
