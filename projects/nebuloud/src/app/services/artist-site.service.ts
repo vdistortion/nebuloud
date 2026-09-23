@@ -14,7 +14,11 @@ export class ArtistSiteService {
 
     if (!host || host === currentHost) return `/artist/${slug}`;
 
+    return this.urlForPath(host, `/artist/${slug}`);
+  }
+
+  urlForPath(host: string, path: string): string {
     const protocol = this.document.location?.protocol ?? 'https:';
-    return `${protocol}//${host}/artist/${slug}`;
+    return `${protocol}//${host}${path}`;
   }
 }
