@@ -1,11 +1,12 @@
 {
   "name": "nebuloud",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --host 0.0.0.0",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
+    "test": "ng test",
     "format": "prettier . --write"
   },
   "private": true,
@@ -30,7 +31,7 @@
     "@angular/compiler-cli": "^22.1.0",
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
-    "prettier": "^3.8.1",
+    "prettier": "^3.9.9",
     "typescript": "~6.0.2"
   }
 }
