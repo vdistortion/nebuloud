@@ -68,13 +68,17 @@ jobs:
           VPS_USER="${VPS_USER:-root}"
           VPS_PORT="${VPS_PORT:-22}"
           VPS_APP_PATH="${VPS_APP_PATH:-/root/nebuloud}"
-          ssh -p "$VPS_PORT" ${SSH_HOST_KEY_OPTIONS:-} "$VPS_USER@$VPS_HOST" "test -f '$VPS_APP_PATH/compose.production.yaml'"
+          ssh -p "$VPS_PORT" ${SSH_HOST_KEY_OPTIONS:-} \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=20 \
+            "$VPS_USER@$VPS_HOST" "test -f '$VPS_APP_PATH/compose.production.yaml'"
           rsync -az \
             --exclude '.env' \
             --exclude '.git/' \
             --exclude 'dist/' \
             --exclude 'node_modules/' \
-            -e "ssh -p $VPS_PORT ${SSH_HOST_KEY_OPTIONS:-}" ./ "$VPS_USER@$VPS_HOST:$VPS_APP_PATH/"
+            -e "ssh -p $VPS_PORT ${SSH_HOST_KEY_OPTIONS:-} -o ServerAliveInterval=30 -o ServerAliveCountMax=20" \
+            ./ "$VPS_USER@$VPS_HOST:$VPS_APP_PATH/"
       - name: Build and restart web
         run: |
           set -euo pipefail
@@ -82,5 +86,8 @@ jobs:
           VPS_USER="${VPS_USER:-root}"
           VPS_PORT="${VPS_PORT:-22}"
           VPS_APP_PATH="${VPS_APP_PATH:-/root/nebuloud}"
-          ssh -p "$VPS_PORT" ${SSH_HOST_KEY_OPTIONS:-} "$VPS_USER@$VPS_HOST" "cd '$VPS_APP_PATH' && docker compose -f compose.production.yaml build web && docker compose -f compose.production.yaml up -d web"
+          ssh -p "$VPS_PORT" ${SSH_HOST_KEY_OPTIONS:-} \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=20 \
+            "$VPS_USER@$VPS_HOST" "cd '$VPS_APP_PATH' && docker compose -f compose.production.yaml build web && docker compose -f compose.production.yaml up -d web"
           curl --fail --silent --show-error --head "https://nebuloud.zvalentin.com/"
