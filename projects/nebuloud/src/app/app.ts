@@ -1,4 +1,5 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import {
   NavigationCancel,
   NavigationEnd,
@@ -19,6 +20,7 @@ import { artistHost } from './config';
 })
 export class App {
   private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
   private readonly artistSite = inject(ArtistSiteService);
 
@@ -36,6 +38,7 @@ export class App {
         event instanceof NavigationError
       ) {
         this.navigationLoading.set(false);
+        if (this.document.defaultView) this.document.body.classList.add('app-ready');
       }
     });
   }
