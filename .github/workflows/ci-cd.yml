@@ -1,0 +1,72 @@
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '24.x'
+  DIRECTUS_URL: https://api.nebuloud.zvalentin.com
+  SUGGESTION_WEBHOOK_URL: https://api.nebuloud.zvalentin.com/flows/trigger/f1866803-f7b3-4dd1-9d59-bec46289c5e5
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npx tsc -p projects/nebuloud/tsconfig.app.json --noEmit
+      - run: npx prettier --check README.md ARCHITECTURE.md .github/workflows/ci-cd.yml $(find projects/nebuloud/src -type f \( -name '*.ts' -o -name '*.html' -o -name '*.scss' \))
+      - run: npm run build
+
+  deploy:
+    name: Deploy production
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure SSH
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+      - name: Sync source to VPS
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT || 22 }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_APP_PATH: ${{ secrets.VPS_APP_PATH || '/root/nebuloud' }}
+        run: |
+          ssh -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" "test -f '$VPS_APP_PATH/compose.production.yaml'"
+          rsync -az \
+            --exclude '.env' \
+            --exclude '.git/' \
+            --exclude 'dist/' \
+            --exclude 'node_modules/' \
+            -e "ssh -p $VPS_PORT" ./ "$VPS_USER@$VPS_HOST:$VPS_APP_PATH/"
+      - name: Build and restart web
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT || 22 }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_APP_PATH: ${{ secrets.VPS_APP_PATH || '/root/nebuloud' }}
+        run: |
+          ssh -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" "cd '$VPS_APP_PATH' && docker compose -f compose.production.yaml build web && docker compose -f compose.production.yaml up -d web"
+          curl --fail --silent --show-error --head "https://nebuloud.zvalentin.com/"

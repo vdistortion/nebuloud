@@ -7,9 +7,8 @@ discographies, lyrics, albums, videos, galleries, Directus and PostgreSQL.
 видео и фотогалерей. В будущем проект может вырасти в движок готовых сайтов
 для музыкантов.
 
-Текущая версия — Angular SSG/frontend с Directus + PostgreSQL как основным
-источником контента. Локальный TypeScript-каталог сохраняется как временный
-fallback и архив миграции.
+Текущая версия — Angular SSG/frontend с Directus + PostgreSQL как единственным
+источником контента.
 
 ## Документация
 
@@ -62,6 +61,41 @@ npm run build
 Скрипт сохраняет PostgreSQL dump, volumes Garage и production `.env` в
 `/root/backups/nebuloud/`. Backup нужно дополнительно копировать за пределы VPS.
 
+Скачать backup на локальную машину можно через SSH:
+
+```bash
+BACKUP_STAMP=20260923-092025
+mkdir -p ~/backups/nebuloud
+
+scp -F /home/v/.ssh/config \
+  "de-ai:/root/backups/nebuloud/postgres-$BACKUP_STAMP.dump" \
+  "de-ai:/root/backups/nebuloud/garage-meta-$BACKUP_STAMP.tar.gz" \
+  "de-ai:/root/backups/nebuloud/garage-data-$BACKUP_STAMP.tar.gz" \
+  "de-ai:/root/backups/nebuloud/directus-uploads-$BACKUP_STAMP.tar.gz" \
+  ~/backups/nebuloud/
+```
+
+Файл `env-$BACKUP_STAMP` содержит production-секреты и скачивается отдельно
+только при необходимости восстановления:
+
+```bash
+scp -F /home/v/.ssh/config \
+  "de-ai:/root/backups/nebuloud/env-$BACKUP_STAMP" \
+  ~/backups/nebuloud/
+chmod 600 ~/backups/nebuloud/env-$BACKUP_STAMP
+```
+
+Перед скачиванием следующего backup список файлов можно посмотреть так:
+
+```bash
+ssh -F /home/v/.ssh/config de-ai \
+  'ls -lh /root/backups/nebuloud'
+```
+
+Для восстановления Garage нужны оба архива — `garage-meta` и `garage-data` —
+одного timestamp. `pre-dedup-*.dump` — отдельная база до операции удаления
+дубликатов, без архивов Garage.
+
 ## Production на VPS
 
 Для VPS предусмотрен отдельный compose-файл:
@@ -85,6 +119,42 @@ Directus → Garage (сеть garage)
 production-секреты должны быть заданы в `.env` на VPS. Caddy подключается через
 лейблы compose и сам выпускает HTTPS-сертификаты.
 
+Проект не подключён к `vps-infra` как submodule или package. Связь происходит
+через внешние Docker-сети: Caddy публикует контейнеры по доменам, а Directus
+подключается к Garage по сети `garage`. Общая инфраструктура находится в
+`/home/v/Projects/vps-infra/` и должна быть запущена на VPS отдельно.
+
+### GitHub Actions и секреты
+
+Workflow `.github/workflows/ci-cd.yml` проверяет TypeScript, форматирование и
+production-сборку на pull request и при push в `main`. После успешного push в
+`main` он синхронизирует исходники на VPS, пересобирает только `web` и
+перезапускает его. Контент и изображения берутся из Directus.
+
+В GitHub Actions нужны следующие secrets:
+
+- `VPS_HOST` — адрес VPS;
+- `VPS_PORT` — SSH-порт, обычно `22`;
+- `VPS_USER` — пользователь деплоя;
+- `VPS_SSH_KEY` — приватный SSH-ключ без passphrase или ключ, доступный runner;
+- `VPS_KNOWN_HOSTS` — строка из `ssh-keyscan` для этого VPS;
+- `VPS_APP_PATH` — каталог проекта на VPS, сейчас `/root/nebuloud`.
+
+Секреты PostgreSQL, Directus и Garage в GitHub Actions не нужны: они остаются
+в `.env` на VPS и передаются Docker Compose локально на сервере. Для ключа SSH
+лучше создать отдельную учётную запись с правами только на деплой, когда схема
+перестанет использовать root.
+
+### Caddy, nginx и Garage
+
+Caddy из `vps-infra` — внешний reverse proxy: он принимает HTTP/HTTPS,
+выпускает сертификаты и направляет домены в контейнеры. `nginx:alpine` внутри
+`web` нужен только для раздачи готовых Angular SSG-файлов и fallback-маршрута
+`index.html`. К Garage nginx отношения не имеет: Garage используется Directus
+как S3-хранилище для изображений и файлов. Заменить nginx можно позже, если
+отдавать собранную статику непосредственно другим HTTP-сервером, но текущая
+пара Caddy + nginx разделяет внешний proxy и внутреннюю раздачу файлов.
+
 ## Directus + PostgreSQL
 
 Локальный Directus запускается в отдельном Docker Compose-стеке вместе с PostgreSQL:
@@ -98,23 +168,16 @@ docker compose up -d
 
 Production-адрес Directus: `https://api.nebuloud.zvalentin.com`.
 
-URL Directus задаётся в `projects/nebuloud/public/config.js`. Для production при
-деплое нужно заменить значения:
+URL Directus задаётся в `projects/nebuloud/public/config.js` для локального
+запуска и заменяется Dockerfile на production URL при сборке:
 
 ```js
 globalThis.__NEBULOUD_CONFIG__ = {
   directusUrl: 'https://api.nebuloud.zvalentin.com',
-  contentMode: 'directus',
 };
 ```
 
 Пересобирать Angular для смены API-адреса не потребуется.
-
-Режимы контента:
-
-- `fallback` — Directus с переходом на локальную базу при ошибке;
-- `directus` — только Directus, production-режим;
-- `local` — только локальная база для offline/demo-режима.
 
 Создать базовые коллекции и поля Nebuloud:
 
@@ -132,38 +195,6 @@ python scripts/bootstrap-suggestion-flow.py
 
 Скрипт использует `DIRECTUS_ADMIN_*`, `TELEGRAM_BOT_TOKEN` и
 `TELEGRAM_CHAT_ID` из окружения. Telegram-токен не хранится в репозитории.
-
-Импортировать текстовый каталог из локальной `db`:
-
-```bash
-npx --yes tsx scripts/migrate-static-content.ts
-```
-
-Импорт переносит артистов, альбомы, песни, тексты, связи треков с альбомами и
-ссылки на стриминги. Локальные изображения импортируются отдельным шагом:
-
-```bash
-npx --yes tsx scripts/migrate-covers.ts
-```
-
-Сейчас скрипт переносит аватары артистов и обложки альбомов. Фотогалереи
-переносятся отдельным скриптом:
-
-```bash
-npx --yes tsx scripts/migrate-galleries.ts
-```
-
-Скрипт идемпотентный и сохраняет структуру галерей, порядок фотографий и ссылки
-на Directus Assets.
-
-Проверить полноту миграции локального каталога в Directus:
-
-```bash
-npx --yes tsx scripts/verify-content.ts
-```
-
-Скрипт сравнивает количество и slug артистов, альбомов, песен и галерей, а
-также выводит отсутствующие записи.
 
 Проверить slug по текущей политике транслитерации:
 
@@ -227,7 +258,6 @@ docker compose down
 ```text
 projects/nebuloud/src/
   app/       Angular-страницы, layout, UI и сервисы
-  db/        текущий локальный каталог артистов и контента
   styles.scss глобальные стили и design tokens
 ```
 
@@ -245,9 +275,7 @@ projects/nebuloud/src/
 /artist/:artist/images/:gallery        отдельная галерея
 ```
 
-## Локальные изображения
+## Изображения
 
-Изображения в `projects/nebuloud/public/artist/` не коммитятся в репозиторий,
-чтобы не раздувать Git-историю. Для локального запуска они должны находиться в
-этом каталоге. В production аватары, обложки и галереи хранятся в Directus
-Files через Garage.
+Аватары, обложки и галереи хранятся в Directus Files через Garage. Локальная
+копия изображений в репозитории не используется.
