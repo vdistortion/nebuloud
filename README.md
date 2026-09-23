@@ -151,16 +151,26 @@ production-сборку на pull request и при push в `main`. После �
 В GitHub Actions нужны следующие secrets:
 
 - `VPS_HOST` — адрес VPS;
-- `VPS_PORT` — SSH-порт, обычно `22`;
-- `VPS_USER` — пользователь деплоя;
+- `VPS_PORT` — SSH-порт, необязательно; если секрет пустой, workflow использует `22`;
+- `VPS_USER` — пользователь деплоя, необязательно; если секрет пустой, workflow использует `root`;
 - `VPS_SSH_KEY` — приватный SSH-ключ без passphrase или ключ, доступный runner;
-- `VPS_KNOWN_HOSTS` — строка из `ssh-keyscan` для этого VPS;
+- `VPS_KNOWN_HOSTS` — необязательно: публичный ключ SSH-хоста из `ssh-keyscan`;
+  если секрет задан, workflow строго проверяет его перед подключением, а если
+  пустой — принимает новый ключ один раз на текущем runner;
 - `VPS_APP_PATH` — каталог проекта на VPS, сейчас `/root/nebuloud`.
 
 Секреты PostgreSQL, Directus и Garage в GitHub Actions не нужны: они остаются
 в `.env` на VPS и передаются Docker Compose локально на сервере. Для ключа SSH
 лучше создать отдельную учётную запись с правами только на деплой, когда схема
 перестанет использовать root.
+
+Получить `VPS_KNOWN_HOSTS` можно локально так, подставив реальный адрес и порт:
+
+```bash
+ssh-keyscan -H -p 22 your-vps.example.com
+```
+
+Весь выведенный текст нужно сохранить в GitHub Secret `VPS_KNOWN_HOSTS`.
 
 ### Caddy, nginx и Garage
 

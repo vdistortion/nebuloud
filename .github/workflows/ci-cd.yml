@@ -35,6 +35,11 @@ jobs:
     needs: verify
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_PORT: ${{ secrets.VPS_PORT }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_APP_PATH: ${{ secrets.VPS_APP_PATH }}
 
     steps:
       - uses: actions/checkout@v4
@@ -43,30 +48,39 @@ jobs:
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
           VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
         run: |
+          set -euo pipefail
+          : "${VPS_SSH_KEY:?GitHub secret VPS_SSH_KEY is required}"
           install -d -m 700 ~/.ssh
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519
+          if [ -n "${VPS_KNOWN_HOSTS:-}" ]; then
+            printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+            chmod 600 ~/.ssh/known_hosts
+            echo 'SSH_HOST_KEY_OPTIONS=' >> "$GITHUB_ENV"
+          else
+            echo 'VPS_KNOWN_HOSTS is empty; accepting a new SSH host key for this runner.' >&2
+            echo 'SSH_HOST_KEY_OPTIONS=-o StrictHostKeyChecking=accept-new' >> "$GITHUB_ENV"
+          fi
       - name: Sync source to VPS
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_PORT: ${{ secrets.VPS_PORT || 22 }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_APP_PATH: ${{ secrets.VPS_APP_PATH || '/root/nebuloud' }}
         run: |
-          ssh -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" "test -f '$VPS_APP_PATH/compose.production.yaml'"
+          set -euo pipefail
+          : "${VPS_HOST:?GitHub secret VPS_HOST is required}"
+          VPS_USER="${VPS_USER:-root}"
+          VPS_PORT="${VPS_PORT:-22}"
+          VPS_APP_PATH="${VPS_APP_PATH:-/root/nebuloud}"
+          ssh -p "$VPS_PORT" ${SSH_HOST_KEY_OPTIONS:-} "$VPS_USER@$VPS_HOST" "test -f '$VPS_APP_PATH/compose.production.yaml'"
           rsync -az \
             --exclude '.env' \
             --exclude '.git/' \
             --exclude 'dist/' \
             --exclude 'node_modules/' \
-            -e "ssh -p $VPS_PORT" ./ "$VPS_USER@$VPS_HOST:$VPS_APP_PATH/"
+            -e "ssh -p $VPS_PORT ${SSH_HOST_KEY_OPTIONS:-}" ./ "$VPS_USER@$VPS_HOST:$VPS_APP_PATH/"
       - name: Build and restart web
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_PORT: ${{ secrets.VPS_PORT || 22 }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_APP_PATH: ${{ secrets.VPS_APP_PATH || '/root/nebuloud' }}
         run: |
-          ssh -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" "cd '$VPS_APP_PATH' && docker compose -f compose.production.yaml build web && docker compose -f compose.production.yaml up -d web"
+          set -euo pipefail
+          : "${VPS_HOST:?GitHub secret VPS_HOST is required}"
+          VPS_USER="${VPS_USER:-root}"
+          VPS_PORT="${VPS_PORT:-22}"
+          VPS_APP_PATH="${VPS_APP_PATH:-/root/nebuloud}"
+          ssh -p "$VPS_PORT" ${SSH_HOST_KEY_OPTIONS:-} "$VPS_USER@$VPS_HOST" "cd '$VPS_APP_PATH' && docker compose -f compose.production.yaml build web && docker compose -f compose.production.yaml up -d web"
           curl --fail --silent --show-error --head "https://nebuloud.zvalentin.com/"
