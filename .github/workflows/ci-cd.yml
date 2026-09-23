@@ -17,7 +17,7 @@ env:
 jobs:
   verify:
     name: Verify
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v5
@@ -35,7 +35,7 @@ jobs:
           npm run build
       - name: Upload production static files
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: nebuloud-browser
           path: dist/nebuloud/browser
@@ -46,7 +46,7 @@ jobs:
     name: Deploy production
     needs: verify
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_PORT: ${{ secrets.VPS_PORT }}
@@ -56,7 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Download production static files
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: nebuloud-browser
           path: dist/nebuloud/browser
