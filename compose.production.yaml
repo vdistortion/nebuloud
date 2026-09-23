@@ -34,7 +34,7 @@ services:
       ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
       PUBLIC_URL: https://api.nebuloud.zvalentin.com
       CORS_ENABLED: 'true'
-      CORS_ORIGIN: https://nebuloud.zvalentin.com
+      CORS_ORIGIN: https://nebuloud.zvalentin.com,https://master.nebuloud.zvalentin.com,https://shmeli.nebuloud.zvalentin.com
       STORAGE_LOCATIONS: garage,local
       STORAGE_GARAGE_DRIVER: s3
       STORAGE_GARAGE_KEY: ${GARAGE_ACCESS_KEY_ID}
@@ -66,7 +66,7 @@ services:
     networks:
       - caddy
     labels:
-      caddy: nebuloud.zvalentin.com
+      caddy: nebuloud.zvalentin.com master.nebuloud.zvalentin.com shmeli.nebuloud.zvalentin.com
       caddy.reverse_proxy: '{{upstreams 80}}'
 
 volumes:

@@ -9,6 +9,7 @@ import {
 } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Header } from './components/header/header';
+import { ArtistSiteService } from './services/artist-site.service';
 
 @Component({
   selector: 'app-root',
@@ -18,10 +19,16 @@ import { Header } from './components/header/header';
 export class App {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly artistSite = inject(ArtistSiteService);
 
   readonly navigationLoading = signal(false);
 
   constructor() {
+    const artistSlug = this.artistSite.currentArtistSlug;
+    if (artistSlug && typeof window !== 'undefined' && this.router.url === '/') {
+      void this.router.navigateByUrl(`/artist/${artistSlug}`, { replaceUrl: true });
+    }
+
     this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       if (event instanceof NavigationStart) this.navigationLoading.set(true);
       if (

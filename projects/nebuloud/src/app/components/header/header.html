@@ -1,7 +1,11 @@
 @if (artistId()) {
   <header class="header">
     <h2>
-      <a routerLink="" (click)="onClick(`click_header_home_from_${artistId()}`)">&#9776;</a>
+      <a
+        [routerLink]="'/artist/' + artistId()"
+        (click)="onClick(`click_header_home_from_${artistId()}`)"
+        >&#9776;</a
+      >
       <a
         [routerLink]="'/artist/' + artistId()"
         (click)="onClick(`click_header_artist_from_${artistId()}`)"

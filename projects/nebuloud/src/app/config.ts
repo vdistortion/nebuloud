@@ -5,8 +5,20 @@ declare global {
     | {
         directusUrl?: string;
         suggestionWebhookUrl?: string;
+        artistHosts?: Record<string, string>;
       }
     | undefined;
+}
+
+export function artistHost(slug: string): string | undefined {
+  const hosts = globalThis.__NEBULOUD_CONFIG__?.artistHosts ?? {};
+  return Object.entries(hosts).find(([, artistSlug]) => artistSlug === slug)?.[0];
+}
+
+export function artistSlugForCurrentHost(): string | undefined {
+  const hostname = globalThis.location?.hostname;
+  if (!hostname) return undefined;
+  return globalThis.__NEBULOUD_CONFIG__?.artistHosts?.[hostname];
 }
 
 function getDirectusUrl(): string {

@@ -110,10 +110,23 @@ Production-схема рассчитана на общие сети из `/home/
 
 ```text
 nebuloud.zvalentin.com        → web/nginx → Angular SSG
+master.nebuloud.zvalentin.com → web/nginx → профиль Мастера
+shmeli.nebuloud.zvalentin.com → web/nginx → профиль Шмелей
 api.nebuloud.zvalentin.com    → directus:8055
 Directus → PostgreSQL
 Directus → Garage (сеть garage)
 ```
+
+Поддомены `master` и `shmeli` включены в runtime-конфигурации приложения.
+Главный домен остаётся каталогом всех артистов. С карточки Мастера или Шмелей
+с него выполняется переход на соответствующий поддомен; неизвестные hostnames
+и остальные артисты продолжают использовать URL `/artist/<slug>`. На самом
+поддомене текущие страницы также доступны по `/artist/<slug>/...`, а его корень
+автоматически перенаправляется на профиль артиста.
+
+Для запуска поддоменов нужны DNS-записи `A` или `CNAME` для `master` и
+`shmeli`, указывающие на тот же VPS. Caddy получает эти имена через
+`compose.production.yaml` и выпускает для них отдельные TLS-сертификаты.
 
 Перед запуском должны существовать внешние Docker-сети `caddy` и `garage`, а
 production-секреты должны быть заданы в `.env` на VPS. Caddy подключается через

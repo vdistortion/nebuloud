@@ -49,7 +49,7 @@
         @for (artist of filteredArtists(); track artist.id) {
           <a
             class="artist-card"
-            [routerLink]="'/artist/' + artist.id"
+            [href]="artistUrl(artist.id)"
             (click)="onClick(`click_artist_${artist.id}`)"
           >
             <div class="artist-card__image-wrap">

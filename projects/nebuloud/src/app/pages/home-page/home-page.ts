@@ -7,6 +7,7 @@ import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { SeoService } from '../../services/seo.service';
 import { AssetUrlService } from '../../services/asset-url.service';
+import { ArtistSiteService } from '../../services/artist-site.service';
 import type { ArtistSummary } from '../../models/content.models';
 
 @Component({
@@ -21,6 +22,7 @@ export class HomePage {
   private readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
   private readonly assetUrl = inject(AssetUrlService);
+  private readonly artistSite = inject(ArtistSiteService);
 
   readonly artists = toSignal(
     this.route.data.pipe(map((data) => data['artistSummaries'] as ArtistSummary[])),
@@ -48,6 +50,10 @@ export class HomePage {
 
   imageUrl(value: string): string {
     return this.assetUrl.resolve(value);
+  }
+
+  artistUrl(slug: string): string {
+    return this.artistSite.urlForArtist(slug);
   }
 
   onSearch(event: Event) {
