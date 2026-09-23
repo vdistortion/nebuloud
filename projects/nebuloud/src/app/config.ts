@@ -10,15 +10,20 @@ declare global {
     | undefined;
 }
 
+const DEFAULT_ARTIST_HOSTS: Record<string, string> = {
+  'master.nebuloud.zvalentin.com': 'master',
+  'shmeli.nebuloud.zvalentin.com': 'shmeli',
+};
+
 export function artistHost(slug: string): string | undefined {
-  const hosts = globalThis.__NEBULOUD_CONFIG__?.artistHosts ?? {};
+  const hosts = { ...DEFAULT_ARTIST_HOSTS, ...globalThis.__NEBULOUD_CONFIG__?.artistHosts };
   return Object.entries(hosts).find(([, artistSlug]) => artistSlug === slug)?.[0];
 }
 
 export function artistSlugForCurrentHost(): string | undefined {
   const hostname = globalThis.location?.hostname;
   if (!hostname) return undefined;
-  return globalThis.__NEBULOUD_CONFIG__?.artistHosts?.[hostname];
+  return globalThis.__NEBULOUD_CONFIG__?.artistHosts?.[hostname] ?? DEFAULT_ARTIST_HOSTS[hostname];
 }
 
 function getDirectusUrl(): string {
