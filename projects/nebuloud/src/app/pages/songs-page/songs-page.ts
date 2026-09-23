@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
+import { artistSlugForCurrentHost } from '../../config';
 import type { ArtistProfile } from '../../models/content.models';
 import type { CatalogSong } from '../../models/content.models';
 
@@ -17,12 +18,13 @@ import type { CatalogSong } from '../../models/content.models';
 export class SongsPage {
   private readonly route = inject(ActivatedRoute);
   private readonly titleService = inject(Title);
-  private readonly artistService = inject(ArtistService);
+  readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
 
-  readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
-    initialValue: null,
-  });
+  readonly artistId = toSignal(
+    this.route.paramMap.pipe(map((params) => params.get('artist') ?? artistSlugForCurrentHost())),
+    { initialValue: artistSlugForCurrentHost() },
+  );
   readonly resolvedArtistProfile = toSignal(
     this.route.data.pipe(map((data) => data['artistProfile'] as ArtistProfile | undefined)),
     { initialValue: undefined },
@@ -69,9 +71,8 @@ export class SongsPage {
     const artistId = this.artistId();
     if (!artistId) return;
 
-    const url = query
-      ? `/artist/${artistId}/songs?q=${encodeURIComponent(query)}`
-      : `/artist/${artistId}/songs`;
+    const path = query ? `/songs?q=${encodeURIComponent(query)}` : '/songs';
+    const url = this.artistService.route(path, artistId);
     window.history.replaceState({}, '', url);
   }
 

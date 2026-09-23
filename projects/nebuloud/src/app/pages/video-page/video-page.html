@@ -1,6 +1,6 @@
 @if (artistName() && artistId()) {
   <main class="video-page">
-    <a class="video-page__back" [routerLink]="'/artist/' + artistId()">← {{ artistName() }}</a>
+    <a class="video-page__back" [routerLink]="artistService.route()">← {{ artistName() }}</a>
     <header class="video-page__header">
       <div>
         <p class="eyebrow">Видеоархив</p>
@@ -20,7 +20,7 @@
               <p class="video-card__type">Клип</p>
               <a
                 class="video-card__title"
-                [routerLink]="'/artist/' + artistId() + '/song/' + song.id"
+                [routerLink]="artistService.route('/song/' + song.id)"
                 (click)="onClick(`click_video_song_${song.id}_artist_${artistId()}`)"
               >
                 {{ song.title }}

@@ -1,6 +1,6 @@
 @if (artistId() && gallery()) {
   <main class="gallery-page">
-    <a class="gallery-page__back" [routerLink]="'/artist/' + artistId() + '/images'">
+    <a class="gallery-page__back" [routerLink]="artistService.route('/images')">
       ← Все фотографии {{ artistName() }}
     </a>
     <header class="gallery-page__header">

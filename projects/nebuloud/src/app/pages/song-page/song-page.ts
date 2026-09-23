@@ -8,6 +8,7 @@ import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { SeoService } from '../../services/seo.service';
 import { SUGGESTION_WEBHOOK_URL } from '../../config';
+import { artistSlugForCurrentHost } from '../../config';
 import type { ArtistProfile } from '../../models/content.models';
 import type { CatalogAlbum, CatalogSong } from '../../models/content.models';
 
@@ -20,13 +21,14 @@ import type { CatalogAlbum, CatalogSong } from '../../models/content.models';
 export class SongPage {
   private readonly route = inject(ActivatedRoute);
   private readonly seo = inject(SeoService);
-  private readonly artistService = inject(ArtistService);
+  readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
   readonly suggestionWebhookUrl = inject(SUGGESTION_WEBHOOK_URL);
 
-  readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
-    initialValue: null,
-  });
+  readonly artistId = toSignal(
+    this.route.paramMap.pipe(map((params) => params.get('artist') ?? artistSlugForCurrentHost())),
+    { initialValue: artistSlugForCurrentHost() },
+  );
   readonly songId = toSignal(this.route.paramMap.pipe(map((params) => params.get('song'))), {
     initialValue: null,
   });

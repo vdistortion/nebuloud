@@ -25,7 +25,7 @@ function deepestRoute(route: ActivatedRoute): ActivatedRoute {
   styleUrl: './header.scss',
 })
 export class Header {
-  private readonly artistService = inject(ArtistService);
+  readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);

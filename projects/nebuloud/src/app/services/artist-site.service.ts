@@ -8,6 +8,11 @@ export class ArtistSiteService {
 
   readonly currentArtistSlug = artistSlugForCurrentHost();
 
+  pathForArtist(slug: string, suffix = ''): string {
+    if (this.currentArtistSlug === slug) return suffix || '/';
+    return `/artist/${slug}${suffix}`;
+  }
+
   urlForArtist(slug: string): string {
     const host = artistHost(slug);
     const currentHost = this.document.location?.hostname;

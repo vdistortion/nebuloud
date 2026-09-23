@@ -1,6 +1,6 @@
 @if (song(); as currentSong) {
   <main class="song-page">
-    <a class="song-page__back" [routerLink]="'/artist/' + artistId() + '/songs'">
+    <a class="song-page__back" [routerLink]="artistService.route('/songs')">
       ← Все тексты {{ artistName() }}
     </a>
 
@@ -113,7 +113,7 @@
               @for (album of albums(); track album.id) {
                 <a
                   class="song-meta__album"
-                  [routerLink]="'/artist/' + artistId() + '/album/' + album.id"
+                  [routerLink]="artistService.route('/album/' + album.id)"
                 >
                   <span>{{ album.name }}</span>
                   <small>{{ album.year }}</small>
@@ -123,7 +123,7 @@
           } @else {
             <a
               class="song-meta__album"
-              [routerLink]="'/artist/' + artistId() + '/songs'"
+              [routerLink]="artistService.route('/songs')"
               [queryParams]="{ other: true }"
             >
               <span>Песни вне альбомов</span>

@@ -25,16 +25,14 @@
     </section>
 
     <nav class="artist-tabs" aria-label="Разделы артиста">
-      <a class="artist-tabs__link artist-tabs__link--active" [routerLink]="'/artist/' + artistId()">
+      <a class="artist-tabs__link artist-tabs__link--active" [routerLink]="artistService.route()">
         Дискография
       </a>
-      <a class="artist-tabs__link" [routerLink]="'/artist/' + artistId() + '/songs'"
-        >Тексты песен</a
-      >
+      <a class="artist-tabs__link" [routerLink]="artistService.route('/songs')">Тексты песен</a>
       @if (artistProfile()!.hasImages) {
-        <a class="artist-tabs__link" [routerLink]="'/artist/' + artistId() + '/images'">Фото</a>
+        <a class="artist-tabs__link" [routerLink]="artistService.route('/images')">Фото</a>
       }
-      <a class="artist-tabs__link" [routerLink]="'/artist/' + artistId() + '/video'">Видео</a>
+      <a class="artist-tabs__link" [routerLink]="artistService.route('/video')">Видео</a>
     </nav>
 
     <section class="artist-section" aria-labelledby="albums-title">
@@ -49,7 +47,7 @@
       <div class="albums-grid">
         @for (album of albums(); track album.id) {
           <app-album-card
-            [link]="'/artist/' + artistId() + '/album/' + album.id"
+            [link]="artistService.route('/album/' + album.id)"
             [name]="album.name"
             [year]="album.year"
             [image]="album.cover"

@@ -1,6 +1,6 @@
 @if (artistName() && artistId()) {
   <main class="songs-page">
-    <a class="songs-page__back" [routerLink]="'/artist/' + artistId()">← {{ artistName() }}</a>
+    <a class="songs-page__back" [routerLink]="artistService.route()">← {{ artistName() }}</a>
 
     <header class="songs-page__header">
       <div>
@@ -40,7 +40,7 @@
         @for (song of filteredSongs(); track song.id; let i = $index) {
           <a
             class="song-row"
-            [routerLink]="'/artist/' + artistId() + '/song/' + song.id"
+            [routerLink]="artistService.route('/song/' + song.id)"
             (click)="onClick(`click_song_${song.id}_page_songs_artist_${artistId()}`)"
           >
             <span class="song-row__number">{{ formatSongNumber(i) }}</span>

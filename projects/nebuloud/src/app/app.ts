@@ -25,11 +25,6 @@ export class App {
   readonly navigationLoading = signal(false);
 
   constructor() {
-    const artistSlug = this.artistSite.currentArtistSlug;
-    if (artistSlug && typeof window !== 'undefined' && this.router.url === '/') {
-      void this.router.navigateByUrl(`/artist/${artistSlug}`, { replaceUrl: true });
-    }
-
     this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       if (event instanceof NavigationStart) {
         this.redirectConfiguredArtistRoute(event.url);
@@ -46,14 +41,20 @@ export class App {
   }
 
   private redirectConfiguredArtistRoute(url: string) {
-    if (typeof window === 'undefined' || this.artistSite.currentArtistSlug) return;
-
     const artistSlug = url.match(/^\/artist\/([^/?#]+)/)?.[1];
-    if (!artistSlug) return;
+    if (typeof window === 'undefined' || !artistSlug) return;
+
+    const suffix = url.replace(`/artist/${artistSlug}`, '') || '/';
+    if (this.artistSite.currentArtistSlug === artistSlug) {
+      void this.router.navigateByUrl(suffix, { replaceUrl: true });
+      return;
+    }
+
+    if (this.artistSite.currentArtistSlug) return;
 
     const host = artistHost(decodeURIComponent(artistSlug));
     if (!host || host === window.location.hostname) return;
 
-    window.location.replace(this.artistSite.urlForPath(host, url));
+    window.location.replace(this.artistSite.urlForPath(host, suffix));
   }
 }

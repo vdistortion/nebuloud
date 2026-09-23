@@ -33,6 +33,12 @@ const artistSlugs = async () => {
 };
 
 export const serverRoutes: ServerRoute[] = [
+  { path: 'album/:album', renderMode: RenderMode.Client },
+  { path: 'songs', renderMode: RenderMode.Client },
+  { path: 'song/:song', renderMode: RenderMode.Client },
+  { path: 'video', renderMode: RenderMode.Client },
+  { path: 'images', renderMode: RenderMode.Client },
+  { path: 'images/:gallery', renderMode: RenderMode.Client },
   {
     path: 'artist/:artist',
     renderMode: RenderMode.Prerender,

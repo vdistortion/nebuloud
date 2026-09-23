@@ -9,6 +9,7 @@ import { ArtistService } from '../../services/artist.service';
 import { Analytics } from '../../services/analytics.service';
 import { SeoService } from '../../services/seo.service';
 import { AssetUrlService } from '../../services/asset-url.service';
+import { artistSlugForCurrentHost } from '../../config';
 import type { ArtistProfile } from '../../models/content.models';
 
 @Component({
@@ -20,13 +21,14 @@ import type { ArtistProfile } from '../../models/content.models';
 export class ArtistPage {
   private readonly route = inject(ActivatedRoute);
   private readonly seo = inject(SeoService);
-  private readonly artistService = inject(ArtistService);
+  readonly artistService = inject(ArtistService);
   private readonly analytics = inject(Analytics);
   private readonly assetUrl = inject(AssetUrlService);
 
-  readonly artistId = toSignal(this.route.paramMap.pipe(map((params) => params.get('artist'))), {
-    initialValue: null,
-  });
+  readonly artistId = toSignal(
+    this.route.paramMap.pipe(map((params) => params.get('artist') ?? artistSlugForCurrentHost())),
+    { initialValue: artistSlugForCurrentHost() },
+  );
   readonly resolvedArtistProfile = toSignal(
     this.route.data.pipe(map((data) => data['artistProfile'] as ArtistProfile | undefined)),
     { initialValue: undefined },

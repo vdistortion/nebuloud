@@ -1,6 +1,6 @@
 @if (album(); as currentAlbum) {
   <main class="album-page">
-    <a class="album-page__back" [routerLink]="'/artist/' + artistId()">← {{ artistName() }}</a>
+    <a class="album-page__back" [routerLink]="artistService.route()">← {{ artistName() }}</a>
 
     <section class="album-hero">
       <div class="album-hero__cover">
@@ -34,7 +34,7 @@
           @if (song.id && song.isText) {
             <a
               class="track track--link"
-              [routerLink]="'/artist/' + artistId() + '/song/' + song.id"
+              [routerLink]="artistService.route('/song/' + song.id)"
               (click)="
                 onClick(`click_song_${song.id}_album_${currentAlbum.id}_artist_${artistId()}`)
               "

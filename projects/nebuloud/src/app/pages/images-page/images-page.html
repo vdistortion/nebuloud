@@ -1,6 +1,6 @@
 @if (artistId() && artistName()) {
   <main class="images-page">
-    <a class="images-page__back" [routerLink]="'/artist/' + artistId()">← {{ artistName() }}</a>
+    <a class="images-page__back" [routerLink]="artistService.route()">← {{ artistName() }}</a>
     <header class="images-page__header">
       <div>
         <p class="eyebrow">Фотоархив</p>
@@ -13,7 +13,7 @@
       <div class="galleries-grid">
         @for (item of images(); track item.id) {
           <app-gallery-card
-            [link]="'/artist/' + artistId() + '/images/' + item.id"
+            [link]="artistService.route('/images/' + item.id)"
             [name]="item.title"
             [image]="imageUrl(item.id)"
             (click)="onClick(`click_gallery_${item.path.join('/')}_artist_${artistId()}`)"

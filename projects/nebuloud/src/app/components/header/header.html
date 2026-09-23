@@ -2,12 +2,12 @@
   <header class="header">
     <h2>
       <a
-        [routerLink]="'/artist/' + artistId()"
+        [routerLink]="artistService.route()"
         (click)="onClick(`click_header_home_from_${artistId()}`)"
         >&#9776;</a
       >
       <a
-        [routerLink]="'/artist/' + artistId()"
+        [routerLink]="artistService.route()"
         (click)="onClick(`click_header_artist_from_${artistId()}`)"
       >
         {{ artistName() }}
@@ -16,7 +16,7 @@
     <ul class="header__menu">
       <li [routerLinkActive]="'active'" [routerLinkActiveOptions]="{ exact: true }">
         <a
-          [routerLink]="'/artist/' + artistId()"
+          [routerLink]="artistService.route()"
           (click)="onClick(`click_header_albums_from_${artistId()}`)"
         >
           Дискография
@@ -25,7 +25,7 @@
       @if (isImages()) {
         <li [routerLinkActive]="'active'">
           <a
-            [routerLink]="'/artist/' + artistId() + '/images'"
+            [routerLink]="artistService.route('/images')"
             (click)="onClick(`click_header_images_from_${artistId()}`)"
           >
             Фото
@@ -34,7 +34,7 @@
       }
       <li [routerLinkActive]="'active'">
         <a
-          [routerLink]="'/artist/' + artistId() + '/songs'"
+          [routerLink]="artistService.route('/songs')"
           (click)="onClick(`click_header_songs_from_${artistId()}`)"
         >
           Тексты песен
@@ -42,7 +42,7 @@
       </li>
       <li [routerLinkActive]="'active'">
         <a
-          [routerLink]="'/artist/' + artistId() + '/video'"
+          [routerLink]="artistService.route('/video')"
           (click)="onClick(`click_header_video_from_${artistId()}`)"
         >
           Клипы
