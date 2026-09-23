@@ -60,8 +60,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        DIRECTUS_URL: https://api.nebuloud.zvalentin.com
     restart: unless-stopped
     networks:
       - caddy

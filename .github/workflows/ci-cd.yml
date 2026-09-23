@@ -28,7 +28,19 @@ jobs:
       - run: npm ci
       - run: npx tsc -p projects/nebuloud/tsconfig.app.json --noEmit
       - run: npx prettier --check README.md ARCHITECTURE.md .github/workflows/ci-cd.yml $(find projects/nebuloud/src -type f \( -name '*.ts' -o -name '*.html' -o -name '*.scss' \))
-      - run: npm run build
+      - name: Build production static files
+        run: |
+          set -euo pipefail
+          sed -i "s#http://localhost:8056#${DIRECTUS_URL}#; s#suggestionWebhookUrl: ''#suggestionWebhookUrl: '${SUGGESTION_WEBHOOK_URL}'#" projects/nebuloud/public/config.js
+          npm run build
+      - name: Upload production static files
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nebuloud-browser
+          path: dist/nebuloud/browser
+          if-no-files-found: error
+          retention-days: 1
 
   deploy:
     name: Deploy production
@@ -43,6 +55,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Download production static files
+        uses: actions/download-artifact@v4
+        with:
+          name: nebuloud-browser
+          path: dist/nebuloud/browser
       - name: Configure SSH
         env:
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
@@ -75,7 +92,6 @@ jobs:
           rsync -az \
             --exclude '.env' \
             --exclude '.git/' \
-            --exclude 'dist/' \
             --exclude 'node_modules/' \
             -e "ssh -p $VPS_PORT ${SSH_HOST_KEY_OPTIONS:-} -o ServerAliveInterval=30 -o ServerAliveCountMax=20" \
             ./ "$VPS_USER@$VPS_HOST:$VPS_APP_PATH/"

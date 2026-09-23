@@ -106,6 +106,10 @@ docker compose -f compose.production.yaml build web
 docker compose -f compose.production.yaml up -d web
 ```
 
+В автоматическом deploy workflow Angular production build выполняется в
+GitHub Actions один раз. На VPS передаётся готовый `dist/nebuloud/browser`, и
+там собирается только небольшой nginx-образ со статикой.
+
 Production-схема рассчитана на общие сети из `/home/v/Projects/vps-infra/`:
 
 ```text
