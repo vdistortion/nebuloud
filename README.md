@@ -38,13 +38,22 @@ npm start
 
 Открыть `http://localhost:4200/`.
 
-Production-сборка:
+Запустить сайт артиста локально:
 
 ```bash
-npm run build
+npm run start:artist -- --slug master --port 4201
 ```
 
-Статические файлы появятся в `dist/nebuloud/`.
+Каталог останется на `http://localhost:4200/`, сайт артиста откроется на
+`http://localhost:4201/`.
+
+Production SSG-сборка каталога и всех артистов с доменом:
+
+```bash
+DIRECTUS_URL=https://api.nebuloud.zvalentin.com MAIN_DOMAIN=nebuloud.zvalentin.com npm run build
+```
+
+Статические файлы появятся в `dist/sites/`: сборка каталога и отдельная SSG-сборка для каждого артиста с доменом.
 
 Проверить доступность production-сайта и Directus:
 
@@ -98,17 +107,27 @@ ssh -F /home/v/.ssh/config de-ai \
 
 ## Production на VPS
 
-Для VPS предусмотрен отдельный compose-файл:
+Для VPS предусмотрен отдельный compose-файл. Сначала создай поле `site_domain`
+в Directus через `scripts/bootstrap-directus.py` и заполни его у артистов. Для
+текущих сайтов Мастера и Шмелей укажи `master.nebuloud.zvalentin.com` и
+`shmeli.nebuloud.zvalentin.com`. В поле вводится hostname без схемы и пути.
+
+После сборки compose получает сгенерированные из Directus домены для Caddy и CORS:
 
 ```bash
+DIRECTUS_URL=https://api.nebuloud.zvalentin.com MAIN_DOMAIN=nebuloud.zvalentin.com SUGGESTION_WEBHOOK_URL=https://api.nebuloud.zvalentin.com/flows/trigger/f1866803-f7b3-4dd1-9d59-bec46289c5e5 npm run build
+set -a
+. dist/sites/deploy/deploy.env
+set +a
 docker compose -f compose.production.yaml up -d db directus
 docker compose -f compose.production.yaml build web
 docker compose -f compose.production.yaml up -d web
 ```
 
-В автоматическом deploy workflow Angular production build выполняется в
-GitHub Actions один раз. На VPS передаётся готовый `dist/nebuloud/browser`, и
-там собирается только небольшой nginx-образ со статикой.
+В deploy workflow каталог собирается один раз, затем artist-приложение
+SSG-собирается отдельно для каждого артиста с заполненным `site_domain`.
+На VPS передаются готовые статические файлы и созданная из тех же данных
+конфигурация nginx/Caddy. Там собирается только небольшой nginx-образ.
 
 Тот же workflow можно запустить вручную через `Actions → CI/CD → Run
 workflow`. Такой запуск пересобирает SSG из текущих данных Directus и
@@ -119,27 +138,28 @@ Production-схема рассчитана на общие сети из `/home/
 
 ```text
 nebuloud.zvalentin.com        → web/nginx → Angular SSG
-master.nebuloud.zvalentin.com → web/nginx → профиль Мастера
-shmeli.nebuloud.zvalentin.com → web/nginx → профиль Шмелей
+<site_domain из Directus>   → Caddy → web/nginx → SSG-сайт артиста
 api.nebuloud.zvalentin.com    → directus:8055
 Directus → PostgreSQL
 Directus → Garage (сеть garage)
 ```
 
-Поддомены `master` и `shmeli` включены в runtime-конфигурации приложения.
-Главный домен остаётся каталогом всех артистов, но для настроенных артистов
-поддомен является основным адресом. С карточки Мастера или Шмелей с него
-выполняется переход на соответствующий поддомен; старые URL вида
-`/artist/master/...` и `/artist/shmeli/...` на главном домене также
-перенаправляются туда. Если для артиста поддомен не настроен, его URL
-`/artist/<slug>` продолжает работать как раньше. На самом поддомене профиль
-открывается по `/`, а остальные страницы используют чистые пути `/album/...`,
-`/songs`, `/song/...`, `/images` и `/video`. Старые пути
-`/artist/<slug>/...` перенаправляются на соответствующие чистые URL.
+Полный домен артиста задаётся в поле `site_domain` коллекции `artists` в
+Directus, без `https://` и пути. Это единственный источник соответствия артистов
+доменам. Если поле пустое, профиль и все его страницы остаются на главном сайте
+по адресу `/artist/<slug>`. Если домен задан, карточка каталога ведёт сразу на
+`https://<site_domain>/`, а сайт артиста отдаёт SSG-страницы по чистым путям
+`/`, `/album/...`, `/songs`, `/song/...`, `/images` и `/video`.
 
-Для запуска поддоменов нужны DNS-записи `A` или `CNAME` для `master` и
-`shmeli`, указывающие на тот же VPS. Caddy получает эти имена через
-`compose.production.yaml` и выпускает для них отдельные TLS-сертификаты.
+Сборка проверяет домены на корректный формат и дубликаты. Из Directus также
+генерируются маршруты nginx для выбора SSG-файлов, Caddy host list и CORS
+allowlist Directus. Старые URL `/artist/<slug>/...` на главном домене
+перенаправляются на соответствующий домен артиста.
+
+Для каждого домена нужна DNS-запись `A` или `CNAME`, указывающая на VPS. Caddy
+получает список доменов из сгенерированного deploy-файла и выпускает TLS-
+сертификаты. После изменения `site_domain` нужно заново собрать и развернуть
+сайты; для этого подходит `Actions → CI/CD → Run workflow`.
 
 Перед запуском должны существовать внешние Docker-сети `caddy` и `garage`, а
 production-секреты должны быть заданы в `.env` на VPS. Caddy подключается через
@@ -204,8 +224,10 @@ docker compose up -d
 
 Production-адрес Directus: `https://api.nebuloud.zvalentin.com`.
 
-URL Directus задаётся в `projects/nebuloud/public/config.js` для локального
-запуска и заменяется Dockerfile на production URL при сборке:
+URL Directus для локального запуска задаётся в
+`projects/shared/public/config.js`. Production runtime-конфигурация создаётся
+скриптом сборки из переменных окружения. Домены в этот файл не попадают: они
+читаются из `artists.site_domain` в Directus.
 
 ```js
 globalThis.__NEBULOUD_CONFIG__ = {
@@ -292,9 +314,10 @@ docker compose down
 ## Структура
 
 ```text
-projects/nebuloud/src/
-  app/       Angular-страницы, layout, UI и сервисы
-  styles.scss глобальные стили и design tokens
+projects/
+  catalog/   Angular-приложение каталога
+  artist/    Angular-приложение отдельного сайта артиста
+  shared/    общие Angular-страницы, UI, модели и сервисы
 ```
 
 Основные маршруты:
@@ -309,6 +332,18 @@ projects/nebuloud/src/
 /artist/:artist/video                  видео
 /artist/:artist/images                 фотогалереи
 /artist/:artist/images/:gallery        отдельная галерея
+```
+
+На домене артиста приложение использует чистые пути:
+
+```text
+/                                      профиль артиста
+/album/:album                         альбом
+/song/:song                           песня и текст
+/songs                                тексты песен
+/video                                видео
+/images                               фотогалереи
+/images/:gallery                      отдельная галерея
 ```
 
 ## Изображения

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Create the minimal Nebuloud content model in a local Directus instance.
+"""Create the minimal Nebuloud content model in a Directus instance.
 
 The script is intentionally idempotent: existing collections and fields are kept.
-It creates the content shape first; relations and permissions are a later step.
+It also ensures that the public artist read permission includes site_domain.
 """
 
 from __future__ import annotations
@@ -50,6 +50,12 @@ COLLECTIONS = {
             ("image", "uuid", {"interface": "file"}, {}),
             ("country", "json", {"interface": "input-code", "options": {"language": "json"}}, {}),
             ("description", "text", {"interface": "input-rich-text-md"}, {}),
+            (
+                "site_domain",
+                "string",
+                {"interface": "input", "note": "Полный домен сайта артиста без протокола"},
+                {},
+            ),
         ],
     },
     "albums": {
@@ -221,14 +227,29 @@ def main() -> int:
     )
     public_policy_id = public_policy["id"]
     _, permissions_response = request("GET", "/permissions?limit=-1", token)
-    public_reads = {
-        permission["collection"]
+    public_read_permissions = {
+        permission["collection"]: permission
         for permission in permissions_response["data"]
         if permission.get("policy") == public_policy_id and permission.get("action") == "read"
     }
     for collection in PUBLIC_COLLECTIONS:
-        if collection in public_reads:
+        permission = public_read_permissions.get(collection)
+        if permission:
             print(f"exists public read: {collection}")
+            if collection == "artists":
+                allowed_fields = permission.get("fields")
+                if (
+                    isinstance(allowed_fields, list)
+                    and "*" not in allowed_fields
+                    and "site_domain" not in allowed_fields
+                ):
+                    request(
+                        "PATCH",
+                        f"/permissions/{permission['id']}",
+                        token,
+                        {"fields": [*allowed_fields, "site_domain"]},
+                    )
+                    print("  added public read field: artists.site_domain")
             continue
         request(
             "POST",

@@ -1,0 +1,70 @@
+<header class="catalog-header">
+  <div class="catalog-header__inner">
+    <a class="catalog-logo" routerLink="/" aria-label="Nebuloud — главная">
+      <span class="catalog-logo__mark">N</span>
+      <span>
+        <strong>NEBULOUD</strong>
+        <small>музыкальный каталог</small>
+      </span>
+    </a>
+
+    <label class="catalog-search">
+      <span class="visually-hidden">Поиск артиста</span>
+      <span class="catalog-search__icon" aria-hidden="true">⌕</span>
+      <input
+        type="search"
+        placeholder="Найти артиста..."
+        [value]="searchQuery()"
+        (input)="onSearch($event)"
+      />
+    </label>
+
+    <nav class="catalog-nav" aria-label="Основная навигация">
+      <a href="#artists">Артисты</a>
+      <a href="#about">О каталоге</a>
+    </nav>
+  </div>
+</header>
+
+<main class="catalog-page">
+  <section class="catalog-intro" id="about">
+    <p class="eyebrow">Independent music archive</p>
+    <h1>Музыка, которую<br /><em>не хочется терять.</em></h1>
+    <p class="catalog-intro__description">
+      Архив артистов, альбомов, песен и текстов. Без лишнего шума — только музыка и её история.
+    </p>
+  </section>
+
+  <section class="artist-catalog" id="artists" aria-labelledby="artists-title">
+    <div class="artist-catalog__heading">
+      <div>
+        <p class="eyebrow">Каталог</p>
+        <h2 id="artists-title">Артисты</h2>
+      </div>
+      <span>{{ filteredArtists().length }} / {{ artists().length }}</span>
+    </div>
+
+    @if (filteredArtists().length) {
+      <div class="artists-grid">
+        @for (artist of filteredArtists(); track artist.id) {
+          <a
+            class="artist-card"
+            [href]="artistUrl(artist.id, artist.siteDomain)"
+            (click)="onClick(`click_artist_${artist.id}`)"
+          >
+            <div class="artist-card__image-wrap">
+              <img class="artist-card__image" [src]="imageUrl(artist.image)" [alt]="artist.name" />
+              <span class="artist-card__arrow" aria-hidden="true">↗</span>
+            </div>
+            <div class="artist-card__body">
+              <h3>{{ artist.name }}</h3>
+              <p>{{ artist.country.join(' · ') }}</p>
+            </div>
+          </a>
+        }
+      </div>
+    } @else {
+      <p class="catalog-empty">Ничего не найдено. Попробуй другой запрос.</p>
+    }
+  </section>
+</main>

@@ -13,6 +13,7 @@ env:
   NODE_VERSION: '24.x'
   DIRECTUS_URL: https://api.nebuloud.zvalentin.com
   SUGGESTION_WEBHOOK_URL: https://api.nebuloud.zvalentin.com/flows/trigger/f1866803-f7b3-4dd1-9d59-bec46289c5e5
+  MAIN_DOMAIN: nebuloud.zvalentin.com
 
 jobs:
   verify:
@@ -26,19 +27,21 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
-      - run: npx tsc -p projects/nebuloud/tsconfig.app.json --noEmit
-      - run: npx prettier --check README.md ARCHITECTURE.md .github/workflows/ci-cd.yml $(find projects/nebuloud/src -type f \( -name '*.ts' -o -name '*.html' -o -name '*.scss' \))
-      - name: Build production static files
-        run: |
-          set -euo pipefail
-          sed -i "s#http://localhost:8056#${DIRECTUS_URL}#; s#suggestionWebhookUrl: ''#suggestionWebhookUrl: '${SUGGESTION_WEBHOOK_URL}'#" projects/nebuloud/public/config.js
-          npm run build
+      - run: npx tsc -p projects/catalog/tsconfig.app.json --noEmit
+      - run: npx tsc -p projects/artist/tsconfig.app.json --noEmit
+      - run: >-
+          npx prettier --check README.md ARCHITECTURE.md angular.json package.json
+          compose.production.yaml .github/workflows/ci-cd.yml tsconfig.json
+          scripts/build-sites.mjs scripts/serve-artist.mjs
+          $(find projects -type f \( -name '*.ts' -o -name '*.html' -o -name '*.scss' -o -name '*.js' -o -name '*.json' \))
+      - name: Build production static sites
+        run: npm run build
       - name: Upload production static files
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v6
         with:
-          name: nebuloud-browser
-          path: dist/nebuloud/browser
+          name: nebuloud-sites
+          path: dist/sites
           if-no-files-found: error
           retention-days: 1
 
@@ -58,8 +61,8 @@ jobs:
       - name: Download production static files
         uses: actions/download-artifact@v8
         with:
-          name: nebuloud-browser
-          path: dist/nebuloud/browser
+          name: nebuloud-sites
+          path: dist/sites
       - name: Configure SSH
         env:
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
@@ -105,5 +108,5 @@ jobs:
           ssh -p "$VPS_PORT" ${SSH_HOST_KEY_OPTIONS:-} \
             -o ServerAliveInterval=30 \
             -o ServerAliveCountMax=20 \
-            "$VPS_USER@$VPS_HOST" "cd '$VPS_APP_PATH' && docker compose -f compose.production.yaml build web && docker compose -f compose.production.yaml up -d directus web"
+            "$VPS_USER@$VPS_HOST" "cd '$VPS_APP_PATH' && set -a && . dist/sites/deploy/deploy.env && set +a && docker compose -f compose.production.yaml build web && docker compose -f compose.production.yaml up -d directus web"
           curl --fail --silent --show-error --head "https://nebuloud.zvalentin.com/"

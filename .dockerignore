@@ -1,8 +1,8 @@
 .git
 .angular
 node_modules
-projects/nebuloud/public/artist
 *.log
+__pycache__
 .env
 .env.*
 !.env.example

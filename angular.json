@@ -7,59 +7,34 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "nebuloud": {
+    "catalog": {
       "projectType": "application",
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss",
-          "skipTests": true
-        },
-        "@schematics/angular:class": {
-          "skipTests": true
-        },
-        "@schematics/angular:directive": {
-          "skipTests": true
-        },
-        "@schematics/angular:guard": {
-          "skipTests": true
-        },
-        "@schematics/angular:interceptor": {
-          "skipTests": true
-        },
-        "@schematics/angular:pipe": {
-          "skipTests": true
-        },
-        "@schematics/angular:resolver": {
-          "skipTests": true
-        },
-        "@schematics/angular:service": {
-          "skipTests": true
-        }
-      },
-      "root": "projects/nebuloud",
-      "sourceRoot": "projects/nebuloud/src",
+      "root": "projects/catalog",
+      "sourceRoot": "projects/catalog/src",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "browser": "projects/nebuloud/src/main.ts",
-            "tsConfig": "projects/nebuloud/tsconfig.app.json",
+            "outputPath": "dist/sites/catalog",
+            "index": "projects/shared/src/index.html",
+            "browser": "projects/catalog/src/main.ts",
+            "tsConfig": "projects/catalog/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "projects/nebuloud/public"
+                "input": "projects/shared/public"
               }
             ],
-            "styles": ["projects/nebuloud/src/styles.scss"],
-            "server": "projects/nebuloud/src/main.server.ts",
+            "styles": ["projects/shared/src/styles.scss"],
+            "server": "projects/catalog/src/main.server.ts",
             "outputMode": "static",
             "security": {
               "allowedHosts": []
             },
             "ssr": {
-              "entry": "projects/nebuloud/src/server.ts"
+              "entry": "projects/catalog/src/server.ts"
             }
           },
           "configurations": {
@@ -90,14 +65,85 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "nebuloud:build:production"
+              "buildTarget": "catalog:build:production"
             },
             "development": {
-              "buildTarget": "nebuloud:build:development"
+              "buildTarget": "catalog:build:development"
             }
           },
           "options": {
-            "allowedHosts": ["localhost", "0.0.0.0"]
+            "allowedHosts": ["localhost", "0.0.0.0", ".localhost"]
+          },
+          "defaultConfiguration": "development"
+        }
+      }
+    },
+    "artist": {
+      "projectType": "application",
+      "root": "projects/artist",
+      "sourceRoot": "projects/artist/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/sites/artists/default",
+            "index": "projects/shared/src/index.html",
+            "browser": "projects/artist/src/main.ts",
+            "tsConfig": "projects/artist/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/shared/public"
+              }
+            ],
+            "styles": ["projects/shared/src/styles.scss"],
+            "server": "projects/artist/src/main.server.ts",
+            "outputMode": "static",
+            "security": {
+              "allowedHosts": []
+            },
+            "ssr": {
+              "entry": "projects/artist/src/server.ts"
+            }
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "artist:build:production"
+            },
+            "development": {
+              "buildTarget": "artist:build:development"
+            }
+          },
+          "options": {
+            "allowedHosts": ["localhost", "0.0.0.0", ".localhost"]
           },
           "defaultConfiguration": "development"
         }

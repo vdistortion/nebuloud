@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --host 0.0.0.0",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
+    "start": "ng serve catalog --host 0.0.0.0",
+    "start:artist": "node scripts/serve-artist.mjs",
+    "build": "node scripts/build-sites.mjs",
+    "build:catalog": "ng build catalog",
+    "watch": "ng build catalog --watch --configuration development",
     "test": "ng test",
     "format": "prettier . --write"
   },

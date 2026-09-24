@@ -1,6 +1,7 @@
 FROM nginx:alpine
 
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
-COPY dist/nebuloud/browser /usr/share/nginx/html
+COPY dist/sites/deploy/nginx.conf /etc/nginx/conf.d/default.conf
+COPY dist/sites/catalog /usr/share/nginx/html/sites/catalog
+COPY dist/sites/artists /usr/share/nginx/html/sites/artists
 
 EXPOSE 80
