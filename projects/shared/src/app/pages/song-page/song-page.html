@@ -7,7 +7,7 @@
     <section class="song-layout">
       <article class="lyrics-card">
         <header class="lyrics-card__header">
-          <p class="eyebrow">Текст песни</p>
+          <p class="eyebrow">{{ currentSong.lyrics.trim() ? 'Текст песни' : 'Песня' }}</p>
           <h1>{{ currentSong.title }}</h1>
           @if (currentSong.aliases.length) {
             @for (alias of currentSong.aliases; track alias) {
@@ -19,7 +19,13 @@
             <p class="lyrics-card__authors">Авторы: {{ currentSong.authors }}</p>
           }
         </header>
-        <pre class="lyrics-card__text">{{ currentSong.lyrics.trim() }}</pre>
+        @if (currentSong.lyrics.trim()) {
+          <pre class="lyrics-card__text">{{ currentSong.lyrics.trim() }}</pre>
+        } @else {
+          <p class="lyrics-card__empty">
+            У этой песни пока нет текста. Помогите добавить его в каталог.
+          </p>
+        }
 
         @if (suggestionWebhookUrl) {
           <section class="suggestion-box">
@@ -29,13 +35,19 @@
                 type="button"
                 (click)="suggestionOpen.set(true)"
               >
-                Предложить исправление текста
+                {{
+                  currentSong.lyrics.trim() ? 'Предложить исправление текста' : 'Предложить текст'
+                }}
               </button>
             } @else {
               <div class="suggestion-box__header">
                 <div>
                   <p class="eyebrow">Помочь каталогу</p>
-                  <h2>Предложение по тексту</h2>
+                  <h2>
+                    {{
+                      currentSong.lyrics.trim() ? 'Предложение по тексту' : 'Предложить текст песни'
+                    }}
+                  </h2>
                 </div>
                 <button
                   type="button"
@@ -55,7 +67,11 @@
                 >
                   <textarea
                     required
-                    placeholder="Введите исправленный или новый текст"
+                    [placeholder]="
+                      currentSong.lyrics.trim()
+                        ? 'Введите исправленный или новый текст'
+                        : 'Введите текст песни'
+                    "
                     [value]="suggestionText()"
                     (input)="suggestionText.set($any($event.target).value)"
                   ></textarea>

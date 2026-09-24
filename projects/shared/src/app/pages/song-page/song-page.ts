@@ -60,6 +60,11 @@ export class SongPage {
 
   constructor() {
     effect(() => {
+      const song = this.song();
+      if (song) this.suggestionOpen.set(!song.lyrics.trim() && Boolean(this.suggestionWebhookUrl));
+    });
+
+    effect(() => {
       const artistId = this.artistId() ?? '';
       const songId = this.songId() ?? '';
       const song = this.song();
@@ -68,7 +73,9 @@ export class SongPage {
       this.seo.set({
         title: song ? `${song.title} | ${this.artistName()}` : 'Песня не найдена',
         description: song
-          ? `Текст песни «${song.title}» — ${this.artistName()}.`
+          ? song.lyrics.trim()
+            ? `Текст песни «${song.title}» — ${this.artistName()}.`
+            : `У песни «${song.title}» пока нет текста. Предложите его для каталога ${this.artistName()}.`
           : 'Песня не найдена',
       });
     });

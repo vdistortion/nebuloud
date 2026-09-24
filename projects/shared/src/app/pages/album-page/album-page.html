@@ -58,7 +58,22 @@
                 @if (song.authors) {
                   <small class="track__authors">{{ song.authors }}</small>
                 }
-                <small class="track__status">текст отсутствует</small>
+                @if (song.id) {
+                  <a
+                    class="track__status track__status-link"
+                    [routerLink]="artistService.route('/song/' + song.id)"
+                    aria-label="Предложить текст песни {{ song.name }}"
+                    (click)="
+                      onClick(
+                        `click_add_lyrics_song_${song.id}_album_${currentAlbum.id}_artist_${artistId()}`
+                      )
+                    "
+                  >
+                    Предложить текст
+                  </a>
+                } @else {
+                  <small class="track__status">текст отсутствует</small>
+                }
               </span>
               @if (song.duration) {
                 <span class="track__duration">{{ getTime(song.duration) }}</span>

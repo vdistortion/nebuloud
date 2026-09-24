@@ -47,6 +47,9 @@ npm run start:artist -- --slug master --port 4201
 Каталог останется на `http://localhost:4200/`, сайт артиста откроется на
 `http://localhost:4201/`.
 
+Локальная форма предложений использует production webhook. Отправленные с
+localhost тексты попадут в production на проверку.
+
 Production SSG-сборка каталога и всех артистов с доменом:
 
 ```bash

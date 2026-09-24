@@ -25,6 +25,8 @@ if (!artistSlug) {
 const directusUrl = (process.env['DIRECTUS_URL'] ?? 'http://localhost:8056').replace(/\/$/, '');
 const configPath = resolve('projects/shared/public/config.js');
 const originalConfig = await readFile(configPath, 'utf8');
+const defaultSuggestionWebhookUrl =
+  originalConfig.match(/suggestionWebhookUrl:\s*(['"])(.*?)\1/)?.[2] ?? '';
 const ngCli = resolve('node_modules/@angular/cli/bin/ng.js');
 
 const response = await fetch(
@@ -40,7 +42,7 @@ if (!payload.data?.length) throw new Error(`Artist "${artistSlug}" was not found
 
 const runtimeConfig = {
   directusUrl,
-  suggestionWebhookUrl: process.env['SUGGESTION_WEBHOOK_URL'] ?? '',
+  suggestionWebhookUrl: process.env['SUGGESTION_WEBHOOK_URL'] ?? defaultSuggestionWebhookUrl,
   artistSlug,
 };
 

@@ -127,7 +127,7 @@
   text-decoration: none;
 }
 
-.track:hover {
+.track--link:hover {
   padding-right: 0.7rem;
   padding-left: 0.7rem;
   background: rgba(255, 68, 68, 0.06);
@@ -159,6 +159,18 @@
   color: #666;
   font-size: 0.72rem;
   font-weight: 400;
+}
+
+.track__status-link {
+  color: #ff8b84;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 139, 132, 0.45);
+  text-underline-offset: 0.15em;
+}
+
+.track__status-link:hover {
+  color: #ff665f;
+  text-decoration-color: currentColor;
 }
 
 .track__authors {
