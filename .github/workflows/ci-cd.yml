@@ -54,7 +54,7 @@ jobs:
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_PORT: ${{ secrets.VPS_PORT }}
       VPS_USER: ${{ secrets.VPS_USER }}
-      VPS_APP_PATH: ${{ secrets.VPS_APP_PATH }}
+      PROJECT_NAME: ${{ github.event.repository.name }}
 
     steps:
       - uses: actions/checkout@v5
@@ -87,26 +87,24 @@ jobs:
           : "${VPS_HOST:?GitHub secret VPS_HOST is required}"
           VPS_USER="${VPS_USER:-root}"
           VPS_PORT="${VPS_PORT:-22}"
-          VPS_APP_PATH="${VPS_APP_PATH:-/root/nebuloud}"
           ssh -p "$VPS_PORT" ${SSH_HOST_KEY_OPTIONS:-} \
             -o ServerAliveInterval=30 \
             -o ServerAliveCountMax=20 \
-            "$VPS_USER@$VPS_HOST" "test -f '$VPS_APP_PATH/compose.production.yaml'"
+            "$VPS_USER@$VPS_HOST" "mkdir -p \"\$HOME/projects/$PROJECT_NAME\""
           rsync -az \
             --exclude '.env' \
             --exclude '.git/' \
             --exclude 'node_modules/' \
             -e "ssh -p $VPS_PORT ${SSH_HOST_KEY_OPTIONS:-} -o ServerAliveInterval=30 -o ServerAliveCountMax=20" \
-            ./ "$VPS_USER@$VPS_HOST:$VPS_APP_PATH/"
+            ./ "$VPS_USER@$VPS_HOST:~/projects/$PROJECT_NAME/"
       - name: Build and restart web
         run: |
           set -euo pipefail
           : "${VPS_HOST:?GitHub secret VPS_HOST is required}"
           VPS_USER="${VPS_USER:-root}"
           VPS_PORT="${VPS_PORT:-22}"
-          VPS_APP_PATH="${VPS_APP_PATH:-/root/nebuloud}"
           ssh -p "$VPS_PORT" ${SSH_HOST_KEY_OPTIONS:-} \
             -o ServerAliveInterval=30 \
             -o ServerAliveCountMax=20 \
-            "$VPS_USER@$VPS_HOST" "cd '$VPS_APP_PATH' && set -a && . dist/sites/deploy/deploy.env && set +a && docker compose -f compose.production.yaml build web && docker compose -f compose.production.yaml up -d directus web"
+            "$VPS_USER@$VPS_HOST" "cd \"\$HOME/projects/$PROJECT_NAME\" && set -a && . dist/sites/deploy/deploy.env && set +a && docker compose -f compose.production.yaml build web && docker compose -f compose.production.yaml up -d directus web"
           curl --fail --silent --show-error --head "https://nebuloud.zvalentin.com/"
