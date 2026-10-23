@@ -4,15 +4,15 @@ Nebuloud is an Angular-based music archive and artist website platform with
 discographies, lyrics, albums, videos, galleries, Directus and PostgreSQL.
 
 Это музыкальный каталог с поддержкой артистов, альбомов, песен, текстов,
-видео и фотогалерей. В будущем проект может вырасти в движок готовых сайтов
-для музыкантов.
+видео и фотогалерей. Основная цель — развивать каталог и сайты артистов на
+реальном музыкальном контенте.
 
 Текущая версия — Angular SSG/frontend с Directus + PostgreSQL как единственным
 источником контента.
 
 ## Документация
 
-Главный источник решений и плана проекта:
+Актуальная техническая архитектура и принятые технические решения:
 
 - [ARCHITECTURE.md](ARCHITECTURE.md)
 
