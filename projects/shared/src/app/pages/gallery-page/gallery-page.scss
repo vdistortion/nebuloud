@@ -55,6 +55,12 @@
   display: block;
 }
 
+.gallery-page__images:not(.gallery-page__images--laid-out) {
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+}
+
 .gallery-page__link {
   display: block;
   border: 1px solid rgba(255, 68, 68, 0.12);

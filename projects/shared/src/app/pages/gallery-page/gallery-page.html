@@ -13,7 +13,7 @@
       #images
       class="gallery-page__images"
       [style.height.px]="layoutHeight() || null"
-      [class.gallery-page__images--laid-out]="layoutHeight() > 0"
+      [class.gallery-page__images--laid-out]="layoutReady()"
     >
       @for (picture of pictures(); track picture) {
         <a
@@ -29,6 +29,7 @@
             [src]="imageUrl(picture)"
             [alt]="picture"
             (load)="updateLayout()"
+            (error)="updateLayout()"
           />
         </a>
       }

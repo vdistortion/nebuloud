@@ -31,6 +31,7 @@ import type { CatalogGallery } from '../../models/content.models';
 export class GalleryPage {
   private readonly imagesElement = viewChild<ElementRef<HTMLElement>>('images');
   private readonly imageBoxes = signal(new Map<string, { left: number; top: number; width: number; height: number }>());
+  readonly layoutReady = signal(false);
   readonly layoutHeight = signal(0);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
@@ -83,14 +84,22 @@ export class GalleryPage {
     if (!element) return;
     const images = Array.from(element.querySelectorAll<HTMLImageElement>('img'));
     const width = element.clientWidth;
-    if (!width || images.length !== this.pictures().length || images.some((image) => !image.naturalWidth)) return;
+    if (!width || images.length !== this.pictures().length || images.some((image) => !image.complete)) return;
+
+    const loadedImages = images.filter((image) => image.naturalWidth > 0 && image.naturalHeight > 0);
+    if (loadedImages.length === 0) {
+      this.imageBoxes.set(new Map());
+      this.layoutHeight.set(0);
+      this.layoutReady.set(true);
+      return;
+    }
 
     const layout = justifiedLayout(
-      images.map((image) => image.naturalWidth / image.naturalHeight),
+      loadedImages.map((image) => image.naturalWidth / image.naturalHeight),
       { containerWidth: width, containerPadding: 0, boxSpacing: 16, targetRowHeight: 280 },
     );
     const boxes = new Map<string, { left: number; top: number; width: number; height: number }>();
-    images.forEach((image, index) => {
+    loadedImages.forEach((image, index) => {
       const box = layout.boxes[index];
       boxes.set(this.pictures()[index], {
         left: box.left,
@@ -101,13 +110,13 @@ export class GalleryPage {
     });
     this.imageBoxes.set(boxes);
     this.layoutHeight.set(layout.containerHeight);
+    this.layoutReady.set(true);
   }
 
   boxStyle(picture: string) {
     const box = this.imageBoxes().get(picture);
-    return box
-      ? { left: `${box.left}px`, top: `${box.top}px`, width: `${box.width}px`, height: `${box.height}px` }
-      : {};
+    if (!box) return this.layoutReady() ? { display: 'none' } : {};
+    return { left: `${box.left}px`, top: `${box.top}px`, width: `${box.width}px`, height: `${box.height}px` };
   }
 
   imageUrl(picture: string): string {
