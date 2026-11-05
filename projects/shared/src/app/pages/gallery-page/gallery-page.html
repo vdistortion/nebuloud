@@ -9,7 +9,12 @@
       <p>{{ pictures().length }} фотографий · {{ artistName() }}</p>
     </header>
 
-    <div class="gallery-page__images">
+    <div
+      #images
+      class="gallery-page__images"
+      [style.height.px]="layoutHeight() || null"
+      [class.gallery-page__images--laid-out]="layoutHeight() > 0"
+    >
       @for (picture of pictures(); track picture) {
         <a
           class="gallery-page__link"
@@ -17,8 +22,14 @@
           target="_blank"
           rel="noreferrer"
           (click)="onClick(`click_image_${galleryPath()}/${picture}_artist_${artistId()}`)"
+          [style]="boxStyle(picture)"
         >
-          <img class="gallery-page__image" [src]="imageUrl(picture)" [alt]="picture" />
+          <img
+            class="gallery-page__image"
+            [src]="imageUrl(picture)"
+            [alt]="picture"
+            (load)="updateLayout()"
+          />
         </a>
       }
     </div>
