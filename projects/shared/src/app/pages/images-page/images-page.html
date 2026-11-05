@@ -16,6 +16,7 @@
             [link]="artistService.route('/images/' + item.id)"
             [name]="item.title"
             [image]="imageUrl(item.id)"
+            [photoCount]="item.pictures.length"
             (click)="onClick(`click_gallery_${item.path.join('/')}_artist_${artistId()}`)"
           ></app-gallery-card>
         }

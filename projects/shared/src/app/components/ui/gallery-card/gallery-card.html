@@ -3,6 +3,9 @@
     <img [src]="imageUrl(image ?? '/album-card.jpg')" [alt]="name" class="gallery-card__img" />
   </div>
   <div class="gallery-card__name">{{ name }}</div>
+  @if (photoCount !== undefined) {
+    <div class="gallery-card__count">{{ photoCount }} {{ photoCountWord }}</div>
+  }
   @if (year) {
     <div class="gallery-card__year">{{ year }}</div>
   }

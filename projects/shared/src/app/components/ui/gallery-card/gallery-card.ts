@@ -13,8 +13,21 @@ export class GalleryCard {
   @Input({ required: true }) public name!: string;
   @Input() public image: string | undefined;
   @Input() public year: number = 0;
+  @Input() public photoCount: number | undefined;
   @Input() public thumbnail: boolean = false;
   private readonly assetUrl = inject(AssetUrlService);
+
+  get photoCountWord(): string {
+    if (this.photoCount === undefined) return '';
+    return {
+      one: 'фотография',
+      two: 'фотографии',
+      few: 'фотографии',
+      many: 'фотографий',
+      zero: 'фотографий',
+      other: 'фотографии',
+    }[new Intl.PluralRules('ru').select(this.photoCount)];
+  }
 
   imageUrl(value: string): string {
     return this.assetUrl.resolve(value);
