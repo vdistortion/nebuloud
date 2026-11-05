@@ -358,3 +358,23 @@ projects/
 
 Аватары, обложки и галереи хранятся в Directus Files через Garage. Локальная
 копия изображений в репозитории не используется.
+
+Если старые изображения отдаются как скачиваемые файлы из-за MIME-типа
+`application/octet-stream`, можно проверить метаданные Directus:
+
+```bash
+python scripts/repair-directus-image-mime.py
+```
+
+Команда выше только показывает план. Для применения нужно явно передать `--apply`
+и подтвердить точный URL Directus. Для локальной базы скрипт сам прочитает
+учётные данные из `.env`:
+
+```bash
+python scripts/repair-directus-image-mime.py --apply --confirm-url http://localhost:8056
+```
+
+Для production перед запуском задай `DIRECTUS_URL`, `DIRECTUS_ADMIN_EMAIL` и
+`DIRECTUS_ADMIN_PASSWORD` в окружении и укажи production URL в `--confirm-url`.
+Скрипт обновляет только MIME-тип поддерживаемых изображений; он не запускается
+автоматически и не исправляет ширину/высоту файлов.
