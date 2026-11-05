@@ -27,7 +27,10 @@
                 "input": "projects/shared/public"
               }
             ],
-            "styles": ["projects/shared/src/styles.scss"],
+            "styles": [
+              "projects/shared/src/styles.scss",
+              "node_modules/photoswipe/dist/photoswipe.css"
+            ],
             "server": "projects/catalog/src/main.server.ts",
             "outputMode": "static",
             "security": {
@@ -98,7 +101,10 @@
                 "input": "projects/shared/public"
               }
             ],
-            "styles": ["projects/shared/src/styles.scss"],
+            "styles": [
+              "projects/shared/src/styles.scss",
+              "node_modules/photoswipe/dist/photoswipe.css"
+            ],
             "server": "projects/artist/src/main.server.ts",
             "outputMode": "static",
             "security": {

@@ -19,6 +19,8 @@
         <a
           class="gallery-page__link"
           [href]="imageUrl(picture)"
+          [attr.data-pswp-width]="imageSize(picture)?.width"
+          [attr.data-pswp-height]="imageSize(picture)?.height"
           target="_blank"
           rel="noreferrer"
           (click)="onClick(`click_image_${galleryPath()}/${picture}_artist_${artistId()}`)"

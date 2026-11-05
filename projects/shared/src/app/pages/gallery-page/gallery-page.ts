@@ -30,9 +30,14 @@ import type { CatalogGallery } from '../../models/content.models';
 })
 export class GalleryPage {
   private readonly imagesElement = viewChild<ElementRef<HTMLElement>>('images');
-  private readonly imageBoxes = signal(new Map<string, { left: number; top: number; width: number; height: number }>());
+  private readonly imageBoxes = signal(
+    new Map<string, { left: number; top: number; width: number; height: number }>(),
+  );
+  private readonly imageDimensions = signal(new Map<string, { width: number; height: number }>());
   readonly layoutReady = signal(false);
   readonly layoutHeight = signal(0);
+  private lightbox?: { destroy: () => void };
+  private destroyed = false;
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   private readonly titleService = inject(Title);
@@ -67,8 +72,13 @@ export class GalleryPage {
       if (!element) return;
       const observer = new ResizeObserver(() => this.updateLayout());
       observer.observe(element);
-      this.destroyRef.onDestroy(() => observer.disconnect());
+      this.destroyRef.onDestroy(() => {
+        this.destroyed = true;
+        observer.disconnect();
+        this.lightbox?.destroy();
+      });
       this.updateLayout();
+      void this.initializeLightbox(element);
     });
     effect(() => {
       const artistId = this.artistId() ?? '';
@@ -84,11 +94,19 @@ export class GalleryPage {
     if (!element) return;
     const images = Array.from(element.querySelectorAll<HTMLImageElement>('img'));
     const width = element.clientWidth;
-    if (!width || images.length !== this.pictures().length || images.some((image) => !image.complete)) return;
+    if (
+      !width ||
+      images.length !== this.pictures().length ||
+      images.some((image) => !image.complete)
+    )
+      return;
 
-    const loadedImages = images.filter((image) => image.naturalWidth > 0 && image.naturalHeight > 0);
+    const loadedImages = images.filter(
+      (image) => image.naturalWidth > 0 && image.naturalHeight > 0,
+    );
     if (loadedImages.length === 0) {
       this.imageBoxes.set(new Map());
+      this.imageDimensions.set(new Map());
       this.layoutHeight.set(0);
       this.layoutReady.set(true);
       return;
@@ -99,16 +117,20 @@ export class GalleryPage {
       { containerWidth: width, containerPadding: 0, boxSpacing: 16, targetRowHeight: 280 },
     );
     const boxes = new Map<string, { left: number; top: number; width: number; height: number }>();
+    const dimensions = new Map<string, { width: number; height: number }>();
     loadedImages.forEach((image, index) => {
       const box = layout.boxes[index];
-      boxes.set(this.pictures()[index], {
+      const picture = this.pictures()[images.indexOf(image)];
+      boxes.set(picture, {
         left: box.left,
         top: box.top,
         width: box.width,
         height: box.height,
       });
+      dimensions.set(picture, { width: image.naturalWidth, height: image.naturalHeight });
     });
     this.imageBoxes.set(boxes);
+    this.imageDimensions.set(dimensions);
     this.layoutHeight.set(layout.containerHeight);
     this.layoutReady.set(true);
   }
@@ -116,7 +138,29 @@ export class GalleryPage {
   boxStyle(picture: string) {
     const box = this.imageBoxes().get(picture);
     if (!box) return this.layoutReady() ? { display: 'none' } : {};
-    return { left: `${box.left}px`, top: `${box.top}px`, width: `${box.width}px`, height: `${box.height}px` };
+    return {
+      left: `${box.left}px`,
+      top: `${box.top}px`,
+      width: `${box.width}px`,
+      height: `${box.height}px`,
+    };
+  }
+
+  imageSize(picture: string) {
+    return this.imageDimensions().get(picture);
+  }
+
+  private async initializeLightbox(gallery: HTMLElement): Promise<void> {
+    const { default: PhotoSwipeLightbox } = await import('photoswipe/lightbox');
+    if (this.destroyed) return;
+
+    const lightbox = new PhotoSwipeLightbox({
+      gallery,
+      children: 'a',
+      pswpModule: () => import('photoswipe'),
+    });
+    lightbox.init();
+    this.lightbox = lightbox;
   }
 
   imageUrl(picture: string): string {
