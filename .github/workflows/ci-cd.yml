@@ -104,4 +104,4 @@ jobs:
             -o ServerAliveInterval=30 \
             -o ServerAliveCountMax=20 \
             "$VPS_USER@$VPS_HOST" "cd \"\$HOME/projects/$PROJECT_NAME\" && set -a && . dist/sites/deploy/deploy.env && set +a && docker compose -f compose.production.yaml build web && docker compose -f compose.production.yaml up -d directus web"
-          curl --fail --silent --show-error --head "https://nebuloud.zvalentin.com/"
+          curl --fail --silent --show-error --head --retry 8 --retry-delay 3 --retry-all-errors --max-time 10 "https://nebuloud.zvalentin.com/"
