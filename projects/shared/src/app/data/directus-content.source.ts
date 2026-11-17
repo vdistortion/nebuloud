@@ -71,6 +71,7 @@ export class DirectusContentSource implements ContentSource {
       }),
       this.items<DirectusItem>('songs', {
         'filter[artist][_eq]': artistId,
+        'filter[is_visible][_eq]': 'true',
         fields: 'id,slug,title,aliases,lyrics,authors,video_url,sort',
         sort: 'sort',
         limit: '-1',
@@ -160,6 +161,7 @@ export class DirectusContentSource implements ContentSource {
 
     const songs = await this.items<DirectusItem>('songs', {
       'filter[artist][_eq]': String(artist.id),
+      'filter[is_visible][_eq]': 'true',
       fields: 'id,slug,title,aliases,lyrics,authors,video_url,sort',
       sort: 'sort',
       limit: '-1',
@@ -243,6 +245,7 @@ export class DirectusContentSource implements ContentSource {
       galleries.map(async (gallery) => {
         const images = await this.items<DirectusItem>('gallery_images', {
           'filter[gallery][_eq]': String(gallery.id),
+          'filter[is_visible][_eq]': 'true',
           fields: 'image,sort',
           sort: 'sort',
           limit: '-1',

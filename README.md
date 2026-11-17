@@ -378,3 +378,6 @@ python scripts/repair-directus-image-mime.py --apply --confirm-url http://localh
 `DIRECTUS_ADMIN_PASSWORD` в окружении и укажи production URL в `--confirm-url`.
 Скрипт обновляет только MIME-тип поддерживаемых изображений; он не запускается
 автоматически и не исправляет ширину/высоту файлов.
+
+Лимит тела запроса Directus по умолчанию выставлен в `10mb`. Его можно
+переопределить переменной `DIRECTUS_MAX_PAYLOAD_SIZE`.

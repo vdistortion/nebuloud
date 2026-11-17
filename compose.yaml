@@ -28,6 +28,7 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:-nebuloud}
       ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL:-admin@nebuloud.dev}
       ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD:-change-this-admin-password}
+      MAX_PAYLOAD_SIZE: ${DIRECTUS_MAX_PAYLOAD_SIZE:-10mb}
       PUBLIC_URL: ${DIRECTUS_PUBLIC_URL:-http://localhost:8056}
       CORS_ENABLED: 'true'
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:4200}

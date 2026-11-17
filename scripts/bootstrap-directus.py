@@ -80,6 +80,7 @@ COLLECTIONS = {
             ("lyrics", "text", {"interface": "input-rich-text-md"}, {}),
             ("authors", "string", {"interface": "input"}, {}),
             ("video_url", "string", {"interface": "input"}, {}),
+            ("is_visible", "boolean", {"interface": "boolean", "note": "Показывать на сайте"}, {"default_value": True}),
             ("sort", "integer", {"interface": "input"}, {"default_value": 0}),
         ],
     },
@@ -106,6 +107,7 @@ COLLECTIONS = {
         "fields": [
             ("gallery", "integer", {"interface": "input"}, {}),
             ("image", "uuid", {"interface": "file", "required": True}, {}),
+            ("is_visible", "boolean", {"interface": "boolean", "note": "Показывать на сайте"}, {"default_value": True}),
             ("sort", "integer", {"interface": "input"}, {"default_value": 0}),
         ],
     },
@@ -236,20 +238,25 @@ def main() -> int:
         permission = public_read_permissions.get(collection)
         if permission:
             print(f"exists public read: {collection}")
-            if collection == "artists":
+            extra_field = {
+                "artists": "site_domain",
+                "songs": "is_visible",
+                "gallery_images": "is_visible",
+            }.get(collection)
+            if extra_field:
                 allowed_fields = permission.get("fields")
                 if (
                     isinstance(allowed_fields, list)
                     and "*" not in allowed_fields
-                    and "site_domain" not in allowed_fields
+                    and extra_field not in allowed_fields
                 ):
                     request(
                         "PATCH",
                         f"/permissions/{permission['id']}",
                         token,
-                        {"fields": [*allowed_fields, "site_domain"]},
+                        {"fields": [*allowed_fields, extra_field]},
                     )
-                    print("  added public read field: artists.site_domain")
+                    print(f"  added public read field: {collection}.{extra_field}")
             continue
         request(
             "POST",

@@ -61,6 +61,7 @@ async function contentSlugs<T extends DirectusRecord>(
   for (const artist of artistRecords) {
     const records = await items<T>(collection, {
       'filter[artist][_eq]': String(artist.id),
+      ...(collection === 'songs' ? { 'filter[is_visible][_eq]': 'true' } : {}),
       fields,
     });
     results.push(
@@ -116,6 +117,7 @@ async function currentArtistContentSlugs<T extends DirectusRecord>(
   const artist = await currentArtist();
   const records = await items<T>(collection, {
     'filter[artist][_eq]': String(artist.id),
+    ...(collection === 'songs' ? { 'filter[is_visible][_eq]': 'true' } : {}),
     fields,
   });
   return records.map((record) => String(record.slug ?? record.id));
