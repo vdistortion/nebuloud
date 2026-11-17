@@ -17,6 +17,7 @@ type AlbumTrack = {
   id: string;
   duration: number;
   isText: boolean;
+  isInstrumental: boolean;
   authors?: string;
 };
 
@@ -57,6 +58,7 @@ export class AlbumPage {
         name: song.title,
         duration: song.duration ?? 0,
         isText: Boolean(song.lyrics.trim()),
+        isInstrumental: song.isInstrumental,
         authors: song.authors,
       })) ?? [],
   );

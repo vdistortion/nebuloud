@@ -81,6 +81,7 @@ COLLECTIONS = {
             ("authors", "string", {"interface": "input"}, {}),
             ("video_url", "string", {"interface": "input"}, {}),
             ("is_visible", "boolean", {"interface": "boolean", "note": "Показывать на сайте"}, {"default_value": True}),
+            ("is_instrumental", "boolean", {"interface": "boolean", "note": "Инструментальная композиция без текста"}, {"default_value": False}),
             ("sort", "integer", {"interface": "input"}, {"default_value": 0}),
         ],
     },
@@ -238,25 +239,26 @@ def main() -> int:
         permission = public_read_permissions.get(collection)
         if permission:
             print(f"exists public read: {collection}")
-            extra_field = {
-                "artists": "site_domain",
-                "songs": "is_visible",
-                "gallery_images": "is_visible",
-            }.get(collection)
-            if extra_field:
+            extra_fields = {
+                "artists": ["site_domain"],
+                "songs": ["is_visible", "is_instrumental"],
+                "gallery_images": ["is_visible"],
+            }.get(collection, [])
+            if extra_fields:
                 allowed_fields = permission.get("fields")
                 if (
                     isinstance(allowed_fields, list)
                     and "*" not in allowed_fields
-                    and extra_field not in allowed_fields
                 ):
-                    request(
-                        "PATCH",
-                        f"/permissions/{permission['id']}",
-                        token,
-                        {"fields": [*allowed_fields, extra_field]},
-                    )
-                    print(f"  added public read field: {collection}.{extra_field}")
+                    missing_fields = [field for field in extra_fields if field not in allowed_fields]
+                    if missing_fields:
+                        request(
+                            "PATCH",
+                            f"/permissions/{permission['id']}",
+                            token,
+                            {"fields": [*allowed_fields, *missing_fields]},
+                        )
+                        print(f"  added public read fields: {collection}.{', '.join(missing_fields)}")
             continue
         request(
             "POST",

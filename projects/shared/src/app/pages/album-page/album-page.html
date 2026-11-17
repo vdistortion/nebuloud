@@ -31,7 +31,7 @@
 
       <div class="tracklist">
         @for (song of songs(); track song.id || song.name; let i = $index) {
-          @if (song.id && song.isText) {
+          @if (song.id && song.isText && !song.isInstrumental) {
             <a
               class="track track--link"
               [routerLink]="artistService.route('/song/' + song.id)"
@@ -58,7 +58,14 @@
                 @if (song.authors) {
                   <small class="track__authors">{{ song.authors }}</small>
                 }
-                @if (song.id) {
+                @if (song.isInstrumental && song.id) {
+                  <a
+                    class="track__status track__status-link"
+                    [routerLink]="artistService.route('/song/' + song.id)"
+                  >
+                    Инструментальная композиция
+                  </a>
+                } @else if (song.id) {
                   <a
                     class="track__status track__status-link"
                     [routerLink]="artistService.route('/song/' + song.id)"

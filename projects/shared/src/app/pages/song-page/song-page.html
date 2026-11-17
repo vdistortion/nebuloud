@@ -7,7 +7,15 @@
     <section class="song-layout">
       <article class="lyrics-card">
         <header class="lyrics-card__header">
-          <p class="eyebrow">{{ currentSong.lyrics.trim() ? 'Текст песни' : 'Песня' }}</p>
+          <p class="eyebrow">
+            {{
+              currentSong.isInstrumental
+                ? 'Инструментальная композиция'
+                : currentSong.lyrics.trim()
+                  ? 'Текст песни'
+                  : 'Песня'
+            }}
+          </p>
           <h1>{{ currentSong.title }}</h1>
           @if (currentSong.aliases.length) {
             @for (alias of currentSong.aliases; track alias) {
@@ -19,7 +27,9 @@
             <p class="lyrics-card__authors">Авторы: {{ currentSong.authors }}</p>
           }
         </header>
-        @if (currentSong.lyrics.trim()) {
+        @if (currentSong.isInstrumental) {
+          <p class="lyrics-card__empty">Инструментальная композиция без текста.</p>
+        } @else if (currentSong.lyrics.trim()) {
           <pre class="lyrics-card__text">{{ currentSong.lyrics.trim() }}</pre>
         } @else {
           <p class="lyrics-card__empty">
@@ -27,7 +37,7 @@
           </p>
         }
 
-        @if (suggestionWebhookUrl) {
+        @if (suggestionWebhookUrl && !currentSong.isInstrumental) {
           <section class="suggestion-box">
             @if (!suggestionOpen()) {
               <button

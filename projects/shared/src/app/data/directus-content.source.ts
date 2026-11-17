@@ -72,7 +72,7 @@ export class DirectusContentSource implements ContentSource {
       this.items<DirectusItem>('songs', {
         'filter[artist][_eq]': artistId,
         'filter[is_visible][_eq]': 'true',
-        fields: 'id,slug,title,aliases,lyrics,authors,video_url,sort',
+        fields: 'id,slug,title,aliases,lyrics,is_instrumental,authors,video_url,sort',
         sort: 'sort',
         limit: '-1',
       }),
@@ -162,7 +162,7 @@ export class DirectusContentSource implements ContentSource {
     const songs = await this.items<DirectusItem>('songs', {
       'filter[artist][_eq]': String(artist.id),
       'filter[is_visible][_eq]': 'true',
-      fields: 'id,slug,title,aliases,lyrics,authors,video_url,sort',
+      fields: 'id,slug,title,aliases,lyrics,is_instrumental,authors,video_url,sort',
       sort: 'sort',
       limit: '-1',
     });
@@ -294,6 +294,7 @@ export class DirectusContentSource implements ContentSource {
       title: String(item['title'] ?? ''),
       aliases: Array.isArray(item['aliases']) ? item['aliases'].map(String) : [],
       lyrics: String(item['lyrics'] ?? ''),
+      isInstrumental: item['is_instrumental'] === true,
       albums: [],
       authors: item['authors'] ? String(item['authors']) : undefined,
       videoId: this.youtubeId(item['video_url']),

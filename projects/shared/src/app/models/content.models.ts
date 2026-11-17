@@ -23,6 +23,7 @@ export interface CatalogSong {
   title: string;
   aliases: string[];
   lyrics: string;
+  isInstrumental: boolean;
   albums: string[];
   authors?: string;
   videoId?: string;

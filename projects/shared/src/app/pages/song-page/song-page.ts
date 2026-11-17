@@ -61,7 +61,10 @@ export class SongPage {
   constructor() {
     effect(() => {
       const song = this.song();
-      if (song) this.suggestionOpen.set(!song.lyrics.trim() && Boolean(this.suggestionWebhookUrl));
+      if (song)
+        this.suggestionOpen.set(
+          !song.isInstrumental && !song.lyrics.trim() && Boolean(this.suggestionWebhookUrl),
+        );
     });
 
     effect(() => {
@@ -73,9 +76,11 @@ export class SongPage {
       this.seo.set({
         title: song ? `${song.title} | ${this.artistName()}` : 'Песня не найдена',
         description: song
-          ? song.lyrics.trim()
-            ? `Текст песни «${song.title}» — ${this.artistName()}.`
-            : `У песни «${song.title}» пока нет текста. Предложите его для каталога ${this.artistName()}.`
+          ? song.isInstrumental
+            ? `Инструментальная композиция «${song.title}» — ${this.artistName()}.`
+            : song.lyrics.trim()
+              ? `Текст песни «${song.title}» — ${this.artistName()}.`
+              : `У песни «${song.title}» пока нет текста. Предложите его для каталога ${this.artistName()}.`
           : 'Песня не найдена',
       });
     });
@@ -88,7 +93,14 @@ export class SongPage {
   async submitSuggestion() {
     const song = this.song();
     const artistId = this.artistId();
-    if (!song || !artistId || !this.suggestionWebhookUrl || !this.suggestionText().trim()) return;
+    if (
+      !song ||
+      song.isInstrumental ||
+      !artistId ||
+      !this.suggestionWebhookUrl ||
+      !this.suggestionText().trim()
+    )
+      return;
 
     this.suggestionState.set('sending');
     try {
