@@ -44,6 +44,7 @@ services:
       STORAGE_GARAGE_ENDPOINT: http://garage:3900
       STORAGE_GARAGE_REGION: garage
       STORAGE_GARAGE_FORCE_PATH_STYLE: 'true'
+      AWS_RESPONSE_CHECKSUM_VALIDATION: WHEN_REQUIRED
     depends_on:
       db:
         condition: service_healthy
